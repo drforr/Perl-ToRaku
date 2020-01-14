@@ -1,0 +1,53 @@
+#!/usr/bin/env perl
+
+use strict;
+use warnings;
+
+use Carp qw(croak);
+
+use Getopt::Long;
+use PPI;
+use Perl::ToRaku;
+
+my $help    = 0;
+my $verbose = 0;
+
+GetOptions(
+#  "length=i"  => \$length,    # numeric
+#  "file=s"    => \$data,      # string
+  "help|h|?"  => \$help,
+  "verbose|v" => \$verbose
+) or die "Error in CLI arguments";
+
+my @filenames = @ARGV;
+
+for my $filename ( @filenames ) {
+  my $output_filename = perl_to_raku_filename( $filename );
+  Log( "Transforming '$filename' to '$output_filename'." );
+  my $ppi = PPI::Document->new( $filename );
+
+  if ( Perl::ToRaku::has_multiple_packages( $ppi ) ) {
+    warn "Could not transform '$filename': File has multiple packages";
+    next;
+  }
+
+  Perl::ToRaku::mogrify( $ppi );
+
+  if ( $ARGV[0] eq '-' ) {
+    print STDOUT $output_filename;
+    exit 0;
+  }
+  else {
+    $ppi->save( $output_filename );
+  }
+}
+
+sub Log {
+  my ( $message ) = @_;
+  print $message . "\n" if $verbose;
+}
+
+sub perl_to_raku_filename {
+  my ( $filename ) = @_;
+  return $filename . '.rk';
+}
