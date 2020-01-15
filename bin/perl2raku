@@ -24,14 +24,16 @@ my @filenames = @ARGV;
 for my $filename ( @filenames ) {
   my $output_filename = perl_to_raku_filename( $filename );
   Log( "Transforming '$filename' to '$output_filename'." );
-  my $ppi = PPI::Document->new( $filename );
 
-  if ( Perl::ToRaku::has_multiple_packages( $ppi ) ) {
+  my $toRaku = Perl::ToRaku->new( $filename );
+
+  if ( $toRaku->has_multiple_packages ) {
     warn "Could not transform '$filename': File has multiple packages";
     next;
   }
 
-  Perl::ToRaku::mogrify( $ppi );
+  $toRaku->transform;
+  my $ppi = $toRaku->{ppi};
 
   if ( $ARGV[0] eq '-' ) {
     print STDOUT $output_filename;

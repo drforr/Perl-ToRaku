@@ -5,35 +5,91 @@ use warnings;
 
 use Carp qw(croak);
 
+use File::Slurp;
 use PPI;
 
-sub _replace {
-  my ( $token, $replacement ) = @_;
-
-  $token->insert_before( $replacement );
-  $token->delete;
+BEGIN {
+  my @core_modules = (
+    'Perl::ToRaku::Transformers::Shebang',
+    'Perl::ToRaku::Transformers::PackageDeclaration',
+    'Perl::ToRaku::Transformers::StrictPragma',
+    'Perl::ToRaku::Transformers::WarningsPragma',
+    'Perl::ToRaku::Transformers::Utf8Pragma',
+    'Perl::ToRaku::Transformers::CoreRakuModules',
+    'Perl::ToRaku::Transformers::BitwiseOperators',
+    'Perl::ToRaku::Transformers::Undef'
+  );
+  use Module::Pluggable
+    sub_name    => 'core_plugins',
+    search_path => ['Perl::ToRaku::Transformers'],
+    require     => 1,
+    only        => \@core_modules;
+  use Module::Pluggable
+    sub_name    => 'user_plugins',
+    search_path => ['Perl::ToRaku::TransformersX'],
+    require     => 1;
 }
 
-sub mogrify {
-  my ( $ppi ) = @_;
+# Argument to pass in:
+#   --remove-redundant-parentheses-around-conditions
+#   --remove-redundant-parentheses-around-expressions (superset of above)
 
-  mogrify_shebang( $ppi );
+sub new {
+  my ( $class, $filename ) = @_;
+  my $content = read_file( $filename ); # Don't put in the hashref.
 
-  remove_strict_pragma( $ppi );
-  remove_warnings_pragma( $ppi );
-  remove_utf8_pragma( $ppi );
+  return bless {
+    content => $content,
+    ppi     => PPI::Document->new( $filename )
+  }, $class;
+}
 
-  remove_core_raku_modules( $ppi );
+# 'use overload' may cause an issue
+#
+sub transform {
+  my ( $self ) = @_;
+  my $ppi      = $self->{ppi};
 
-  mogrify_numerical_operators( $ppi );
+  for my $plugin ( $self->core_plugins ) {
+    $plugin->transformer( $ppi );
+  }
+  #use YAML;die Dump($self->user_plugins);
+}
+
+# ?..:..; has a bug, here's an instance:
+#
+# ( $sW eq "\x00" ) ? undef : $sW
+#
+#              PPI::Document
+#                PPI::Statement
+#                  PPI::Structure::List    ( ... )
+#                    PPI::Statement::Expression
+#[ 2, 13, 13 ]        PPI::Token::Symbol   '$sW'
+#[ 2, 17, 17 ]        PPI::Token::Operator         'eq'
+#[ 2, 20, 20 ]        PPI::Token::Quote::Double    '"\x00"'
+#[ 2, 29, 29 ]    PPI::Token::Operator     '?'
+#[ 2, 31, 31 ]    PPI::Token::Label        'undef :'
+#[ 2, 37, 37 ]    PPI::Token::Symbol       '$sW'
+#[ 2, 40, 40 ]    PPI::Token::Structure    ';'
+
+# Note that subroutines may "fool" you into thinking they're methods.
+# Look at ParseExcel.pm's _subStrWk "method".
+# It has '$self' as the first argument.
+# Actually it probably *is* because of how it's called, but not how a modern Perl
+# author would think of it.
+#
+# Specifically _subStrWk( $oBook, substr( $sWk, 8 ) );
+#sub _subStrWk {
+#    my ( $self, $biff_data, $is_continue ) = @_;
+#}
+
+#  # 'sort { $a <=> $b } @list'
+#  # =>
+#  # 'sort { $^a <=> $^b }, @list'
 
 #  # 'sub Name { my ( $x ) = @_; my $y = shift; ... }'
 #  # =>
 #  # 'sub Name( $x, $y ) { ... }'
-#
-#  # 'package My::Name;'
-#  # =>
-#  # 'unit class My::Name;'
 #
 #  # Does the package have a parent(s)?
 #  #
@@ -42,6 +98,10 @@ sub mogrify {
 #  # 'use parent qw(...)'
 #  # or
 #  # 'our @ISA = qw(...)'
+
+#  # 'if ( exists $error_strings{$parse_error} )'
+#  # =>
+#  # 'if ( %error_strings{$parse_error}:defined )'
 #
 #  # Does pack() exist?
 #  #
@@ -49,6 +109,12 @@ sub mogrify {
 #  # =>
 #  # 'use experimental :pack;'
 #  # '$value.pack( "vVv" );'
+
+
+#    my $width = unpack 'v', $data;
+#                    my ( undef, $cch ) = unpack 'vc', $self->{_buffer};
+#                    substr( $self->{_buffer}, 2, 1 ) = pack( 'C', $cch | 0x01 );
+
 #
 #  # 'pack "vV", $value'
 #  # =>
@@ -57,6 +123,10 @@ sub mogrify {
 #  # 'use constant NAME => $value;'
 #  # =>
 #  # 'constant NAME = $value;'
+#
+#  # int( $x )
+#  # =>
+#  # Int( $x )
 #
 #  # '$x = $self->{Foo};'
 #  # =>
@@ -117,7 +187,6 @@ sub mogrify {
 #  # length( $x )
 #  # =>
 #  # $x.chars # XXX or $x.bytes ?
-}
 
 ## 'package My::Name;' exists
 ##
@@ -126,139 +195,20 @@ sub mogrify {
 #
 #  return $ppi->find_first( 'PPI::Statement::Package' ) ? 1 : 0;
 #}
-#
-## 'package My::Name;'
-## ...
-## 'package Other::Name;'
-##
-## Two or more packages exist
-##
-#sub has_multiple_packages {
-#  my $ppi = shift;
-#
-#  my @names = $ppi->find( 'PPI::Statement::Package' );
-#
-#  return @names > 1 ? 1 : 0;
-#}
 
-# '#!perl'              => '#!raku'
-# '#!/usr/bin/perl'     => '#!/usr/bin/env raku'
-# '#!/usr/bin/env perl' => '#!/usr/bin/env raku'
+# 'package My::Name;'
+# ...
+# 'package Other::Name;'
 #
-sub mogrify_shebang {
-  my $ppi = shift;
-  for my $token ( @{ $ppi->find( 'PPI::Token::Comment' ) } ) {
-    next unless $token->line;
-    my $new_text = $token->content;
+# Two or more packages exist
+#
+sub has_multiple_packages {
+  my $self = shift;
 
-    if ( $new_text eq "#!perl\n" ) {
-      $new_text = "#!raku\n";
-    }
-    elsif ( $new_text =~ m{ ^ \# \s* \! .+ env \s+ perl }x ) {
-      $new_text = $token->content;
-      $new_text =~ s{ perl }{raku}x;
-    }
-    elsif ( $new_text =~ m{ ^ \# \s* \! .+ perl }x ) {
-      $new_text =~ s{ perl }{env raku}x;
-    }
-    else {
-	    next;
-    }
+  my @names = $self->{ppi}->find( 'PPI::Statement::Package' );
 
-    my $new_token = PPI::Token::Comment->new( $new_text );
-    _replace( $token, $new_token );
-  }
+  return @names > 1 ? 1 : 0;
 }
-
-# 'use strict'                  => '' # Rare though, would be the last line.
-# 'use strict;'                 => ''
-# 'use strict "vars";'          => ''
-# 'use strict qw( vars refs );' => ''
-#
-sub remove_strict_pragma {
-  my $ppi = shift;
-  for my $token ( @{ $ppi->find( 'PPI::Statement::Include' ) } ) {
-    next unless $token->type eq 'use';
-    next unless $token->module eq 'strict';
-
-    $token->delete;
-  }
-}
-
-# 'use warnings'                  => '' # Rare though, would be the last line.
-# 'use warnings;'                 => ''
-# 'use warnings "vars";'          => ''
-# 'use warnings qw( vars refs );' => ''
-#
-sub remove_warnings_pragma {
-  my $ppi = shift;
-  for my $token ( @{ $ppi->find( 'PPI::Statement::Include' ) } ) {
-    next unless $token->type eq 'use';
-    next unless $token->module eq 'warnings';
-
-    $token->delete;
-  }
-}
-
-# 'use utf8'                  => '' # Rare though, would be the last line.
-# 'use utf8;'                 => ''
-# 'use utf8 "vars";'          => ''
-# 'use utf8 qw( vars refs );' => ''
-#
-sub remove_utf8_pragma {
-  my $ppi = shift;
-  for my $token ( @{ $ppi->find( 'PPI::Statement::Include' ) } ) {
-    next unless $token->type eq 'use';
-    next unless $token->module eq 'utf8';
-
-    $token->delete;
-  }
-}
-
-# 'use IO::Handle'                  => '' # Rare though, would be the last line.
-# 'use IO::Handle;'                 => ''
-# 'use IO::Handle "vars";'          => ''
-# 'use IO::Handle qw( vars refs );' => ''
-#
-sub remove_core_raku_modules {
-  my $ppi = shift;
-  my %modules = map { $_ => 1 } (
-    'DateTime',
-    'FatRat',
-    'IO::File',
-    'IO::Handle',
-    'IO::Path',
-    'IO::Socket',
-    'Proc::Async'
-  );
-
-  for my $token ( @{ $ppi->find( 'PPI::Statement::Include' ) } ) {
-    next unless $token->type eq 'use';
-    next unless exists $modules{ $token->module };
-
-    $token->delete;
-  }
-}
-
-# '1 & 3'
-# =>
-# '1 +& 3'
-#
-sub mogrify_numerical_operators {
-  my $ppi = shift;
-  my %operators = (
-    '&' => '+&',
-    '|' => '+|'
-  );
-
-  for my $token ( @{ $ppi->find( 'PPI::Token::Operator' ) } ) {
-    next unless exists $operators{ $token->content };
-
-    my $new_token = PPI::Token::Operator->new( $operators{ $token->content } );
-    _replace( $token, $new_token );
-  }
-}
-
 
 ## Does the package have a parent(s)?
 ##
@@ -283,7 +233,7 @@ sub mogrify_numerical_operators {
 #
 #  return 0;
 #}
-#
+
 #sub __get_parent_packages {
 #  my $token = shift;
 #  my @package;
@@ -297,7 +247,7 @@ sub mogrify_numerical_operators {
 #  }
 #  return @package;
 #}
-#
+
 #sub _get_parent_packages {
 #  my $ppi = shift;
 #  my @package;
@@ -312,7 +262,7 @@ sub mogrify_numerical_operators {
 #
 #  return @package;
 #}
-#
+
 #sub remove_parent_package {
 #  my $ppi = shift;
 #  my @package;
@@ -338,7 +288,7 @@ sub mogrify_numerical_operators {
 #    $token->delete;
 #  }
 #}
-#
+
 #sub mogrify_package_declaration {
 #  my $ppi = shift;
 #  return unless _has_parent_package( $ppi );

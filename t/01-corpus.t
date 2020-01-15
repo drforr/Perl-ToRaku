@@ -17,7 +17,7 @@ sub get_context {
   my $min_line   = min( scalar @$got_lines, scalar @$expected_lines );
   my $start_line = max( $context_line - CONTEXT_LINES, 0 );
   my $end_line   = min( $context_line + CONTEXT_LINES, $min_line );
-  my $result;
+  my $result     = "Starts differing at line $context_line\n";
 
   for my $line ( $start_line .. $end_line ) {
     if ( $line == $context_line ) {
@@ -33,11 +33,11 @@ sub get_context {
 
 sub is_munged {
   my ( $perl_filename, $raku_filename ) = @_;
-  my $ppi = PPI::Document->new( $perl_filename );
 
-  Perl::ToRaku::mogrify( $ppi );
-  my $got_text = $ppi->serialize;
+  my $toRaku = Perl::ToRaku->new( $perl_filename );
+  $toRaku->transform;
 
+  my $got_text  = $toRaku->{ppi}->serialize;
   my $raku_text = read_file( $raku_filename );
 
   return 1 if $got_text eq $raku_text;
