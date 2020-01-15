@@ -10,7 +10,7 @@ use Perl::ToRaku;
 
 use constant CONTEXT_LINES => 3;
 
-plan tests => 4;
+plan tests => 5;
 
 sub get_context {
   my ( $context_line, $got_lines, $expected_lines ) = @_;
@@ -63,5 +63,7 @@ ok is_munged( 'corpus/lwp-ssl-test.pl',
 	      'corpus/lwp-ssl-test.rk' ), 'lwp-ssl-test';
 ok is_munged( 'corpus/corogofer.pl',
 	      'corpus/corogofer.rk' ), 'corogofer';
+ok is_munged( 'corpus/PerlWM.pm',
+	      'corpus/PerlWM.rk' ), 'PerlWM';
 
 done_testing;

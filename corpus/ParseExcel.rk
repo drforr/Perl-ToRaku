@@ -1,4 +1,4 @@
-unit class Spreadsheet::ParseExcel;
+unit class Spreadsheet::ParseExcel:ver<1.2.3>;
 
 ##############################################################################
 #
@@ -16,7 +16,7 @@ unit class Spreadsheet::ParseExcel;
 
 
 
-use 5.008;
+
 
 
 use OLE::Storage_Lite;

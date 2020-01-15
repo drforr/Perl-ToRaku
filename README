@@ -1,0 +1,96 @@
+Perl::ToRaku
+
+A translator from Perl to Raku, relying on PPI to do the dirty work.
+
+DESCRIPTION
+
+Use this in preference to the older Perl::ToPerl6 module suite to translate your
+existing Perl modules over to Raku. We do our best to make sure that the generated
+.rk code compiles, purely in the sense of 'perl -c' which is a syntax check. We can't
+do anything about missing subroutine names, and while we do our best to determine
+whether a package is meant to be used in OO, there's also a hinting system that will
+let us know whether to get medieval on a package's metaphorical ass, or to translate it
+as the pure OO class it seems to be.
+
+If this is your first time using the tool, please make sure that you have plenty of
+test coverage, and ideally run this tool over your test suite first before getting into
+a large module, so you can see what it actually does. This module *will* make some
+extensive changes to your code, at least if you don't tell it not to through CLI
+options.
+
+What changes? Well, I'm glad you asked that. Perl::ToRaku is designed with a bunch of
+core translator modules that make one transform and pass the altered PPI document to
+the next module in the chain. Some of the core translators right now are as follows:
+
+Constant           - Change 'use constant NAME => 1;'
+CoreRakuModules    - Remove 'use IO::Handle;' and other Raku core modules
+Operators          - Change Perl operators to their Raku equivalent
+PackageDeclaration - Redeclare a 'package' as a 'unit class', complete with version
+Shebang            - Change '#!perl' and '#!/usr/bin/env perl' shebang lines
+StrictPragma       - Remove the unneeded 'use strict;' pragma.
+StyleGuide         - A Transformer style guide, does nothing.
+Undef              - Rename undef to Nil
+Undef_Workarounds    - (and a few places PPI doesn't reach)
+Utf8Pragma         - Remove the unneeded 'use utf8;' pragma
+WarningsPragma     - Remove the unneeded 'use warnings;' pragma
+Whitespace         - Insert whitespace between 'if' and '(...)', 'my' &c as needed
+
+You can also add your own transformers to the TransformersX namespace as needed. We
+will eventually add configuration a la Perl::Critic (and probably compatible with it)
+to let you enable/disable conversions and configure details of those that might need
+special settings.
+
+CAVEATS
+
+(what, you didn't think there would be any?)
+PPI must be able to parse your source, which means that source filters are right out.
+
+After conversion, Perl "attributes" *WILL* be replaced by Raku attributes, with the
+proper sigils. If you want to disable this behavior, there will be a CLI flag to do so,
+but the module was written with this change in mind.
+
+In the NSA's words: Trust, but Verify. (with your test suites.) While the authors hope
+your Raku code will run perfectly out of the box, that's never a guarantee. Have test
+suites, run them, and pay attention to the output.
+
+INSTALLATION
+
+To install this module, run the following commands:
+
+	perl Build.PL
+	make
+	make test
+	make install
+
+SUPPORT AND DOCUMENTATION
+
+After installing, you can find documentation for this module with the
+perldoc command.
+
+    perldoc Perl::ToRaku
+
+You can also look for information at:
+
+    RT, CPAN's request tracker (report bugs here)
+        http://rt.cpan.org/NoAuth/Bugs.html?Dist=Perl-ToRaku
+
+    AnnoCPAN, Annotated CPAN documentation
+        http://annocpan.org/dist/Perl-ToRaku
+
+    CPAN Ratings
+        http://cpanratings.perl.org/d/Perl-ToRaku
+
+    Search CPAN
+        http://search.cpan.org/dist/Perl-ToRaku/
+
+
+LICENSE AND COPYRIGHT
+
+Copyright (C) 2020 Jeff Goff
+
+This program is free software; you can redistribute it and/or modify it
+under the terms of either: the GNU General Public License as published
+by the Free Software Foundation; or the Artistic License.
+
+See http://dev.perl.org/licenses/ for more information.
+
