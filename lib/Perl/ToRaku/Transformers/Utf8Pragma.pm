@@ -10,6 +10,7 @@ use PPI;
 sub transformer {
   my $self = shift;
   my $ppi  = shift;
+
   for my $token ( @{ $ppi->find( 'PPI::Statement::Include' ) } ) {
     next unless $token->type eq 'use';
     next unless $token->module eq 'utf8';

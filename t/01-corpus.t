@@ -17,7 +17,7 @@ sub get_context {
   my $min_line   = min( scalar @$got_lines, scalar @$expected_lines );
   my $start_line = max( $context_line - CONTEXT_LINES, 0 );
   my $end_line   = min( $context_line + CONTEXT_LINES, $min_line );
-  my $result     = "Starts differing at line $context_line\n";
+  my $result     = "Starts differing at line " . ( $context_line + 1 ) . "\n";
 
   for my $line ( $start_line .. $end_line ) {
     if ( $line == $context_line ) {

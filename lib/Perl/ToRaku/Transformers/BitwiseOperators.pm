@@ -9,7 +9,8 @@ use PPI;
 sub transformer {
   my $self = shift;
   my $ppi  = shift;
-  my %operators = (
+
+  my %operator = (
     '&' => '+&',
     '|' => '+|',
     '^' => '+^',
@@ -18,9 +19,9 @@ sub transformer {
   );
 
   for my $token ( @{ $ppi->find( 'PPI::Token::Operator' ) } ) {
-    next unless exists $operators{ $token->content };
+    next unless exists $operator{ $token->content };
 
-    my $new_token = PPI::Token::Operator->new( $operators{ $token->content } );
+    my $new_token = PPI::Token::Operator->new( $operator{ $token->content } );
     $token->insert_before( $new_token );
     $token->delete;
   }

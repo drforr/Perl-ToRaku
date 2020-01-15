@@ -11,6 +11,7 @@ use PPI;
 sub transformer {
   my $self = shift;
   my $ppi  = shift;
+
   if ( my $token = $ppi->find_first( 'PPI::Statement::Package' ) ) {
     my $version = $token->version;
 

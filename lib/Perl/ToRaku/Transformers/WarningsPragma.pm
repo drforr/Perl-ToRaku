@@ -14,6 +14,7 @@ use PPI;
 sub transformer {
   my $self = shift;
   my $ppi  = shift;
+
   for my $token ( @{ $ppi->find( 'PPI::Statement::Include' ) } ) {
     next unless $token->type eq 'use' or
                 $token->type eq 'no';

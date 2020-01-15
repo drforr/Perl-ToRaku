@@ -10,6 +10,7 @@ use PPI;
 
 BEGIN {
   my @core_modules = (
+    'Perl::ToRaku::Transformers::Constant',
     'Perl::ToRaku::Transformers::Shebang',
     'Perl::ToRaku::Transformers::PackageDeclaration',
     'Perl::ToRaku::Transformers::StrictPragma',
@@ -17,7 +18,9 @@ BEGIN {
     'Perl::ToRaku::Transformers::Utf8Pragma',
     'Perl::ToRaku::Transformers::CoreRakuModules',
     'Perl::ToRaku::Transformers::BitwiseOperators',
-    'Perl::ToRaku::Transformers::Undef'
+    'Perl::ToRaku::Transformers::Whitespace',
+    'Perl::ToRaku::Transformers::Undef',
+    'Perl::ToRaku::Transformers::Undef_Workarounds'
   );
   use Module::Pluggable
     sub_name    => 'core_plugins',
@@ -33,7 +36,7 @@ BEGIN {
 # Argument to pass in:
 #   --remove-redundant-parentheses-around-conditions
 #   --remove-redundant-parentheses-around-expressions (superset of above)
-
+#
 sub new {
   my ( $class, $filename ) = @_;
   my $content = read_file( $filename ); # Don't put in the hashref.
@@ -50,27 +53,16 @@ sub transform {
   my ( $self ) = @_;
   my $ppi      = $self->{ppi};
 
+  my $packages = $ppi->find( 'PPI::Statement::Package' );
+  if ( $packages and @{ $packages } > 1 ) {
+    die "Currently only one package per file is supported.\n";
+  }
+
   for my $plugin ( $self->core_plugins ) {
     $plugin->transformer( $ppi );
   }
   #use YAML;die Dump($self->user_plugins);
 }
-
-# ?..:..; has a bug, here's an instance:
-#
-# ( $sW eq "\x00" ) ? undef : $sW
-#
-#              PPI::Document
-#                PPI::Statement
-#                  PPI::Structure::List    ( ... )
-#                    PPI::Statement::Expression
-#[ 2, 13, 13 ]        PPI::Token::Symbol   '$sW'
-#[ 2, 17, 17 ]        PPI::Token::Operator         'eq'
-#[ 2, 20, 20 ]        PPI::Token::Quote::Double    '"\x00"'
-#[ 2, 29, 29 ]    PPI::Token::Operator     '?'
-#[ 2, 31, 31 ]    PPI::Token::Label        'undef :'
-#[ 2, 37, 37 ]    PPI::Token::Symbol       '$sW'
-#[ 2, 40, 40 ]    PPI::Token::Structure    ';'
 
 # Note that subroutines may "fool" you into thinking they're methods.
 # Look at ParseExcel.pm's _subStrWk "method".
@@ -83,132 +75,101 @@ sub transform {
 #    my ( $self, $biff_data, $is_continue ) = @_;
 #}
 
-#  # 'sort { $a <=> $b } @list'
-#  # =>
-#  # 'sort { $^a <=> $^b }, @list'
+# 'sort { $a <=> $b } @list'
+# =>
+# 'sort { $^a <=> $^b }, @list'
 
-#  # 'sub Name { my ( $x ) = @_; my $y = shift; ... }'
-#  # =>
-#  # 'sub Name( $x, $y ) { ... }'
-#
-#  # Does the package have a parent(s)?
-#  #
-#  # 'use base qw(...)'
-#  # or
-#  # 'use parent qw(...)'
-#  # or
-#  # 'our @ISA = qw(...)'
+# 'sub Name { my ( $x ) = @_; my $y = shift; ... }'
+# =>
+# 'sub Name( $x, $y ) { ... }'
 
-#  # 'if ( exists $error_strings{$parse_error} )'
-#  # =>
-#  # 'if ( %error_strings{$parse_error}:defined )'
+# Does the package have a parent(s)?
 #
-#  # Does pack() exist?
-#  #
-#  # 'pack( "vVv", $value );'
-#  # =>
-#  # 'use experimental :pack;'
-#  # '$value.pack( "vVv" );'
+# 'use base qw(...)'
+# or
+# 'use parent qw(...)'
+# or
+# 'our @ISA = qw(...)'
+
+# 'if ( exists $error_strings{$parse_error} )'
+# =>
+# 'if ( %error_strings{$parse_error}:defined )'
+
+# Does pack() exist?
+#
+# 'pack( "vVv", $value );'
+# =>
+# 'use experimental :pack;'
+# '$value.pack( "vVv" );'
 
 
 #    my $width = unpack 'v', $data;
 #                    my ( undef, $cch ) = unpack 'vc', $self->{_buffer};
 #                    substr( $self->{_buffer}, 2, 1 ) = pack( 'C', $cch | 0x01 );
 
-#
-#  # 'pack "vV", $value'
-#  # =>
-#  # '$value.pack( "vV" );'
-#
-#  # 'use constant NAME => $value;'
-#  # =>
-#  # 'constant NAME = $value;'
-#
-#  # int( $x )
-#  # =>
-#  # Int( $x )
-#
-#  # '$x = $self->{Foo};'
-#  # =>
-#  # 'has $.Foo;'
-#  # ...
-#  # '$x = $.Foo;'
-#
-#  # '%x = $self->{Foo};'
-#  # =>
-#  # 'has %.Foo;'
-#  # ...
-#  # '%x = %.Foo;'
-#
-#  # '@x = $self->{Foo};'
-#  # =>
-#  # 'has @.Foo;'
-#  # ...
-#  # '@x = @.Foo;'
-#
-#  # '$self->{Foo}[0]'
-#  # =>
-#  # 'has @.Foo;'
-#  # ...
-#  # '@.Foo[0]'
-#
-#  # 'sub new { ... }'
-#  # =>
-#  # 'multi method new(...) { ... }'
-#
-#  # For packages, collect the name of the "functions" it declares.
-#  # In a given method, look to see if it calls one of those function names.
-#  # If so, the variable that calls it must be $self.
-#
-#  # ... Then the operators, I guess....
-#
-#  # Drop parens around if... operators.
-#
-#  # for... blocks &c
-#  #
-#  # for ( my $i = 0; $i < $x ; $i++ ) { ... }
-#  # =>
-#  # for ( 0 .. $x - 1 ) -> $i { ... }
-#  # or
-#  # for ^$x -> $i { ... }
-#
-#  # for ( my $i = $l ; $i < $h ; $i++ ) { ... }
-#  # =>
-#  # for ( $l .. $h - 1 ) -> $i { ... }
-#
-#  # 'my( $x, $y );'
-#  # =>
-#  # 'my ( $x, $y );'
-#
-#  # 'if( $x ) { }'
-#  # =>
-#  # 'if ( $x ) { }'
-#
-#  # length( $x )
-#  # =>
-#  # $x.chars # XXX or $x.bytes ?
+# 'pack "vV", $value'
+# =>
+# '$value.pack( "vV" );'
 
-## 'package My::Name;' exists
-##
-#sub is_package {
-#  my $ppi = shift;
-#
-#  return $ppi->find_first( 'PPI::Statement::Package' ) ? 1 : 0;
-#}
+# 'use constant NAME => $value;'
+# =>
+# 'constant NAME = $value;'
 
-# 'package My::Name;'
+# int( $x )
+# =>
+# Int( $x )
+
+# '$x = $self->{Foo};'
+# =>
+# 'has $.Foo;'
 # ...
-# 'package Other::Name;'
-#
-# Two or more packages exist
-#
-sub has_multiple_packages {
-  my $self = shift;
+# '$x = $.Foo;'
 
-  my @names = $self->{ppi}->find( 'PPI::Statement::Package' );
+# '%x = $self->{Foo};'
+# =>
+# 'has %.Foo;'
+# ...
+# '%x = %.Foo;'
 
-  return @names > 1 ? 1 : 0;
-}
+# '@x = $self->{Foo};'
+# =>
+# 'has @.Foo;'
+# ...
+# '@x = @.Foo;'
+
+# '$self->{Foo}[0]'
+# =>
+# 'has @.Foo;'
+# ...
+# '@.Foo[0]'
+
+# 'sub new { ... }'
+# =>
+# 'multi method new(...) { ... }'
+
+# For packages, collect the name of the "functions" it declares.
+# In a given method, look to see if it calls one of those function names.
+# If so, the variable that calls it must be $self.
+
+# ... Then the operators, I guess....
+
+# Drop parens around if... operators.
+
+# for... blocks &c
+#
+# for ( my $i = 0; $i < $x ; $i++ ) { ... }
+# =>
+# for ( 0 .. $x - 1 ) -> $i { ... }
+# or
+# for ^$x -> $i { ... }
+
+# for ( my $i = $l ; $i < $h ; $i++ ) { ... }
+# =>
+# for ( $l .. $h - 1 ) -> $i { ... }
+
+# length( $x )
+# =>
+# $x.chars # XXX or $x.bytes ?
 
 ## Does the package have a parent(s)?
 ##
@@ -296,7 +257,6 @@ sub has_multiple_packages {
 #  my @parent = _get_parent_packages( $ppi );
 #
 #  my $token = $ppi->find_first( 'PPI::Statement::Package' );
-#use YAML; die Dump($token);
 #}
 
 1;

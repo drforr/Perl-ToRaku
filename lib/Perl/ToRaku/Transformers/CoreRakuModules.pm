@@ -10,7 +10,8 @@ use PPI;
 sub transformer {
   my $self = shift;
   my $ppi  = shift;
-  my %modules = map { $_ => 1 } (
+
+  my %module = map { $_ => 1 } (
     'DateTime',
     'FatRat',
     'IO::File',
@@ -22,7 +23,7 @@ sub transformer {
 
   for my $token ( @{ $ppi->find( 'PPI::Statement::Include' ) } ) {
     next unless $token->type eq 'use';
-    next unless exists $modules{ $token->module };
+    next unless exists $module{ $token->module };
 
     $token->delete;
   }

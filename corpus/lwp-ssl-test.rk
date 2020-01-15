@@ -17,7 +17,7 @@ GetOptions(
            'CAdir:s' => \$opt_cadir,
            );
  
-if($opt_debug) {
+if ($opt_debug) {
     eval "use LWP::Debug qw(+);";
 }
  
