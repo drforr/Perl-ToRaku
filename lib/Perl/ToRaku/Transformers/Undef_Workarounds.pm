@@ -1,7 +1,5 @@
 package Perl::ToRaku::Transformers::Undef_Workarounds;
 
-use PPI;
-
 # 'undef;'                     => 'Nil;'
 # '( $sWk & 32 ) ? undef : 3;' => '( $sWk & 32 ) ? Nil : 3;' # XXX The workaround
 #

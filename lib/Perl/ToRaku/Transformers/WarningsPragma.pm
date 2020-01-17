@@ -1,7 +1,5 @@
 package Perl::ToRaku::Transformers::WarningsPragma;
 
-use PPI;
-
 # 'use warnings'                  => '' # Rare though, would be the last line.
 # 'use warnings;'                 => ''
 # 'use warnings "vars";'          => ''

@@ -1,7 +1,5 @@
 package Perl::ToRaku::Transformers::BitwiseOperators;
 
-use PPI;
-
 # '1 & 3'
 # =>
 # '1 +& 3'
@@ -11,9 +9,9 @@ sub transformer {
   my $ppi  = shift;
 
   my %operator = (
-    '&' => '+&',
-    '|' => '+|',
-    '^' => '+^',
+    '&'  => '+&',
+    '|'  => '+|',
+    '^'  => '+^',
     '<<' => '+<',
     '>>' => '+>'
   );

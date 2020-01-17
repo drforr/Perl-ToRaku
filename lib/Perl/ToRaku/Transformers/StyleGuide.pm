@@ -50,6 +50,7 @@ sub transformer {
   # but I'm going to write the code this way.
   #
   for my $token ( @{ $tokens } ) {
+  }
   
   # Save newly-created tokens into a temporary variable.
   # You don't really need it after testing, but remember that

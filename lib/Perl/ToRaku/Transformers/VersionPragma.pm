@@ -1,7 +1,5 @@
 package Perl::ToRaku::Transformers::VersionPragma;
 
-use PPI;
-
 # 'use 5.008'                  => '' # Rare though, would be the last line.
 # 'use 5.008;'                 => ''
 # 'use 5.008 "vars";'          => ''

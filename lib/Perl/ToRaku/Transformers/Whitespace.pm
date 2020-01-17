@@ -1,7 +1,5 @@
 package Perl::ToRaku::Transformers::Whitespace;
 
-use PPI;
-
 # 'my($x);' => 'my ($x);'
 # 'if($i==0) {}' => 'if ($i==0) {}'
 #

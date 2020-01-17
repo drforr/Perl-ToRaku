@@ -1,7 +1,5 @@
 package Perl::ToRaku::Transformers::PackageDeclaration;
 
-use PPI;
-
 # 'package My::Name;' => 'unit class My::Name'
 # 'package My::Name v1.2.3;' => 'unit class My::Name:ver<1.2.3>;'
 #

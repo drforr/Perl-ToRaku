@@ -1,7 +1,5 @@
 package Perl::ToRaku::Transformers::Shebang;
 
-use PPI;
-
 # '#!perl'              => '#!raku'
 # '#!/usr/bin/perl'     => '#!/usr/bin/env raku'
 # '#!/usr/bin/env perl' => '#!/usr/bin/env raku'
@@ -14,7 +12,7 @@ sub transformer {
     next unless $token->line;
     my $new_text = $token->content;
 
-    if ( $new_text eq "#!perl\n" ) {
+    if ( $new_text =~ m{ ^ \# \! perl }x ) {
       $new_text = "#!raku\n";
     }
     elsif ( $new_text =~ m{ ^ \# \s* \! .+ env \s+ perl }x ) {

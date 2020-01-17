@@ -1,7 +1,5 @@
 package Perl::ToRaku::Transformers::CoreRakuModules;
 
-use PPI;
-
 # 'use IO::Handle'                  => '' # Rare though, would be the last line.
 # 'use IO::Handle;'                 => ''
 # 'use IO::Handle "vars";'          => ''

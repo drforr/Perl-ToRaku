@@ -1,7 +1,5 @@
 package Perl::ToRaku::Transformers::Utf8Pragma;
 
-use PPI;
-
 # 'use utf8'                  => '' # Rare though, would be the last line.
 # 'use utf8;'                 => ''
 # 'use utf8 "vars";'          => ''

@@ -19,6 +19,7 @@ BEGIN {
     'Perl::ToRaku::Transformers::CoreRakuModules',
     'Perl::ToRaku::Transformers::BitwiseOperators',
     'Perl::ToRaku::Transformers::Whitespace',
+    'Perl::ToRaku::Transformers::VersionPragma',
     'Perl::ToRaku::Transformers::Undef',
     'Perl::ToRaku::Transformers::Undef_Workarounds'
   );
@@ -37,13 +38,20 @@ BEGIN {
 #   --remove-redundant-parentheses-around-conditions
 #   --remove-redundant-parentheses-around-expressions (superset of above)
 #
+#   --PAUSE-author='JGOFF' # To help populate 'unit class MyClass:auth<JGOFF>'
+#
 sub new {
   my ( $class, $filename ) = @_;
   my $content = read_file( $filename ); # Don't put in the hashref.
+  my $ppi     = PPI::Document->new( $filename );
+
+  # Collect $VERSION from 'our $VERSION = v1.2.3;' or
+  #                       'our $VERSION = "0.1.2";
+  # Collect $VERSION from 'package MyPackage v0.1.2' # PPI fails to do this
 
   return bless {
     content => $content,
-    ppi     => PPI::Document->new( $filename )
+    ppi     => $ppi
   }, $class;
 }
 
@@ -110,10 +118,6 @@ sub transform {
 # 'pack "vV", $value'
 # =>
 # '$value.pack( "vV" );'
-
-# 'use constant NAME => $value;'
-# =>
-# 'constant NAME = $value;'
 
 # int( $x )
 # =>
@@ -248,15 +252,6 @@ sub transform {
 #
 #    $token->delete;
 #  }
-#}
-
-#sub mogrify_package_declaration {
-#  my $ppi = shift;
-#  return unless _has_parent_package( $ppi );
-#
-#  my @parent = _get_parent_packages( $ppi );
-#
-#  my $token = $ppi->find_first( 'PPI::Statement::Package' );
 #}
 
 1;

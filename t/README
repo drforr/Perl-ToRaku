@@ -1,0 +1,14 @@
+Test README
+
+The directory is named the way it is because of prove(1)'s defaults.
+It doesn't recurse through directories by default, and I'm always
+(well, occasionally) forgetting to add the '-r' flag to run my full
+test suites. So to KISS I'm going to put all of the tests for core stuff
+in the top-level directory.
+
+You'll note as well I'm not using the convention of naming the
+Transformers:: tests DDD-$name.t. I'm not doing this because eventually
+if I number the things, I'll either not like where they are run or
+what order they're run in, so I'll just keep the numbers off all the
+t/$Transformer::Name.t tests. It means they'll run at the end, but
+all of the core tests *should* be run anyway...

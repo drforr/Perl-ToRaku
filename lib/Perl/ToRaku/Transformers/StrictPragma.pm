@@ -1,7 +1,5 @@
 package Perl::ToRaku::Transformers::StrictPragma;
 
-use PPI;
-
 # 'use strict'                  => '' # Rare though, would be the last line.
 # 'use strict;'                 => ''
 # 'use strict "vars";'          => ''
