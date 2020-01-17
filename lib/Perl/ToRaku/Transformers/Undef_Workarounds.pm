@@ -1,5 +1,8 @@
 package Perl::ToRaku::Transformers::Undef_Workarounds;
 
+use strict;
+use warnings;
+
 # 'undef;'                     => 'Nil;'
 # '( $sWk & 32 ) ? undef : 3;' => '( $sWk & 32 ) ? Nil : 3;' # XXX The workaround
 #
@@ -7,16 +10,19 @@ sub transformer {
   my $self = shift;
   my $ppi  = shift;
 
-  for my $token ( @{ $ppi->find( 'PPI::Token::Label' ) } ) {
-    next unless $token->content =~ / undef /x;
-    next unless $token->sprevious_sibling->isa( 'PPI::Token::Operator' ) and
-                $token->sprevious_sibling->content eq '?';
+  my $labels = $ppi->find( 'PPI::Token::Label' );
+  if ( $labels ) {
+    for my $label ( @{ $labels } ) {
+      next unless $label->content =~ / undef /x;
+      next unless $label->sprevious_sibling->isa( 'PPI::Token::Operator' ) and
+                  $label->sprevious_sibling->content eq '?';
 
-    my $text = $token->content;
-    $text =~ s{ undef }{Nil}x;
-    my $new_token = PPI::Token::Word->new( $text );
-    $token->insert_before( $new_token );
-    $token->delete;
+      my $text = $label->content;
+      $text =~ s{ undef }{Nil}x;
+      my $new_word = PPI::Token::Word->new( $text );
+      $label->insert_before( $new_word );
+      $label->delete;
+    }
   }
 }
 

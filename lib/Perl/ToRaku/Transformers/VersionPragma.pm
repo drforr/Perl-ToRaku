@@ -1,5 +1,8 @@
 package Perl::ToRaku::Transformers::VersionPragma;
 
+use strict;
+use warnings;
+
 # 'use 5.008'                  => '' # Rare though, would be the last line.
 # 'use 5.008;'                 => ''
 # 'use 5.008 "vars";'          => ''
@@ -9,12 +12,15 @@ sub transformer {
   my $self = shift;
   my $ppi  = shift;
 
-  for my $token ( @{ $ppi->find( 'PPI::Statement::Include' ) } ) {
-    next unless $token->type eq 'use';
-    next if $token->module;
-    next unless $token->version =~ m{ [1-9][0-9]* \. [0-9]+ }x;
+  my $includes = $ppi->find( 'PPI::Statement::Include' );
+  if ( $includes ) {
+    for my $include ( @{ $includes } ) {
+      next unless $include->type eq 'use';
+      next if $include->module;
+      next unless $include->version =~ m{ [1-9][0-9]* \. [0-9]+ }x;
 
-    $token->delete;
+      $include->delete;
+    }
   }
 }
 

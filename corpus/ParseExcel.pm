@@ -1,4 +1,4 @@
-package Spreadsheet::ParseExcel v1.2.3;
+package Spreadsheet::ParseExcel;
 
 ##############################################################################
 #

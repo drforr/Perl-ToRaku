@@ -9,25 +9,31 @@ use File::Slurp;
 use PPI;
 
 BEGIN {
-  my @core_modules = (
-    'Perl::ToRaku::Transformers::Constant',
-    'Perl::ToRaku::Transformers::Shebang',
-    'Perl::ToRaku::Transformers::PackageDeclaration',
-    'Perl::ToRaku::Transformers::StrictPragma',
-    'Perl::ToRaku::Transformers::WarningsPragma',
-    'Perl::ToRaku::Transformers::Utf8Pragma',
-    'Perl::ToRaku::Transformers::CoreRakuModules',
-    'Perl::ToRaku::Transformers::BitwiseOperators',
-    'Perl::ToRaku::Transformers::Whitespace',
-    'Perl::ToRaku::Transformers::VersionPragma',
-    'Perl::ToRaku::Transformers::Undef',
-    'Perl::ToRaku::Transformers::Undef_Workarounds'
+  my @core_modules = map { __PACKAGE__ . '::Transformers::' . $_ } (
+    'Constant',
+    'Shebang',
+    'PackageDeclaration',
+    'StrictPragma',
+    'WarningsPragma',
+    'Utf8Pragma',
+    'CoreRakuModules',
+    'BitwiseOperators',
+    'Whitespace',
+    'VersionPragma',
+    'Undef',
+    'Undef_Workarounds'
   );
+
   use Module::Pluggable
     sub_name    => 'core_plugins',
     search_path => ['Perl::ToRaku::Transformers'],
     require     => 1,
     only        => \@core_modules;
+  use Module::Pluggable
+    sub_name    => 'optional_plugins',
+    search_path => ['Perl::ToRaku::Transformers'],
+    require     => 1,
+    except      => \@core_modules;
   use Module::Pluggable
     sub_name    => 'user_plugins',
     search_path => ['Perl::ToRaku::TransformersX'],
@@ -44,15 +50,22 @@ sub new {
   my ( $class, $filename ) = @_;
   my $content = read_file( $filename ); # Don't put in the hashref.
   my $ppi     = PPI::Document->new( $filename );
+  my $self    = {
+    content => $content,
+    ppi     => $ppi,
+  };
 
   # Collect $VERSION from 'our $VERSION = v1.2.3;' or
   #                       'our $VERSION = "0.1.2";
   # Collect $VERSION from 'package MyPackage v0.1.2' # PPI fails to do this
+  #
+  my $packages = $ppi->find( 'PPI::Statement::Package' );
+  die "Currently only one package per file is supported.\n" if
+     $packages and @{ $packages } > 1;
 
-  return bless {
-    content => $content,
-    ppi     => $ppi
-  }, $class;
+  $self->{is_package} = 1 if $packages;
+
+  return bless $self, $class;
 }
 
 # 'use overload' may cause an issue
@@ -61,15 +74,13 @@ sub transform {
   my ( $self ) = @_;
   my $ppi      = $self->{ppi};
 
-  my $packages = $ppi->find( 'PPI::Statement::Package' );
-  if ( $packages and @{ $packages } > 1 ) {
-    die "Currently only one package per file is supported.\n";
-  }
-
   for my $plugin ( $self->core_plugins ) {
     $plugin->transformer( $ppi );
   }
-  #use YAML;die Dump($self->user_plugins);
+
+  for my $plugin ( $self->optional_plugins ) {
+    $plugin->transformer( $ppi );
+  }
 }
 
 # Note that subroutines may "fool" you into thinking they're methods.
@@ -110,10 +121,9 @@ sub transform {
 # 'use experimental :pack;'
 # '$value.pack( "vVv" );'
 
-
-#    my $width = unpack 'v', $data;
-#                    my ( undef, $cch ) = unpack 'vc', $self->{_buffer};
-#                    substr( $self->{_buffer}, 2, 1 ) = pack( 'C', $cch | 0x01 );
+# my $width = unpack 'v', $data;
+#                 my ( undef, $cch ) = unpack 'vc', $self->{_buffer};
+#                 substr( $self->{_buffer}, 2, 1 ) = pack( 'C', $cch | 0x01 );
 
 # 'pack "vV", $value'
 # =>
@@ -123,29 +133,13 @@ sub transform {
 # =>
 # Int( $x )
 
-# '$x = $self->{Foo};'
-# =>
-# 'has $.Foo;'
-# ...
-# '$x = $.Foo;'
+# '$x = $self->{Foo};' => 'has $.Foo;' ... '$x = $.Foo;'
 
-# '%x = $self->{Foo};'
-# =>
-# 'has %.Foo;'
-# ...
-# '%x = %.Foo;'
+# '%x = $self->{Foo};' => 'has %.Foo;' ... '%x = %.Foo;'
 
-# '@x = $self->{Foo};'
-# =>
-# 'has @.Foo;'
-# ...
-# '@x = @.Foo;'
+# '@x = $self->{Foo};' => 'has @.Foo;' ... '@x = @.Foo;'
 
-# '$self->{Foo}[0]'
-# =>
-# 'has @.Foo;'
-# ...
-# '@.Foo[0]'
+# '$self->{Foo}[0]' => 'has @.Foo;' ... '@.Foo[0]'
 
 # 'sub new { ... }'
 # =>

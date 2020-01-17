@@ -1,5 +1,8 @@
 package Perl::ToRaku::Transformers::StrictPragma;
 
+use strict;
+use warnings;
+
 # 'use strict'                  => '' # Rare though, would be the last line.
 # 'use strict;'                 => ''
 # 'use strict "vars";'          => ''
@@ -13,12 +16,15 @@ sub transformer {
   my $self = shift;
   my $ppi  = shift;
 
-  for my $token ( @{ $ppi->find( 'PPI::Statement::Include' ) } ) {
-    next unless $token->type eq 'use' or
-                $token->type eq 'no';
-    next unless $token->module eq 'strict';
+  my $includes = $ppi->find( 'PPI::Statement::Include' );
+  if ( $includes ) {
+    for my $include ( @{ $includes } ) {
+      next unless $include->type eq 'use' or
+                  $include->type eq 'no';
+      next unless $include->module eq 'strict';
 
-    $token->delete;
+      $include->delete;
+    }
   }
 }
 

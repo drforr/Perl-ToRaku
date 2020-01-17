@@ -1,5 +1,8 @@
 package Perl::ToRaku::Transformers::Whitespace;
 
+use strict;
+use warnings;
+
 # 'my($x);' => 'my ($x);'
 # 'if($i==0) {}' => 'if ($i==0) {}'
 #
@@ -7,7 +10,7 @@ sub transformer {
   my $self = shift;
   my $ppi  = shift;
 
-  my %word = map { $_ => 1 } (
+  my %map = map { $_ => 1 } (
     'if',
     'elsif',
     'unless',
@@ -19,12 +22,15 @@ sub transformer {
     'local' # Perl only
   );
 
-  for my $token ( @{ $ppi->find( 'PPI::Token::Word' ) } ) {
-    next unless exists $word{ $token->content };
-    next if $token->next_sibling->isa( 'PPI::Token::Whitespace' );
+  my $words = $ppi->find( 'PPI::Token::Word' );
+  if ( $words ) {
+    for my $word ( @{ $words } ) {
+      next unless exists $map{ $word->content };
+      next if $word->next_sibling->isa( 'PPI::Token::Whitespace' );
 
-    my $new_token = PPI::Token::Whitespace->new( ' ' );
-    $token->insert_after( $new_token );
+      my $new_whitespace = PPI::Token::Whitespace->new( ' ' );
+      $word->insert_after( $new_whitespace );
+    }
   }
 }
 

@@ -1,4 +1,4 @@
-unit class Spreadsheet::ParseExcel:ver<1.2.3>;
+unit class Spreadsheet::ParseExcel;
 
 ##############################################################################
 #

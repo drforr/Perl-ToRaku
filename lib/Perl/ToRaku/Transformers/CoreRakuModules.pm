@@ -1,5 +1,8 @@
 package Perl::ToRaku::Transformers::CoreRakuModules;
 
+use strict;
+use warnings;
+
 # 'use IO::Handle'                  => '' # Rare though, would be the last line.
 # 'use IO::Handle;'                 => ''
 # 'use IO::Handle "vars";'          => ''
@@ -9,7 +12,7 @@ sub transformer {
   my $self = shift;
   my $ppi  = shift;
 
-  my %module = map { $_ => 1 } (
+  my %map = map { $_ => 1 } (
     'DateTime',
     'FatRat',
     'IO::File',
@@ -19,11 +22,14 @@ sub transformer {
     'Proc::Async'
   );
 
-  for my $token ( @{ $ppi->find( 'PPI::Statement::Include' ) } ) {
-    next unless $token->type eq 'use';
-    next unless exists $module{ $token->module };
+  my $includes = $ppi->find( 'PPI::Statement::Include' );
+  if ( $includes ) {
+    for my $include ( @{ $includes } ) {
+      next unless $include->type eq 'use';
+      next unless exists $map{ $include->module };
 
-    $token->delete;
+      $include->delete;
+    }
   }
 }
 
