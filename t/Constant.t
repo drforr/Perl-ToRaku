@@ -1,22 +1,25 @@
 #!/usr/bin/perl
 
+use strict;
+use warnings;
+
+use Perl::ToRaku;
 use Test::More;
-use lib 't/lib/';
-use Perl::ToRaku::Utils qw( transform );
 
 plan tests => 4;
 
 my $package = 'Perl::ToRaku::Transformers::Constant';
+my $toRaku  = Perl::ToRaku->new;
 
 use_ok $package;
 
-is transform( $package, 'use constant FOO => 1;' ),
+is $toRaku->test_transform( $package, 'use constant FOO => 1;' ),
    'constant FOO = 1;';
 
-is transform( $package, 'use constant FOO;' ),
+is $toRaku->test_transform( $package, 'use constant FOO;' ),
    'use constant FOO;';
 
-is transform( $package, 'use strict "warnings";' ),
+is $toRaku->test_transform( $package, 'use strict "warnings";' ),
    'use strict "warnings";';
 
 done_testing;

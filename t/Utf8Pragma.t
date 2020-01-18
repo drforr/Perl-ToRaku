@@ -1,17 +1,20 @@
 #!/usr/bin/perl
 
+use strict;
+use warnings;
+
+use Perl::ToRaku;
 use Test::More;
-use lib 't/lib/';
-use Perl::ToRaku::Utils qw( transform );
 
 plan tests => 3;
 
 my $package = 'Perl::ToRaku::Transformers::Utf8Pragma';
+my $toRaku  = Perl::ToRaku->new;
 
 use_ok $package;
 
-is transform( $package, 'use utf8 qw(foo);' ), '';
+is $toRaku->test_transform( $package, 'use utf8 qw(foo);' ), '';
 
-is transform( $package, 'use warnings;' ), 'use warnings;';
+is $toRaku->test_transform( $package, 'use warnings;' ), 'use warnings;';
 
 done_testing;

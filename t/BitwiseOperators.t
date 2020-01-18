@@ -1,17 +1,22 @@
 #!/usr/bin/perl
 
+use strict;
+use warnings;
+
 use Test::More;
-use lib 't/lib/';
-use Perl::ToRaku::Utils qw( transform );
+use Perl::ToRaku;
 
 plan tests => 3;
 
 my $package = 'Perl::ToRaku::Transformers::BitwiseOperators';
+my $toRaku  = Perl::ToRaku->new;
 
 use_ok $package;
 
-is transform( $package, '1 & 2' ), '1 +& 2';
+is $toRaku->test_transform( $package, '1 & 2' ),
+   '1 +& 2';
 
-is transform( $package, '1 or 2' ), '1 or 2';
+is $toRaku->test_transform( $package, '1 or 2' ),
+   '1 or 2';
 
 done_testing;

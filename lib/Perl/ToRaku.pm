@@ -48,12 +48,21 @@ BEGIN {
 #
 sub new {
   my ( $class, $filename ) = @_;
-  my $content = read_file( $filename ); # Don't put in the hashref.
-  my $ppi     = PPI::Document->new( $filename );
-  my $self    = {
-    content => $content,
-    ppi     => $ppi,
-  };
+  my $self;
+  my $ppi;
+  if ( $filename ) {
+    my $content = read_file( $filename ); # Don't put in the hashref.
+    $ppi     = PPI::Document->new( $filename );
+    $self    = {
+      content => $content,
+      ppi     => $ppi,
+    };
+  }
+  else {
+    $self = {
+    };
+    return bless $self, $class;
+  }
 
   # Collect $VERSION from 'our $VERSION = v1.2.3;' or
   #                       'our $VERSION = "0.1.2";
@@ -81,6 +90,14 @@ sub transform {
   for my $plugin ( $self->optional_plugins ) {
     $plugin->transformer( $ppi );
   }
+}
+
+sub test_transform {
+  my ( $self, $package, $text ) = @_;
+  my $ppi = PPI::Document->new( \$text );
+
+  $package->transformer( $ppi );
+  $ppi->serialize;
 }
 
 # Note that subroutines may "fool" you into thinking they're methods.
