@@ -10,7 +10,8 @@ use warnings;
 #
 sub transformer {
   my $self = shift;
-  my $ppi  = shift;
+  my $obj  = shift;
+  my $ppi  = $obj->_ppi;
 
   my %map = map { $_ => 1 } (
     'DateTime',

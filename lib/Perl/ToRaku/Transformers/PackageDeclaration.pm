@@ -10,7 +10,8 @@ use Carp qw(carp);
 #
 sub transformer {
   my $self         = shift;
-  my $ppi          = shift;
+  my $obj          = shift;
+  my $ppi          = $obj->_ppi;
   my $package_stmt = $ppi->find_first( 'PPI::Statement::Package' );
 
   return unless defined $package_stmt and $package_stmt;

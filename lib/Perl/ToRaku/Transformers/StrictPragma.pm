@@ -14,7 +14,8 @@ use warnings;
 #
 sub transformer {
   my $self = shift;
-  my $ppi  = shift;
+  my $obj  = shift;
+  my $ppi  = $obj->_ppi;
 
   my $includes = $ppi->find( 'PPI::Statement::Include' );
   if ( $includes ) {

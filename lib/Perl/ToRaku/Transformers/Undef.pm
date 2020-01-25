@@ -8,7 +8,8 @@ use warnings;
 #
 sub transformer {
   my $self = shift;
-  my $ppi  = shift;
+  my $obj  = shift;
+  my $ppi  = $obj->_ppi;
 
   my $words = $ppi->find( 'PPI::Token::Word' );
   if ( $words ) {

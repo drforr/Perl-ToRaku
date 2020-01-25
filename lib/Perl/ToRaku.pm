@@ -77,6 +77,13 @@ sub new {
   return bless $self, $class;
 }
 
+sub _ppi {
+  my ( $self ) = @_;
+  my $ppi = $self->{ppi};
+
+  return $ppi;
+}
+
 # 'use overload' may cause an issue
 #
 sub transform {
@@ -84,20 +91,20 @@ sub transform {
   my $ppi      = $self->{ppi};
 
   for my $plugin ( $self->core_plugins ) {
-    $plugin->transformer( $ppi );
+    $plugin->transformer( $self );
   }
 
   for my $plugin ( $self->optional_plugins ) {
-    $plugin->transformer( $ppi );
+    $plugin->transformer( $self );
   }
 }
 
 sub test_transform {
   my ( $self, $package, $text ) = @_;
-  my $ppi = PPI::Document->new( \$text );
+  $self->{ppi} = PPI::Document->new( \$text );
 
-  $package->transformer( $ppi );
-  $ppi->serialize;
+  $package->transformer( $self );
+  $self->{ppi}->serialize;
 }
 
 # Note that subroutines may "fool" you into thinking they're methods.

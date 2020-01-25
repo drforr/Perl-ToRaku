@@ -28,7 +28,8 @@ use warnings;
 #
 sub transformer {
   my $self = shift; # Chosen over @_ purely at random.
-  my $ppi  = shift;
+  my $obj  = shift;
+  my $ppi  = $obj->_ppi;
 
   return; # Prevent the module from actually doing anything, as it shouldn't.
 
