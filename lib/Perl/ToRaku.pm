@@ -9,7 +9,29 @@ use File::Slurp;
 use PPI;
 
 BEGIN {
-  my @core_modules = map { __PACKAGE__ . '::Transformers::' . $_ } (
+  my @core_validators = map { __PACKAGE__ . '::Validators::' . $_ } (
+    'NoOverloadPragma',
+    'NoMultiplePackages',
+  );
+
+  use Module::Pluggable
+    sub_name    => 'core_validators',
+    search_path => 'Perl::ToRaku::Validators',
+    only        => \@core_validators,
+    require     => 1;
+
+  use Module::Pluggable
+    sub_name    => 'optional_validators',
+    search_path => 'Perl::ToRaku::Validators',
+    except      => \@core_validators,
+    require     => 1;
+
+  use Module::Pluggable
+    sub_name    => 'user_validators',
+    search_path => 'Perl::ToRaku::ValidatorsX',
+    require     => 1;
+
+  my @core_transformers = map { __PACKAGE__ . '::Transformers::' . $_ } (
     'Constant',
     'Shebang',
     'PackageDeclaration',
@@ -25,18 +47,20 @@ BEGIN {
   );
 
   use Module::Pluggable
-    sub_name    => 'core_plugins',
-    search_path => ['Perl::ToRaku::Transformers'],
-    require     => 1,
-    only        => \@core_modules;
+    sub_name    => 'core_transformers',
+    search_path => 'Perl::ToRaku::Transformers',
+    only        => \@core_transformers,
+    require     => 1;
+
   use Module::Pluggable
-    sub_name    => 'optional_plugins',
-    search_path => ['Perl::ToRaku::Transformers'],
-    require     => 1,
-    except      => \@core_modules;
+    sub_name    => 'optional_transformers',
+    search_path => 'Perl::ToRaku::Transformers',
+    except      => \@core_transformers,
+    require     => 1;
+
   use Module::Pluggable
-    sub_name    => 'user_plugins',
-    search_path => ['Perl::ToRaku::TransformersX'],
+    sub_name    => 'user_transformers',
+    search_path => 'Perl::ToRaku::TransformersX',
     require     => 1;
 }
 
@@ -48,31 +72,16 @@ BEGIN {
 #
 sub new {
   my ( $class, $filename ) = @_;
-  my $self;
-  my $ppi;
-  if ( $filename ) {
-    my $content = read_file( $filename ); # Don't put in the hashref.
-    $ppi     = PPI::Document->new( $filename );
-    $self    = {
-      content => $content,
-      ppi     => $ppi,
-    };
-  }
-  else {
-    $self = {
-    };
-    return bless $self, $class;
-  }
+  my $self = { };
 
-  # Collect $VERSION from 'our $VERSION = v1.2.3;' or
-  #                       'our $VERSION = "0.1.2";
-  # Collect $VERSION from 'package MyPackage v0.1.2' # PPI fails to do this
-  #
-  my $packages = $ppi->find( 'PPI::Statement::Package' );
-  die "Currently only one package per file is supported.\n" if
-     $packages and @{ $packages } > 1;
-
-  $self->{is_package} = 1 if $packages;
+  if ( ref( $filename ) ) {
+    $self->{content} = $filename;
+  }
+  elsif ( $filename ) {
+    $self->{filename} = $filename;
+    $self->{content} = read_file( $filename );
+  }
+  $self->{ppi} = PPI::Document->new( $filename );
 
   return bless $self, $class;
 }
@@ -86,17 +95,59 @@ sub _ppi {
 
 # 'use overload' may cause an issue
 #
+
+sub _validate {
+  my ( $self ) = @_;
+  my $ppi      = $self->{ppi};
+
+  my @message;
+
+  for my $plugin ( $self->core_validators ) {
+    push @message, $plugin->validator( $self );
+  }
+
+  for my $plugin ( $self->optional_validators ) {
+    push @message, $plugin->validator( $self );
+  }
+
+  for my $plugin ( $self->user_validators ) {
+    push @message, $plugin->validator( $self );
+  }
+
+  if ( @message ) {
+    croak map { "$_\n" } @message;
+  }
+}
+
+# 'use overload' may cause an issue
+#
 sub transform {
   my ( $self ) = @_;
   my $ppi      = $self->{ppi};
 
-  for my $plugin ( $self->core_plugins ) {
+  my $validation = $self->_validate;
+  if ( $validation ) {
+    croak $validation;
+  }
+
+  for my $plugin ( $self->core_transformers ) {
     $plugin->transformer( $self );
   }
 
-  for my $plugin ( $self->optional_plugins ) {
+  for my $plugin ( $self->optional_transformers ) {
     $plugin->transformer( $self );
   }
+
+  for my $plugin ( $self->user_transformers ) {
+    $plugin->transformer( $self );
+  }
+}
+
+sub test_validate {
+  my ( $self, $package, $text ) = @_;
+  $self->{ppi} = PPI::Document->new( \$text );
+
+  return $package->validator( $self );
 }
 
 sub test_transform {
@@ -273,3 +324,115 @@ sub test_transform {
 #}
 
 1;
+
+=head1 NAME
+
+Perl::ToRaku - Perl to Raku language converter
+
+=head1 VERSION
+
+Version 0.01
+
+=cut
+
+our $VERSION = '0.01';
+
+=head1 SYNOPSIS
+
+    ...
+
+=head1 DESCRIPTION
+
+=head1 LAYOUT
+
+This is meant to be all-plugins. For example, right now we don't handle more than one package in a file because of I/O concerns. I started out with a quick test at the start of C<transform()>, but quickly realized it's easy enough to turn that into a plugin which returns an error string if there's any problem.
+
+So begins the mission to make sure everything is a plugin. I started out with the L<Perl::ToRaku::Transformers> namespace with what are the built-in transformers. If you want to add your own custom transformers, you can add them to the L<Perl::ToRaku::TransformersX> namespace.
+
+=head2 Custom ValidatorsX packages
+
+Suppose you're writing translators, and want to skip translating C<.xt> tests because they're usually very specific to an author's setup and may require a bunch of tools you don't have.
+
+Writing a L<::ValidatorsX> package is exactly the right way to go, then. A Validator has access to the C<$self->{filename}> and C<$self->{ppi}> object, so you can check the C<$self->{filename}> and if it's in the C<xt/> directory you just need to return C<"Local rules don't allow xt/ files to be translated."> from your validator and you're done.
+
+=head2 Writing your own Transformers
+
+Let's explore some of the challenges by assuming you want to write a Transformer that only runs on packages, and needs to know the parent name of the existing Perl package. (And pretend that this isn't already saved.)
+
+Ordinarily you'd simply search for a L<PPI::Statement::Include> that looks like 'use base qw(...)', but this poses a problem. The core Translators delete the existing Perl code, so while you could search for the Include statement, you wouldn't find it.
+
+
+
+=head1 SUBROUTINES/METHODS
+
+=head2 format( $stream, $format, @args )
+
+=cut
+
+# {{{ format
+
+sub format {
+}
+
+# }}}
+
+=head1 AUTHOR
+
+Jeff Goff, C<< <jgoff at cpan.org> >>
+
+=head1 BUGS
+
+Please report any bugs or feature requests to C<bug-jgoff-lisp-format at rt.cpan.org>, or through
+the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=JGoff-Parser-PEG>.  I will be notified, and then you'll
+automatically be notified of progress on your bug as I make changes.
+
+
+
+
+=head1 SUPPORT
+
+You can find documentation for this module with the perldoc command.
+
+    perldoc JGoff::Parser::PEG
+
+
+You can also look for information at:
+
+=over 4
+
+=item * RT: CPAN's request tracker (report bugs here)
+
+L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=JGoff-Parser-PEG>
+
+=item * AnnoCPAN: Annotated CPAN documentation
+
+L<http://annocpan.org/dist/JGoff-Parser-PEG>
+
+=item * CPAN Ratings
+
+L<http://cpanratings.perl.org/d/JGoff-Parser-PEG>
+
+=item * Search CPAN
+
+L<http://search.cpan.org/dist/JGoff-Parser-PEG/>
+
+=back
+
+
+=head1 ACKNOWLEDGEMENTS
+
+
+=head1 LICENSE AND COPYRIGHT
+
+Copyright 2012 Jeff Goff.
+
+This program is free software; you can redistribute it and/or modify it
+under the terms of either: the GNU General Public License as published
+by the Free Software Foundation; or the Artistic License.
+
+See http://dev.perl.org/licenses/ for more information.
+
+
+=cut
+
+1; # End of JGoff::Parser::PEG
