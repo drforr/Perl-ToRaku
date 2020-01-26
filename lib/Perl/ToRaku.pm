@@ -103,20 +103,21 @@ sub _validate {
   my @message;
 
   for my $plugin ( $self->core_validators ) {
-    push @message, $plugin->validator( $self );
+    my $message = $plugin->validator( $self );
+    push @message, $message if $message;
   }
 
   for my $plugin ( $self->optional_validators ) {
-    push @message, $plugin->validator( $self );
+    my $message = $plugin->validator( $self );
+    push @message, $message if $message;
   }
 
   for my $plugin ( $self->user_validators ) {
-    push @message, $plugin->validator( $self );
+    my $message = $plugin->validator( $self );
+    push @message, $message if $message;
   }
 
-  if ( @message ) {
-    croak map { "$_\n" } @message;
-  }
+  croak( map { "$_\n" } @message ) if @message;
 }
 
 # 'use overload' may cause an issue
