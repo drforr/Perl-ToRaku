@@ -15,9 +15,7 @@ use_ok $package;
 
 is $toRaku->test_transform( $package, 'undef && 1' ), 'undef && 1';
 
-# Handled by a Workaround file
-#
-is $toRaku->test_transform( $package, '( $sWk & 32 ) ? Nil : 3;' ),
+is $toRaku->test_transform( $package, '( $sWk & 32 ) ? undef : 3;' ),
    '( $sWk & 32 ) ? Nil : 3;';
 
 is $toRaku->test_transform( $package, '# undef' ), '# undef';

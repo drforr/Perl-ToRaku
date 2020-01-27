@@ -61,6 +61,8 @@ BEGIN {
     'Utf8Pragma',
     'CoreRakuModules',
     'BitwiseOperators',
+    'TernaryOperator',
+    'TernaryOperator_Workaround',
     'Whitespace',
     'VersionPragma',
     'Undef',

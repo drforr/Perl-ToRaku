@@ -191,9 +191,9 @@ sub new {
 
     # Check ENDIAN(Little: Intel etc. BIG: Sparc etc)
     $BIGENDIAN =
-        ( defined $hParam{Endian} ) ? $hParam{Endian}
-      : ( unpack( "H08", pack( "L", 2 ) ) eq '02000000' ) ? 0
-      :                                                     1;
+        ( defined $hParam{Endian} ) ?? $hParam{Endian}
+      !! ( unpack( "H08", pack( "L", 2 ) ) eq '02000000' ) ?? 0
+      !!                                                     1;
     my $self = {};
     bless $self, $class;
 
@@ -771,7 +771,7 @@ sub _subBOF {
     if ( $iDt == 0x0005 ) {
         $oBook->{Version} = unpack( "v", $sWk );
         $oBook->{BIFFVersion} =
-          ( $oBook->{Version} == verExcel95 ) ? verBIFF5 : verBIFF8;
+          ( $oBook->{Version} == verExcel95 ) ?? verBIFF5 !! verBIFF8;
         $oBook->{_CurSheet}  = Nil;
         $oBook->{_CurSheet_} = -1;
     }
@@ -889,7 +889,7 @@ sub _convDval {
     my ( $sWk ) = @_;
     return
       unpack( "d",
-        ( $BIGENDIAN ) ? pack( "c8", reverse( unpack( "c8", $sWk ) ) ) : $sWk );
+        ( $BIGENDIAN ) ?? pack( "c8", reverse( unpack( "c8", $sWk ) ) ) !! $sWk );
 }
 
 #------------------------------------------------------------------------------
@@ -1009,8 +1009,8 @@ sub _subFormula {
         if ( ( $iKind == 1 ) or ( $iKind == 2 ) ) {
             my $sTxt =
               ( $iKind == 1 )
-              ? DecodeBoolErr( $iVal, 0 )
-              : DecodeBoolErr( $iVal, 1 );
+              ?? DecodeBoolErr( $iVal, 0 )
+              !! DecodeBoolErr( $iVal, 1 );
             _NewCell(
                 $oBook, $iR, $iC,
                 Kind     => 'Formula Bool',
@@ -1061,7 +1061,7 @@ sub _subString {
     if ( $oBook->{BIFFVersion} == verBIFF8 ) {
         my ( $raBuff, $iLen ) = _convBIFF8String( $oBook, $sWk, 1 );
         $sTxt = $raBuff->[0];
-        $sCode = ( $raBuff->[1] ) ? 'ucs2' : Nil;
+        $sCode = ( $raBuff->[1] ) ?? 'ucs2' !! Nil;
     }
     elsif ( $oBook->{BIFFVersion} == verBIFF5 ) {
         $sCode = '_native_';
@@ -1101,7 +1101,7 @@ sub _subLabel {
         my ( $raBuff, $iLen, $iStPos, $iLenS ) =
           _convBIFF8String( $oBook, substr( $sWk, 6 ), 1 );
         $sLbl = $raBuff->[0];
-        $sCode = ( $raBuff->[1] ) ? 'ucs2' : Nil;
+        $sCode = ( $raBuff->[1] ) ?? 'ucs2' !! Nil;
     }
 
     #Before BIFF8
@@ -1206,7 +1206,7 @@ sub _subLabelSST {
         FormatNo => $iF,
         Format   => $oBook->{Format}[$iF],
         Numeric  => 0,
-        Code     => ( $oBook->{PkgStr}[$iIdx]->{Unicode} ) ? 'ucs2' : Nil,
+        Code     => ( $oBook->{PkgStr}[$iIdx]->{Unicode} ) ?? 'ucs2' !! Nil,
         Book     => $oBook,
         Rich     => $oBook->{PkgStr}[$iIdx]->{Rich},
     );
@@ -1672,22 +1672,22 @@ sub _subXF {
 
         ( $iFnt, $iIdx, $iGen, $iAlign, $iGen2, $iBdr1, $iBdr2, $iBdr3, $iPtn )
           = unpack( "v7Vv", $sWk );
-        $iLock   = ( $iGen +& 0x01 )   ? 1 : 0;
-        $iHidden = ( $iGen +& 0x02 )   ? 1 : 0;
-        $iStyle  = ( $iGen +& 0x04 )   ? 1 : 0;
-        $i123    = ( $iGen +& 0x08 )   ? 1 : 0;
+        $iLock   = ( $iGen +& 0x01 )   ?? 1 !! 0;
+        $iHidden = ( $iGen +& 0x02 )   ?? 1 !! 0;
+        $iStyle  = ( $iGen +& 0x04 )   ?? 1 !! 0;
+        $i123    = ( $iGen +& 0x08 )   ?? 1 !! 0;
         $iAlH    = ( $iAlign +& 0x07 );
-        $iWrap   = ( $iAlign +& 0x08 ) ? 1 : 0;
+        $iWrap   = ( $iAlign +& 0x08 ) ?? 1 !! 0;
         $iAlV    = ( $iAlign +& 0x70 ) / 0x10;
-        $iJustL  = ( $iAlign +& 0x80 ) ? 1 : 0;
+        $iJustL  = ( $iAlign +& 0x80 ) ?? 1 !! 0;
 
         $iRotate = ( ( $iAlign +& 0xFF00 ) / 0x100 ) +& 0x00FF;
         $iRotate = 90            if ( $iRotate == 255 );
         $iRotate = 90 - $iRotate if ( $iRotate > 90 );
 
         $iInd     = ( $iGen2 +& 0x0F );
-        $iShrink  = ( $iGen2 +& 0x10 ) ? 1 : 0;
-        $iMerge   = ( $iGen2 +& 0x20 ) ? 1 : 0;
+        $iShrink  = ( $iGen2 +& 0x10 ) ?? 1 !! 0;
+        $iMerge   = ( $iGen2 +& 0x20 ) ?? 1 !! 0;
         $iReadDir = ( ( $iGen2 +& 0xC0 ) / 0x40 ) +& 0x03;
         $iBdrSL   = $iBdr1 +& 0x0F;
         $iBdrSR   = ( ( $iBdr1 +& 0xF0 ) / 0x10 ) +& 0x0F;
@@ -1712,15 +1712,15 @@ sub _subXF {
 
         ( $iFnt, $iIdx, $iGen, $iAlign, $iPtn, $iPtn2, $iBdr1, $iBdr2 ) =
           unpack( "v8", $sWk );
-        $iLock   = ( $iGen +& 0x01 ) ? 1 : 0;
-        $iHidden = ( $iGen +& 0x02 ) ? 1 : 0;
-        $iStyle  = ( $iGen +& 0x04 ) ? 1 : 0;
-        $i123    = ( $iGen +& 0x08 ) ? 1 : 0;
+        $iLock   = ( $iGen +& 0x01 ) ?? 1 !! 0;
+        $iHidden = ( $iGen +& 0x02 ) ?? 1 !! 0;
+        $iStyle  = ( $iGen +& 0x04 ) ?? 1 !! 0;
+        $i123    = ( $iGen +& 0x08 ) ?? 1 !! 0;
 
         $iAlH   = ( $iAlign +& 0x07 );
-        $iWrap  = ( $iAlign +& 0x08 ) ? 1 : 0;
+        $iWrap  = ( $iAlign +& 0x08 ) ?? 1 !! 0;
         $iAlV   = ( $iAlign +& 0x70 ) / 0x10;
-        $iJustL = ( $iAlign +& 0x80 ) ? 1 : 0;
+        $iJustL = ( $iAlign +& 0x80 ) ?? 1 !! 0;
 
         $iRotate = ( ( $iAlign +& 0x300 ) / 0x100 ) +& 0x3;
 
@@ -1827,10 +1827,10 @@ sub _subFont {
             $sFntName = substr( $sWk, 16, $iSize );
             $sFntName = $oBook->{FmtClass}->TextFmt( $sFntName, '_native_' );
         }
-        $bBold      = ( $iBold >= 0x2BC ) ? 1 : 0;
-        $bItalic    = ( $iAttr +& 0x02 )   ? 1 : 0;
-        $bStrikeout = ( $iAttr +& 0x08 )   ? 1 : 0;
-        $bUnderline = ( $iUnderline )     ? 1 : 0;
+        $bBold      = ( $iBold >= 0x2BC ) ?? 1 !! 0;
+        $bItalic    = ( $iAttr +& 0x02 )   ?? 1 !! 0;
+        $bStrikeout = ( $iAttr +& 0x08 )   ?? 1 !! 0;
+        $bUnderline = ( $iUnderline )     ?? 1 !! 0;
     }
     elsif ( $oBook->{BIFFVersion} == verBIFF5 ) {
         ( $iHeight, $iAttr, $iCIdx, $iBold, $iSuper, $iUnderline ) =
@@ -1839,20 +1839,20 @@ sub _subFont {
           $oBook->{FmtClass}
           ->TextFmt( substr( $sWk, 15, unpack( "c", substr( $sWk, 14, 1 ) ) ),
             '_native_' );
-        $bBold      = ( $iBold >= 0x2BC ) ? 1 : 0;
-        $bItalic    = ( $iAttr +& 0x02 )   ? 1 : 0;
-        $bStrikeout = ( $iAttr +& 0x08 )   ? 1 : 0;
-        $bUnderline = ( $iUnderline )     ? 1 : 0;
+        $bBold      = ( $iBold >= 0x2BC ) ?? 1 !! 0;
+        $bItalic    = ( $iAttr +& 0x02 )   ?? 1 !! 0;
+        $bStrikeout = ( $iAttr +& 0x08 )   ?? 1 !! 0;
+        $bUnderline = ( $iUnderline )     ?? 1 !! 0;
     }
     else {
         ( $iHeight, $iAttr ) = unpack( "v2", $sWk );
         $iCIdx  = Nil;
         $iSuper = 0;
 
-        $bBold      = ( $iAttr +& 0x01 ) ? 1 : 0;
-        $bItalic    = ( $iAttr +& 0x02 ) ? 1 : 0;
-        $bUnderline = ( $iAttr +& 0x04 ) ? 1 : 0;
-        $bStrikeout = ( $iAttr +& 0x08 ) ? 1 : 0;
+        $bBold      = ( $iAttr +& 0x01 ) ?? 1 !! 0;
+        $bItalic    = ( $iAttr +& 0x02 ) ?? 1 !! 0;
+        $bUnderline = ( $iAttr +& 0x04 ) ?? 1 !! 0;
+        $bStrikeout = ( $iAttr +& 0x08 ) ?? 1 !! 0;
 
         $sFntName = substr( $sWk, 5, unpack( "c", substr( $sWk, 4, 1 ) ) );
     }
@@ -1881,7 +1881,7 @@ sub _subFont {
 sub _subBoundSheet {
     my ( $oBook, $bOp, $bLen, $sWk ) = @_;
     my ( $iPos, $iGr, $iKind ) = unpack( "Lc2", $sWk );
-    $iKind &= 0x0F;
+    $iKind +&= 0x0F;
     return if ( ( $iKind != 0x00 ) && ( $iKind != 0x01 ) );
 
     if ( $oBook->{BIFFVersion} >= verBIFF8 ) {
@@ -1933,7 +1933,7 @@ sub _subHeader {
     if ( $oBook->{BIFFVersion} >= verBIFF8 ) {
         $sW = _convBIFF8String( $oBook, $sWk );
         $oBook->{Worksheet}[ $oBook->{_CurSheet} ]->{Header} =
-          ( $sW eq "\x00" ) ? Nil : $sW;
+          ( $sW eq "\x00" ) ?? undef !! $sW;
     }
 
     #Before BIFF8
@@ -1942,7 +1942,7 @@ sub _subHeader {
         $sW =
           $oBook->{FmtClass}->TextFmt( substr( $sWk, 1, $iLen ), '_native_' );
         $oBook->{Worksheet}[ $oBook->{_CurSheet} ]->{Header} =
-          ( $sW eq "\x00\x00\x00" ) ? Nil : $sW;
+          ( $sW eq "\x00\x00\x00" ) ?? undef !! $sW;
     }
 }
 
@@ -1963,7 +1963,7 @@ sub _subFooter {
     if ( $oBook->{BIFFVersion} >= verBIFF8 ) {
         $sW = _convBIFF8String( $oBook, $sWk );
         $oBook->{Worksheet}[ $oBook->{_CurSheet} ]->{Footer} =
-          ( $sW eq "\x00" ) ? Nil : $sW;
+          ( $sW eq "\x00" ) ?? undef !! $sW;
     }
 
     #Before BIFF8
@@ -1972,7 +1972,7 @@ sub _subFooter {
         $sW =
           $oBook->{FmtClass}->TextFmt( substr( $sWk, 1, $iLen ), '_native_' );
         $oBook->{Worksheet}[ $oBook->{_CurSheet} ]->{Footer} =
-          ( $sW eq "\x00\x00\x00" ) ? Nil : $sW;
+          ( $sW eq "\x00\x00\x00" ) ?? undef !! $sW;
     }
 }
 
@@ -2141,14 +2141,14 @@ sub _subSETUP {
     $oWkS->{HeaderMargin} = _convDval( substr( $sWk, 16, 8 ) );
     $oWkS->{FooterMargin} = _convDval( substr( $sWk, 24, 8 ) );
     $oWkS->{Copis} = unpack( 'v2', substr( $sWk, 32, 2 ) );
-    $oWkS->{LeftToRight} = ( ( $iGrBit +& 0x01 ) ? 1 : 0 );
-    $oWkS->{Landscape}   = ( ( $iGrBit +& 0x02 ) ? 1 : 0 );
-    $oWkS->{NoPls}       = ( ( $iGrBit +& 0x04 ) ? 1 : 0 );
-    $oWkS->{NoColor}     = ( ( $iGrBit +& 0x08 ) ? 1 : 0 );
-    $oWkS->{Draft}       = ( ( $iGrBit +& 0x10 ) ? 1 : 0 );
-    $oWkS->{Notes}       = ( ( $iGrBit +& 0x20 ) ? 1 : 0 );
-    $oWkS->{NoOrient}    = ( ( $iGrBit +& 0x40 ) ? 1 : 0 );
-    $oWkS->{UsePage}     = ( ( $iGrBit +& 0x80 ) ? 1 : 0 );
+    $oWkS->{LeftToRight} = ( ( $iGrBit +& 0x01 ) ?? 1 !! 0 );
+    $oWkS->{Landscape}   = ( ( $iGrBit +& 0x02 ) ?? 1 !! 0 );
+    $oWkS->{NoPls}       = ( ( $iGrBit +& 0x04 ) ?? 1 !! 0 );
+    $oWkS->{NoColor}     = ( ( $iGrBit +& 0x08 ) ?? 1 !! 0 );
+    $oWkS->{Draft}       = ( ( $iGrBit +& 0x10 ) ?? 1 !! 0 );
+    $oWkS->{Notes}       = ( ( $iGrBit +& 0x20 ) ?? 1 !! 0 );
+    $oWkS->{NoOrient}    = ( ( $iGrBit +& 0x40 ) ?? 1 !! 0 );
+    $oWkS->{UsePage}     = ( ( $iGrBit +& 0x80 ) ?? 1 !! 0 );
 
     # The NoPls flag indicates that the values have not been taken from an
     # actual printer and thus may not be accurate.
@@ -2314,7 +2314,7 @@ sub _subWSBOOL {
     return Nil unless ( defined $oBook->{_CurSheet} );
 
     $oBook->{Worksheet}[ $oBook->{_CurSheet} ]->{PageFit} =
-      ( ( unpack( 'v', $sWk ) +& 0x100 ) ? 1 : 0 );
+      ( ( unpack( 'v', $sWk ) +& 0x100 ) ?? 1 !! 0 );
 }
 
 #------------------------------------------------------------------------------
@@ -2372,7 +2372,7 @@ sub DecodeBoolErr {
         }
     }
     else {
-        return ( $iVal ) ? "TRUE" : "FALSE";
+        return ( $iVal ) ?? "TRUE" !! "FALSE";
     }
 }
 
@@ -2628,10 +2628,10 @@ sub _NewCell {
         if ( defined $oBook->{Object} ) {
             
             ref( $oBook->{CellHandler} ) eq "CODE"
-              ? $oBook->{CellHandler}->(
+              ?? $oBook->{CellHandler}->(
                 $_Object, $oBook, $oBook->{_CurSheet}, $iR, $iC, $oCell
               )
-              : $oBook->{CellHandler}->callback( $_Object, $oBook, $oBook->{_CurSheet},
+              !! $oBook->{CellHandler}->callback( $_Object, $oBook, $oBook->{_CurSheet},
                 $iR, $iC, $oCell );
         }
         else {
@@ -2656,7 +2656,7 @@ sub ColorIdxToRGB {
 
 
     unless ( defined $currentbook ) {
-	return ( ( defined $aColor[$iIdx] ) ? $aColor[$iIdx] : $aColor[0] );
+	return ( ( defined $aColor[$iIdx] ) ?? $aColor[$iIdx] !! $aColor[0] );
     }
 
     return $currentbook->color_idx_to_rgb( $iIdx );

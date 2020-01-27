@@ -15,8 +15,6 @@ sub transformer {
   if ( $label_tokens ) {
     for my $label_token ( @{ $label_tokens } ) {
       next unless $label_token->content =~ / undef /x;
-      next unless $label_token->sprevious_sibling->isa( 'PPI::Token::Operator' ) and
-                  $label_token->sprevious_sibling->content eq '?';
 
       my $text = $label_token->content;
       $text =~ s{ undef }{Nil}x;

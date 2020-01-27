@@ -1,11 +1,11 @@
-package Perl::ToRaku::Transformers::BitwiseOperators;
+package Perl::ToRaku::Transformers::TernaryOperator;
 
 use strict;
 use warnings;
 
-# '1 & 3'
+# '1 ? 2 : 3'
 # =>
-# '1 +& 3'
+# '1 ?? 2 !! 3'
 #
 sub transformer {
   my $self = shift;
@@ -13,12 +13,8 @@ sub transformer {
   my $ppi  = $obj->_ppi;
 
   my %map = (
-    '&'  => '+&', '&=' => '+&=',
-    '|'  => '+|', '|=' => '+|=',
-    '^'  => '+^', '^=' => '+^=',
-
-    '<<' => '+<', '<<=' => '+<=',
-    '>>' => '+>', '>>=' => '+>='
+    '?'  => '??',
+    ':'  => '!!'
   );
 
   my $operator_tokens = $ppi->find( 'PPI::Token::Operator' );
