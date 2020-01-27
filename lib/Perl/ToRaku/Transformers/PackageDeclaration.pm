@@ -58,16 +58,16 @@ sub transformer {
   else {
     my $variable_stmts = $ppi->find( 'PPI::Statement::Variable' );
     if ( $variable_stmts ) {
-      for my $variable ( @{ $variable_stmts } ) {
-        next unless $variable->type eq 'our';
-        next unless grep { $_ eq '$VERSION' } $variable->variables;
+      for my $variable_stmt ( @{ $variable_stmts } ) {
+        next unless $variable_stmt->type eq 'our';
+        next unless grep { $_ eq '$VERSION' } $variable_stmt->variables;
       
-        unless ( scalar( $variable->variables ) == 1 ) {
+        unless ( scalar( $variable_stmt->variables ) == 1 ) {
           carp "'our' statement has more than just '\$VERSION'";
         }
-        $version = $variable->find_first( 'PPI::Token::Quote' );
+        $version = $variable_stmt->find_first( 'PPI::Token::Quote' );
         my $version_text = $version->string;
-        $variable->delete;
+        $variable_stmt->delete;
 
         my $semicolon = $package_stmt->last_element;
     

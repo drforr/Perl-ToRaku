@@ -1442,7 +1442,7 @@ sub _getustr {
         $len /= 2;
     }
     $len -= $zterm;
-    my $text = join( '', map { chr $_ } unpack( "v$len", substr( $wk, $offset ) ) );
+    my $text = join( '', map { chr $_ }, unpack( "v$len", substr( $wk, $offset ) ) );
     $text =~ s/\0.*\z// if ( $zterm );
     $_[1] = ( $offset += ($len + $zterm) *2 );
     return $text;
@@ -1509,7 +1509,7 @@ sub _subHyperlink {
             $offset += 4;
             if ( $size ) {
                 my $xlen = unpack( 'V', substr( $wk, $offset ) ) / 2;
-                $name = join( '', map { chr $_} unpack( "v$xlen", substr( $wk, $offset+4+2) ) );
+                $name = join( '', map { chr $_}, unpack( "v$xlen", substr( $wk, $offset+4+2) ) );
                 $offset += $size;
             }
             $link .= $name;
@@ -2006,7 +2006,7 @@ sub _subHPageBreak {
             #            push @aBreak, [$iRow, 0, 255];
         }
     }
-    @aBreak = sort { $a <=> $b } @aBreak;
+    @aBreak = sort { $^a <=> $^b }, @aBreak;
     $oBook->{Worksheet}[ $oBook->{_CurSheet} ]->{HPageBreak} = \@aBreak;
 }
 
@@ -2040,7 +2040,7 @@ sub _subVPageBreak {
             #            push @aBreak, [$iCol, 0, 65535];
         }
     }
-    @aBreak = sort { $a <=> $b } @aBreak;
+    @aBreak = sort { $^a <=> $^b }, @aBreak;
     $oBook->{Worksheet}[ $oBook->{_CurSheet} ]->{VPageBreak} = \@aBreak;
 }
 

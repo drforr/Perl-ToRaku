@@ -13,13 +13,13 @@ sub transformer {
   my $obj  = shift;
   my $ppi  = $obj->_ppi;
 
-  my $includes = $ppi->find( 'PPI::Statement::Include' );
-  if ( $includes ) {
-    for my $include ( @{ $includes } ) {
-      next unless $include->type eq 'use';
-      next unless $include->module eq 'utf8';
+  my $include_stmts = $ppi->find( 'PPI::Statement::Include' );
+  if ( $include_stmts ) {
+    for my $include_stmt ( @{ $include_stmts } ) {
+      next unless $include_stmt->type eq 'use';
+      next unless $include_stmt->module eq 'utf8';
 
-      $include->delete;
+      $include_stmt->delete;
     }
   }
 }

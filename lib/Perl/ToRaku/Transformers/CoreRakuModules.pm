@@ -23,13 +23,13 @@ sub transformer {
     'Proc::Async'
   );
 
-  my $includes = $ppi->find( 'PPI::Statement::Include' );
-  if ( $includes ) {
-    for my $include ( @{ $includes } ) {
-      next unless $include->type eq 'use';
-      next unless exists $map{ $include->module };
+  my $include_stmts = $ppi->find( 'PPI::Statement::Include' );
+  if ( $include_stmts ) {
+    for my $include_stmt ( @{ $include_stmts } ) {
+      next unless $include_stmt->type eq 'use';
+      next unless exists $map{ $include_stmt->module };
 
-      $include->delete;
+      $include_stmt->delete;
     }
   }
 }

@@ -1509,7 +1509,7 @@ sub _subHyperlink {
             $offset += 4;
             if( $size ) {
                 my $xlen = unpack( 'V', substr( $wk, $offset ) ) / 2;
-                $name = join( '', map { chr $_} unpack( "v$xlen", substr( $wk, $offset+4+2) ) );
+                $name = join( '', map { chr $_}, unpack( "v$xlen", substr( $wk, $offset+4+2) ) );
                 $offset += $size;
             }
             $link .= $name;

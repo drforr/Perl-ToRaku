@@ -12,17 +12,17 @@ sub transformer {
   my $obj  = shift;
   my $ppi  = $obj->_ppi;
 
-  my $includes = $ppi->find( 'PPI::Statement::Include' );
-  if ( $includes ) {
-    for my $include ( @{ $ppi->find( 'PPI::Statement::Include' ) } ) {
-      next unless $include->type eq 'use';
-      next unless $include->module eq 'constant';
+  my $include_stmts = $ppi->find( 'PPI::Statement::Include' );
+  if ( $include_stmts ) {
+    for my $include_stmt ( @{ $include_stmts } ) {
+      next unless $include_stmt->type eq 'use';
+      next unless $include_stmt->module eq 'constant';
 
-      my $fat_arrow = $include->find_first( 'PPI::Token::Operator' );
+      my $fat_arrow = $include_stmt->find_first( 'PPI::Token::Operator' );
       next unless $fat_arrow;
 
-      $include->first_token->delete; # Delete 'use'
-      $include->first_token->delete; # Delete ' '
+      $include_stmt->first_token->delete; # Delete 'use'
+      $include_stmt->first_token->delete; # Delete ' '
 
       my $equal = PPI::Token::Operator->new( '=' );
       $fat_arrow->insert_before( $equal );

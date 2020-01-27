@@ -12,17 +12,17 @@ sub transformer {
   my $obj  = shift;
   my $ppi  = $obj->_ppi;
 
-  my $comments = $ppi->find( 'PPI::Token::Comment' );
-  if ( $comments ) {
-    for my $comment ( @{ $comments } ) {
-      next unless $comment->line;
-      my $new_text = $comment->content;
+  my $comment_tokens = $ppi->find( 'PPI::Token::Comment' );
+  if ( $comment_tokens ) {
+    for my $comment_token ( @{ $comment_tokens } ) {
+      next unless $comment_token->line;
+      my $new_text = $comment_token->content;
 
       if ( $new_text =~ m{ ^ \# \! perl }x ) {
         $new_text = "#!raku\n";
       }
       elsif ( $new_text =~ m{ ^ \# \s* \! .+ env \s+ perl }x ) {
-        $new_text = $comment->content;
+        $new_text = $comment_token->content;
         $new_text =~ s{ perl }{raku}x;
       }
       elsif ( $new_text =~ m{ ^ \# \s* \! .+ perl }x ) {
@@ -33,8 +33,8 @@ sub transformer {
       }
 
       my $new_comment = PPI::Token::Comment->new( $new_text );
-      $comment->insert_before( $new_comment );
-      $comment->delete;
+      $comment_token->insert_before( $new_comment );
+      $comment_token->delete;
     }
   }
 }

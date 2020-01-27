@@ -11,14 +11,14 @@ sub transformer {
   my $obj  = shift;
   my $ppi  = $obj->_ppi;
 
-  my $words = $ppi->find( 'PPI::Token::Word' );
-  if ( $words ) {
-    for my $word ( @{ $words } ) {
-      next unless $word->content eq 'undef';
+  my $word_tokens = $ppi->find( 'PPI::Token::Word' );
+  if ( $word_tokens ) {
+    for my $word_token ( @{ $word_tokens } ) {
+      next unless $word_token->content eq 'undef';
 
       my $new_word = PPI::Token::Word->new( 'Nil' );
-      $word->insert_before( $new_word );
-      $word->delete;
+      $word_token->insert_before( $new_word );
+      $word_token->delete;
     }
   }
 }

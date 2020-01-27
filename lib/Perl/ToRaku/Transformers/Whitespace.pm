@@ -23,14 +23,14 @@ sub transformer {
     'local' # Perl only
   );
 
-  my $words = $ppi->find( 'PPI::Token::Word' );
-  if ( $words ) {
-    for my $word ( @{ $words } ) {
-      next unless exists $map{ $word->content };
-      next if $word->next_sibling->isa( 'PPI::Token::Whitespace' );
+  my $word_tokens = $ppi->find( 'PPI::Token::Word' );
+  if ( $word_tokens ) {
+    for my $word_token ( @{ $word_tokens } ) {
+      next unless exists $map{ $word_token->content };
+      next if $word_token->next_sibling->isa( 'PPI::Token::Whitespace' );
 
       my $new_whitespace = PPI::Token::Whitespace->new( ' ' );
-      $word->insert_after( $new_whitespace );
+      $word_token->insert_after( $new_whitespace );
     }
   }
 }

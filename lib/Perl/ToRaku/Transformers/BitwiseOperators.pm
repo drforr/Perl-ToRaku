@@ -20,12 +20,16 @@ sub transformer {
     '>>' => '+>'
   );
 
-  for my $operator ( @{ $ppi->find( 'PPI::Token::Operator' ) } ) {
-    next unless exists $map{ $operator->content };
+  my $operator_tokens = $ppi->find( 'PPI::Token::Operator' );
+  if ( $operator_tokens  ) {
+    for my $operator_token ( @{ $operator_tokens } ) {
+      next unless exists $map{ $operator_token->content };
 
-    my $new_operator = PPI::Token::Operator->new( $map{ $operator->content } );
-    $operator->insert_before( $new_operator );
-    $operator->delete;
+      my $new_operator =
+        PPI::Token::Operator->new( $map{ $operator_token->content } );
+      $operator_token->insert_before( $new_operator );
+      $operator_token->delete;
+    }
   }
 }
 

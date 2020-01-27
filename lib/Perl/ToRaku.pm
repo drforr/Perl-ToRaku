@@ -31,6 +31,27 @@ BEGIN {
     search_path => 'Perl::ToRaku::ValidatorsX',
     require     => 1;
 
+  my @core_collectors = map { __PACKAGE__ . '::Collectors::' . $_ } (
+    'IsMoose',
+  );
+
+  use Module::Pluggable
+    sub_name    => 'core_collectors',
+    search_path => 'Perl::ToRaku::Collectors',
+    only        => \@core_collectors,
+    require     => 1;
+
+  use Module::Pluggable
+    sub_name    => 'optional_collectors',
+    search_path => 'Perl::ToRaku::Collectors',
+    except      => \@core_collectors,
+    require     => 1;
+
+  use Module::Pluggable
+    sub_name    => 'user_collectors',
+    search_path => 'Perl::ToRaku::CollectorsX',
+    require     => 1;
+
   my @core_transformers = map { __PACKAGE__ . '::Transformers::' . $_ } (
     'Constant',
     'Shebang',
@@ -72,7 +93,9 @@ BEGIN {
 #
 sub new {
   my ( $class, $filename ) = @_;
-  my $self = { };
+  my $self = {
+    ppi => PPI::Document->new( $filename )
+  };
 
   if ( ref( $filename ) ) {
     $self->{content} = $filename;
@@ -81,7 +104,6 @@ sub new {
     $self->{filename} = $filename;
     $self->{content} = read_file( $filename );
   }
-  $self->{ppi} = PPI::Document->new( $filename );
 
   return bless $self, $class;
 }
@@ -92,9 +114,6 @@ sub _ppi {
 
   return $ppi;
 }
-
-# 'use overload' may cause an issue
-#
 
 sub _validate {
   my ( $self ) = @_;
@@ -120,8 +139,24 @@ sub _validate {
   croak( map { "$_\n" } @message ) if @message;
 }
 
-# 'use overload' may cause an issue
-#
+sub _collect {
+  my ( $self ) = @_;
+  my $ppi      = $self->{ppi};
+
+  for my $plugin ( $self->core_collectors ) {
+    $plugin->collector( $self );
+  }
+
+  for my $plugin ( $self->optional_collectors ) {
+    $plugin->collector( $self );
+  }
+
+  for my $plugin ( $self->user_collectors ) {
+    $plugin =~ m{ :: (.+) $ }x;
+    $self->{$1} = $plugin->collector( $self );
+  }
+}
+
 sub transform {
   my ( $self ) = @_;
   my $ppi      = $self->{ppi};
@@ -130,6 +165,8 @@ sub transform {
   if ( $validation ) {
     croak $validation;
   }
+
+  $self->_collect;
 
   for my $plugin ( $self->core_transformers ) {
     $plugin->transformer( $self );
@@ -151,6 +188,13 @@ sub test_validate {
   return $package->validator( $self );
 }
 
+sub test_collect {
+  my ( $self, $package, $text ) = @_;
+  $self->{ppi} = PPI::Document->new( \$text );
+
+  $package->collector( $self );
+}
+
 sub test_transform {
   my ( $self, $package, $text ) = @_;
   $self->{ppi} = PPI::Document->new( \$text );
@@ -169,10 +213,6 @@ sub test_transform {
 #sub _subStrWk {
 #    my ( $self, $biff_data, $is_continue ) = @_;
 #}
-
-# 'sort { $a <=> $b } @list'
-# =>
-# 'sort { $^a <=> $^b }, @list'
 
 # 'sub Name { my ( $x ) = @_; my $y = shift; ... }'
 # =>
@@ -362,20 +402,11 @@ Let's explore some of the challenges by assuming you want to write a Transformer
 
 Ordinarily you'd simply search for a L<PPI::Statement::Include> that looks like 'use base qw(...)', but this poses a problem. The core Translators delete the existing Perl code, so while you could search for the Include statement, you wouldn't find it.
 
+Which means, of course, it's impossible. NOT. More to the point, it's an excluse to:
 
+=head2 Write your own Collector
 
-=head1 SUBROUTINES/METHODS
-
-=head2 format( $stream, $format, @args )
-
-=cut
-
-# {{{ format
-
-sub format {
-}
-
-# }}}
+Which is just a file in the L<::CollectorX::> namespace. I should point out that you're supposed to return the data structure you want to save. That way we can store it safely under your own package name, with no collisions.
 
 =head1 AUTHOR
 
@@ -383,19 +414,13 @@ Jeff Goff, C<< <jgoff at cpan.org> >>
 
 =head1 BUGS
 
-Please report any bugs or feature requests to C<bug-jgoff-lisp-format at rt.cpan.org>, or through
-the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=JGoff-Parser-PEG>.  I will be notified, and then you'll
-automatically be notified of progress on your bug as I make changes.
-
-
-
+Please report any bugs or feature requests to C<bug-perl-toraku at rt.cpan.org>, or through the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Perl-ToRaku>.  I will be notified, and then you'll automatically be notified of progress on your bug as I make changes.
 
 =head1 SUPPORT
 
 You can find documentation for this module with the perldoc command.
 
-    perldoc JGoff::Parser::PEG
-
+    perldoc Perl::ToRaku
 
 You can also look for information at:
 
@@ -403,25 +428,25 @@ You can also look for information at:
 
 =item * RT: CPAN's request tracker (report bugs here)
 
-L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=JGoff-Parser-PEG>
+L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=Perl-ToRaku>
 
 =item * AnnoCPAN: Annotated CPAN documentation
 
-L<http://annocpan.org/dist/JGoff-Parser-PEG>
+L<http://annocpan.org/dist/Perl-ToRaku>
 
 =item * CPAN Ratings
 
-L<http://cpanratings.perl.org/d/JGoff-Parser-PEG>
+L<http://cpanratings.perl.org/d/Perl-ToRaku>
 
 =item * Search CPAN
 
-L<http://search.cpan.org/dist/JGoff-Parser-PEG/>
+L<http://search.cpan.org/dist/Perl-ToRaku>
 
 =back
 
-
 =head1 ACKNOWLEDGEMENTS
 
+Certainly a tip o' my top hat to Jeff Thalmer, author of Perl::Critic.
 
 =head1 LICENSE AND COPYRIGHT
 
@@ -433,7 +458,6 @@ by the Free Software Foundation; or the Artistic License.
 
 See http://dev.perl.org/licenses/ for more information.
 
-
 =cut
 
-1; # End of JGoff::Parser::PEG
+1; # End of Perl::ToRaku

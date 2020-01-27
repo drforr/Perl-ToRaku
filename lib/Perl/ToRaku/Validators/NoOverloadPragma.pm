@@ -11,11 +11,13 @@ sub validator {
   my $ppi  = $obj->_ppi;
 
   my $include_stmts = $ppi->find( 'PPI::Statement::Include' );
-  for my $include_stmt ( @{ $include_stmts } ) {
-    next unless $include_stmt->type eq 'use';
-    next unless $include_stmt->module eq 'overload';
-
-    return "Currently we do not allow 'overload' pragma.";
+  if ( $include_stmts ) {
+    for my $include_stmt ( @{ $include_stmts } ) {
+      next unless $include_stmt->type eq 'use';
+      next unless $include_stmt->module eq 'overload';
+ 
+      return "Currently we do not allow 'overload' pragma.";
+    }
   }
 }
 
