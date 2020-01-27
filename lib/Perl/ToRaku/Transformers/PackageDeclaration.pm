@@ -103,12 +103,13 @@ sub __get_parent_packages {
   my $token = shift;
   my @package;
 
-  if ( my $tokens = $token->find( 'PPI::Token::Quote' ) ) {
-    for my $_token ( @{ $tokens } ) {
-      push @package, $_token->string;
+  if ( my $quoted_tokens = $token->find( 'PPI::Token::Quote' ) ) {
+    for my $quoted_token ( @{ $quoted_tokens } ) {
+      push @package, $quoted_token->string;
     }
   }
-  elsif ( my $_tokens = $token->find( 'PPI::Token::QuoteLike::Words' ) ) {
+  elsif ( my $quotelike_words = $token->find_first( 'PPI::Token::QuoteLike::Words' ) ) {
+      push @package, $quotelike_words->literal;
   }
   return @package;
 }

@@ -54,6 +54,7 @@ BEGIN {
 
   my @core_transformers = map { __PACKAGE__ . '::Transformers::' . $_ } (
     'Constant',
+    'HigherOrderCommas',
     'Shebang',
     'PackageDeclaration',
     'StrictPragma',
@@ -219,14 +220,6 @@ sub test_transform {
 # 'sub Name { my ( $x ) = @_; my $y = shift; ... }'
 # =>
 # 'sub Name( $x, $y ) { ... }'
-
-# Does the package have a parent(s)?
-#
-# 'use base qw(...)'
-# or
-# 'use parent qw(...)'
-# or
-# 'our @ISA = qw(...)'
 
 # 'if ( exists $error_strings{$parse_error} )'
 # =>
