@@ -16,6 +16,8 @@ sub transformer {
 
   return unless defined $package_stmt and $package_stmt;
 
+  my @parent_packages = _get_parent_packages( $ppi );
+
   # This isn't hard once you visualize the process, but I'll do it in steps.
   #
   # First, add 'unit' before 'package'.
@@ -76,6 +78,84 @@ sub transformer {
         $semicolon->insert_before( $new_version );
         last;
       }
+    }
+  }
+
+  if ( @parent_packages ) {
+    my $package_stmt = $ppi->find_first( 'PPI::Statement::Package' );
+    my $semicolon = $package_stmt->last_element;
+
+    my $new_ws = PPI::Token::Whitespace->new( ' ' );
+    my $new_is = PPI::Token::Word->new( 'is' );
+    my $new_ws_2 = PPI::Token::Whitespace->new( ' ' );
+    my $new_name = PPI::Token::Word->new( $parent_packages[0] ); # XXX
+
+    $semicolon->insert_before( $new_ws );
+    $semicolon->insert_before( $new_is );
+    $semicolon->insert_before( $new_ws_2 );
+    $semicolon->insert_before( $new_name );
+  }
+}
+
+# Handle the variety of arguments that can follow 'use base' and 'use parent'.
+# 
+sub __get_parent_packages {
+  my $token = shift;
+  my @package;
+
+  if ( my $tokens = $token->find( 'PPI::Token::Quote' ) ) {
+    for my $_token ( @{ $tokens } ) {
+      push @package, $_token->string;
+    }
+  }
+  elsif ( my $_tokens = $token->find( 'PPI::Token::QuoteLike::Words' ) ) {
+  }
+  return @package;
+}
+
+sub _get_parent_packages {
+  my $ppi = shift;
+  my @package;
+
+  my $include_stmts = $ppi->find( 'PPI::Statement::Include' );
+  if ( $include_stmts ) {
+    for my $include_stmt ( @{ $include_stmts } ) {
+      next unless $include_stmt->type eq 'use';
+      next unless $include_stmt->module eq 'base' or
+                  $include_stmt->module eq 'parent';
+      push @package, __get_parent_packages( $include_stmt );
+    }
+  }
+
+  remove_parent_package( $ppi );
+
+  return @package;
+}
+
+sub remove_parent_package {
+  my $ppi = shift;
+  my @package;
+
+  my $include_stmts = $ppi->find( 'PPI::Statement::Include' );
+  if ( $include_stmts ) {
+    for my $include_stmt ( @{ $include_stmts } ) {
+      next unless $include_stmt->type eq 'use';
+      next unless $include_stmt->module eq 'base' or
+                  $include_stmt->module eq 'parent';
+
+      $include_stmt->delete;
+    }
+
+    $include_stmts = $ppi->find( 'PPI::Statement::Variable' );
+    for my $include_stmt ( @{ $include_stmts } ) {
+      next unless $include_stmt->type eq 'our';
+      next unless grep { $_ eq '@ISA' } $include_stmt->variables;
+      if ( $include_stmt->variables > 1 ) {
+        warn 'Parent package @ISA is more complex than I can deal with ATM';
+        return;
+      }
+
+      $include_stmt->delete;
     }
   }
 }
