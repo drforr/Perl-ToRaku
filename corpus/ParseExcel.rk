@@ -2709,7 +2709,7 @@ sub error_code {
 
 1;
 
-__END__
+=finish
 
 =head1 NAME
 

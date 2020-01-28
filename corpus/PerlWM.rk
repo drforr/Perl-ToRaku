@@ -22,7 +22,7 @@ use PerlWM::Action;
 sub new {
 
   my ($proto, %args) = @_;
-  my $class = ref($proto) || $proto || __PACKAGE__;
+  my $class = ref($proto) || $proto || $?PACKAGE;
   my $x = PerlWM::X->new(display => $ENV{DISPLAY},
 			 debug => $ENV{PERLWM_DEBUG});
   my $self = $class->SUPER::new(x => $x, id => $x->{root});

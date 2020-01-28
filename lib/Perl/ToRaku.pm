@@ -53,21 +53,23 @@ BEGIN {
     require     => 1;
 
   my @core_transformers = map { __PACKAGE__ . '::Transformers::' . $_ } (
-    'Constant',
-    'HigherOrderCommas',
-    'Shebang',
-    'PackageDeclaration',
-    'StrictPragma',
-    'WarningsPragma',
-    'Utf8Pragma',
-    'CoreRakuModules',
     'BitwiseOperators',
+    'Constant',
+    'CoreRakuModules',
+    'HigherOrderCommas',
+    'PackageDeclaration',
+    'Shebang',
+    'SortVariables',
+    'SpecialLiterals',
+    'StrictPragma',
     'TernaryOperator',
     'TernaryOperator_Workaround',
-    'Whitespace',
-    'VersionPragma',
     'Undef',
-    'Undef_Workarounds'
+    'Undef_Workarounds',
+    'Utf8Pragma',
+    'VersionPragma',
+    'WarningsPragma',
+    'Whitespace',
   );
 
   use Module::Pluggable
