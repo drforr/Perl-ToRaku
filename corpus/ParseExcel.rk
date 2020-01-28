@@ -367,7 +367,7 @@ sub SkipBytes {
     my $scratch = "\0" x REKEY_BLOCK;
     my $block;
 
-    $block = int( ( $start + $count ) / REKEY_BLOCK );
+    $block = Int( ( $start + $count ) / REKEY_BLOCK );
 
     if ( $block != $q->{block} ) {
         MakeKey( $q->{block} = $block, \$q->{rc4_key}, $q->{md5_ctxt} );
@@ -486,7 +486,7 @@ sub QueryNext {
             SkipBytes( $q, $pos, 4 );
             $pos += 4;
 
-            while ( $q->{block} != int( ( $pos + $len ) / REKEY_BLOCK ) ) {
+            while ( $q->{block} != Int( ( $pos + $len ) / REKEY_BLOCK ) ) {
                 my $step = REKEY_BLOCK - ( $pos % REKEY_BLOCK );
                 $res .= $q->{rc4_key}->RC4( substr( $data, 0, $step ) );
                 $data = substr( $data, $step );
@@ -790,7 +790,7 @@ sub _subBOF {
               if ( length( $sWk ) > 4 );
         }
         else {
-            $oBook->{BIFFVersion} = int( $bOp / 0x100 );
+            $oBook->{BIFFVersion} = Int( $bOp / 0x100 );
             if (   ( $oBook->{BIFFVersion} == verBIFF2 )
                 || ( $oBook->{BIFFVersion} == verBIFF3 )
                 || ( $oBook->{BIFFVersion} == verBIFF4 ) )
@@ -1331,7 +1331,7 @@ sub _convert_col_width {
     my $excel_width = shift;
 
     # Convert from Excel units to pixels (rounded up).
-    my $pixels = int( 0.5 + $excel_width * 7 / 256 );
+    my $pixels = Int( 0.5 + $excel_width * 7 / 256 );
 
     # Convert from pixels to user units.
     # The conversion is different for columns <= 1 user unit (12 pixels).
@@ -1344,7 +1344,7 @@ sub _convert_col_width {
     }
 
     # Round up to 2 decimal places.
-    $user_width = int( $user_width * 100 + 0.5 ) / 100;
+    $user_width = Int( $user_width * 100 + 0.5 ) / 100;
 
     return $user_width;
 }
@@ -2574,7 +2574,7 @@ sub _SwapForUnicode {
     my ( $sObj ) = @_;
 
     #    for(my $i = 0; $i<length($$sObj); $i+=2){
-    for ( my $i = 0 ; $i < ( int( length( $$sObj ) / 2 ) * 2 ) ; $i += 2 ) {
+    for ( my $i = 0 ; $i < ( Int( length( $$sObj ) / 2 ) * 2 ) ; $i += 2 ) {
         my $sIt = substr( $$sObj, $i, 1 );
         substr( $$sObj, $i, 1 ) = substr( $$sObj, $i + 1, 1 );
         substr( $$sObj, $i + 1, 1 ) = $sIt;

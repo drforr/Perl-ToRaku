@@ -54,6 +54,7 @@ BEGIN {
 
   my @core_transformers = map { __PACKAGE__ . '::Transformers::' . $_ } (
     'BitwiseOperators',
+    'Casts',
     'Constant',
     'CoreRakuModules',
     'HigherOrderCommas',
@@ -241,10 +242,6 @@ sub test_transform {
 # 'pack "vV", $value'
 # =>
 # '$value.pack( "vV" );'
-
-# int( $x )
-# =>
-# Int( $x )
 
 # '$x = $self->{Foo};' => 'has $.Foo;' ... '$x = $.Foo;'
 
