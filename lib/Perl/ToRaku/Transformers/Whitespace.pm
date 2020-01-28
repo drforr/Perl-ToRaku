@@ -15,8 +15,14 @@ sub transformer {
     'if',
     'elsif',
     'unless',
-    'for',
+    'given',
+    'when',
     'while',
+    'until',
+    'for',
+    'foreach',
+
+#    'qw',
 
     'my',
     'our',
@@ -31,6 +37,17 @@ sub transformer {
 
       my $new_whitespace = PPI::Token::Whitespace->new( ' ' );
       $word_token->insert_after( $new_whitespace );
+    }
+  }
+
+  my $quoted_word_tokens = $ppi->find( 'PPI::Token::QuoteLike::Words' );
+  if ( $quoted_word_tokens ) {
+    for my $quoted_word_token ( @{ $quoted_word_tokens } ) {
+      next unless $quoted_word_token->content =~ m{ ^ qw \( }x; # \)
+
+      my $new_content = $quoted_word_token->content;
+      $new_content =~ s{ ^ qw }{qw }x;
+      $quoted_word_token->set_content( $new_content );
     }
   }
 }

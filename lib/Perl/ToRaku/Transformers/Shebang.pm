@@ -16,25 +16,23 @@ sub transformer {
   if ( $comment_tokens ) {
     for my $comment_token ( @{ $comment_tokens } ) {
       next unless $comment_token->line;
-      my $new_text = $comment_token->content;
+      my $new_content = $comment_token->content;
 
-      if ( $new_text =~ m{ ^ \# \! perl }x ) {
-        $new_text = "#!raku\n";
+      if ( $new_content =~ m{ ^ \# \! perl }x ) {
+        $new_content = "#!raku\n";
       }
-      elsif ( $new_text =~ m{ ^ \# \s* \! .+ env \s+ perl }x ) {
-        $new_text = $comment_token->content;
-        $new_text =~ s{ perl }{raku}x;
+      elsif ( $new_content =~ m{ ^ \# \s* \! .+ env \s+ perl }x ) {
+        $new_content = $comment_token->content;
+        $new_content =~ s{ perl }{raku}x;
       }
-      elsif ( $new_text =~ m{ ^ \# \s* \! .+ perl }x ) {
-        $new_text =~ s{ perl }{env raku}x;
+      elsif ( $new_content =~ m{ ^ \# \s* \! .+ perl }x ) {
+        $new_content =~ s{ perl }{env raku}x;
       }
       else {
         next;
       }
 
-      my $new_comment = PPI::Token::Comment->new( $new_text );
-      $comment_token->insert_before( $new_comment );
-      $comment_token->delete;
+      $comment_token->set_content( $new_content );
     }
   }
 }

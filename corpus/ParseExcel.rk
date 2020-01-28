@@ -20,7 +20,7 @@ unit class Spreadsheet::ParseExcel:ver<0.65>;
 
 
 use OLE::Storage_Lite;
-use File::Basename qw(fileparse);
+use File::Basename qw (fileparse);
 
 use Config;
 
@@ -1933,7 +1933,7 @@ sub _subHeader {
     if ( $oBook->{BIFFVersion} >= verBIFF8 ) {
         $sW = _convBIFF8String( $oBook, $sWk );
         $oBook->{Worksheet}[ $oBook->{_CurSheet} ]->{Header} =
-          ( $sW eq "\x00" ) ?? undef !! $sW;
+          ( $sW eq "\x00" ) ?? Nil !! $sW;
     }
 
     #Before BIFF8
@@ -1942,7 +1942,7 @@ sub _subHeader {
         $sW =
           $oBook->{FmtClass}->TextFmt( substr( $sWk, 1, $iLen ), '_native_' );
         $oBook->{Worksheet}[ $oBook->{_CurSheet} ]->{Header} =
-          ( $sW eq "\x00\x00\x00" ) ?? undef !! $sW;
+          ( $sW eq "\x00\x00\x00" ) ?? Nil !! $sW;
     }
 }
 
@@ -1963,7 +1963,7 @@ sub _subFooter {
     if ( $oBook->{BIFFVersion} >= verBIFF8 ) {
         $sW = _convBIFF8String( $oBook, $sWk );
         $oBook->{Worksheet}[ $oBook->{_CurSheet} ]->{Footer} =
-          ( $sW eq "\x00" ) ?? undef !! $sW;
+          ( $sW eq "\x00" ) ?? Nil !! $sW;
     }
 
     #Before BIFF8
@@ -1972,7 +1972,7 @@ sub _subFooter {
         $sW =
           $oBook->{FmtClass}->TextFmt( substr( $sWk, 1, $iLen ), '_native_' );
         $oBook->{Worksheet}[ $oBook->{_CurSheet} ]->{Footer} =
-          ( $sW eq "\x00\x00\x00" ) ?? undef !! $sW;
+          ( $sW eq "\x00\x00\x00" ) ?? Nil !! $sW;
     }
 }
 

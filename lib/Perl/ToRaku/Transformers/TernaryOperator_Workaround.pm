@@ -3,6 +3,7 @@ package Perl::ToRaku::Transformers::TernaryOperator_Workaround;
 use strict;
 use warnings;
 
+# XXX This may be solved by now...
 # XXX There's a known case we have to solve somehow... just look for an undef
 # XXX ( 0x00 == 0x00 ) ?? undef !! 1;
 #                         ^
@@ -24,10 +25,7 @@ sub transformer {
 
       my $new_content = $label_token->content;
       $new_content =~ s{ : }{!!}x;
-      my $new_label =
-        PPI::Token::Operator->new( $new_content );
-      $label_token->insert_before( $new_label );
-      $label_token->delete;
+      $label_token->set_content( $new_content );
     }
   }
 }

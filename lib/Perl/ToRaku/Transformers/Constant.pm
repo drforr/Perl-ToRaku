@@ -24,9 +24,8 @@ sub transformer {
       $include_stmt->first_token->delete; # Delete 'use'
       $include_stmt->first_token->delete; # Delete ' '
 
-      my $equal = PPI::Token::Operator->new( '=' );
-      $fat_arrow->insert_before( $equal );
-      $fat_arrow->delete;
+      my $new_content = '=';
+      $fat_arrow->set_content( $new_content );
     }
   }
 }

@@ -16,11 +16,9 @@ sub transformer {
     for my $label_token ( @{ $label_tokens } ) {
       next unless $label_token->content =~ / undef /x;
 
-      my $text = $label_token->content;
-      $text =~ s{ undef }{Nil}x;
-      my $new_word = PPI::Token::Word->new( $text );
-      $label_token->insert_before( $new_word );
-      $label_token->delete;
+      my $new_content = $label_token->content;
+      $new_content =~ s{ undef }{Nil}x;
+      $label_token->set_content( $new_content );
     }
   }
 }

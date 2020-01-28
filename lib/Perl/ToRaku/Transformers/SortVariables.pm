@@ -25,9 +25,7 @@ sub transformer {
           my $new_content = $symbol_token->content;
           $new_content =~ s{ ^ \$ }{\$^}x;
 
-          my $new_symbol = PPI::Token::Symbol->new( $new_content );
-          $symbol_token->insert_before( $new_symbol );
-          $symbol_token->delete;
+          $symbol_token->set_content( $new_content );
         }
       }
     }

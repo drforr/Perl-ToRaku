@@ -22,10 +22,8 @@ sub transformer {
     for my $operator_token ( @{ $operator_tokens } ) {
       next unless exists $map{ $operator_token->content };
 
-      my $new_operator =
-        PPI::Token::Operator->new( $map{ $operator_token->content } );
-      $operator_token->insert_before( $new_operator );
-      $operator_token->delete;
+      my $new_content = $map{ $operator_token->content };
+      $operator_token->set_content( $new_content );
     }
   }
 }

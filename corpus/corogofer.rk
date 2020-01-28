@@ -3,7 +3,7 @@
 
 
 
-use Time::HiRes qw(time);
+use Time::HiRes qw (time);
  
 BEGIN { $ENV{PERL_ANYEVENT_STRICT} = 1; $ENV{PERL_ANYEVENT_VERBOSE} = 1; }
  

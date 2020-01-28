@@ -16,9 +16,8 @@ sub transformer {
     for my $word_token ( @{ $word_tokens } ) {
       next unless $word_token->content eq 'undef';
 
-      my $new_word = PPI::Token::Word->new( 'Nil' );
-      $word_token->insert_before( $new_word );
-      $word_token->delete;
+      my $new_content = 'Nil';
+      $word_token->set_content( $new_content );
     }
   }
 }

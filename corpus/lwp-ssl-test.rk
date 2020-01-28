@@ -1,11 +1,11 @@
 #!/usr/bin/env raku
  
-use lib qw(lib);
+use lib qw (lib);
 use LWP::UserAgent;
 use Getopt::Long;
 
-use vars qw($opt_proxy $opt_debug $opt_cert $opt_key $opt_cafile $opt_cadir);
-use Data::Dumper qw(Dumper);
+use vars qw ($opt_proxy $opt_debug $opt_cert $opt_key $opt_cafile $opt_cadir);
+use Data::Dumper qw (Dumper);
  
 GetOptions(
            'd' => \$opt_debug,
