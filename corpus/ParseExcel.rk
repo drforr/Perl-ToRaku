@@ -252,7 +252,7 @@ sub SetEventHandlers {
 sub md5state {
     my ( $md5 ) = @_;
     my $s = '';
-    for ( my $i = 0 ; $i < 4 ; $i++ ) {
+    loop ( my $i = 0 ; $i < 4 ; $i++ ) {
         my $v = $md5->{_state}[$i];
         $s .= chr( $v +& 0xff );
         $s .= chr( ( $v +> 8 ) +& 0xff );
@@ -293,7 +293,7 @@ sub VerifyPassword {
     my $i;
     my $md5 = Digest::Perl::MD5->new();
 
-    for ( $i = 0 ; $i < length( $password ) ; $i++ ) {
+    loop ( $i = 0 ; $i < length( $password ) ; $i++ ) {
         my $o = ord( substr( $password, $i, 1 ) );
         substr( $pwarray, 2 * $i, 1 ) = chr( $o +& 0xff );
         substr( $pwarray, 2 * $i + 1, 1 ) = chr( ( $o +> 8 ) +& 0xff );
@@ -604,8 +604,8 @@ sub parse {
 
         if ($worksheet->{HyperLinks}) {
             foreach my $link (@{$worksheet->{HyperLinks}}) {
-                for ( my $row = $link->[3]; $row <= $link->[4]; $row++ ) {
-                    for ( my $col = $link->[5]; $col <= $link->[6]; $col++ ) {
+                loop( my $row = $link->[3]; $row <= $link->[4]; $row++ ) {
+                    loop( my $col = $link->[5]; $col <= $link->[6]; $col++ ) {
                         $worksheet->{Cells}[$row][$col]{Hyperlink} = $link;
                     }
                 }
@@ -1173,7 +1173,7 @@ sub _subMulBlank {
     my ( $iR, $iSc ) = unpack( "v2", $sWk );
     my $iEc = unpack( "v", substr( $sWk, length( $sWk ) - 2, 2 ) );
     my $iPos = 4;
-    for ( my $iC = $iSc ; $iC <= $iEc ; $iC++ ) {
+    loop ( my $iC = $iSc ; $iC <= $iEc ; $iC++ ) {
         my $iF = unpack( 'v', substr( $sWk, $iPos, 2 ) );
         _NewCell(
             $oBook, $iR, $iC,
@@ -1360,7 +1360,7 @@ sub _subColInfo {
 
     my ( $iSc, $iEc, $iW, $iXF, $iGr ) = unpack( "v5", $sWk );
 
-    for ( my $i = $iSc ; $i <= $iEc ; $i++ ) {
+    loop ( my $i = $iSc ; $i <= $iEc ; $i++ ) {
 
         $oBook->{Worksheet}[ $oBook->{_CurSheet} ]->{ColWidth}[$i] =
           _convert_col_width( $oBook, $iW );
@@ -1799,7 +1799,7 @@ sub _subFormat {
 #------------------------------------------------------------------------------
 sub _subPalette {
     my ( $oBook, $bOp, $bLen, $sWk ) = @_;
-    for ( my $i = 0 ; $i < unpack( 'v', $sWk ) ; $i++ ) {
+    loop ( my $i = 0 ; $i < unpack( 'v', $sWk ) ; $i++ ) {
 
         #        push @aColor, unpack('H6', substr($sWk, $i*4+2));
         $oBook->{aColor}[ $i + 8 ] = unpack( 'H6', substr( $sWk, $i * 4 + 2 ) );
@@ -1988,7 +1988,7 @@ sub _subHPageBreak {
 
     #BIFF8
     if ( $oBook->{BIFFVersion} >= verBIFF8 ) {
-        for ( my $i = 0 ; $i < $iCnt ; $i++ ) {
+        loop ( my $i = 0 ; $i < $iCnt ; $i++ ) {
             my ( $iRow, $iColB, $iColE ) =
               unpack( 'v3', substr( $sWk, 2 + $i * 6, 6 ) );
 
@@ -1999,7 +1999,7 @@ sub _subHPageBreak {
 
     #Before BIFF8
     else {
-        for ( my $i = 0 ; $i < $iCnt ; $i++ ) {
+        loop ( my $i = 0 ; $i < $iCnt ; $i++ ) {
             my ( $iRow ) = unpack( 'v', substr( $sWk, 2 + $i * 2, 2 ) );
             push @aBreak, $iRow;
 
@@ -2022,7 +2022,7 @@ sub _subVPageBreak {
 
     #BIFF8
     if ( $oBook->{BIFFVersion} >= verBIFF8 ) {
-        for ( my $i = 0 ; $i < $iCnt ; $i++ ) {
+        loop ( my $i = 0 ; $i < $iCnt ; $i++ ) {
             my ( $iCol, $iRowB, $iRowE ) =
               unpack( 'v3', substr( $sWk, 2 + $i * 6, 6 ) );
             push @aBreak, $iCol;
@@ -2033,7 +2033,7 @@ sub _subVPageBreak {
 
     #Before BIFF8
     else {
-        for ( my $i = 0 ; $i < $iCnt ; $i++ ) {
+        loop ( my $i = 0 ; $i < $iCnt ; $i++ ) {
             my ( $iCol ) = unpack( 'v', substr( $sWk, 2 + $i * 2, 2 ) );
             push @aBreak, $iCol;
 
@@ -2327,11 +2327,11 @@ sub _subMergeArea {
     my $iCnt = unpack( "v", $sWk );
     my $oWkS = $oBook->{Worksheet}[ $oBook->{_CurSheet} ];
     $oWkS->{MergedArea} = [] unless ( defined $oWkS->{MergedArea} );
-    for ( my $i = 0 ; $i < $iCnt ; $i++ ) {
+    loop ( my $i = 0 ; $i < $iCnt ; $i++ ) {
         my ( $iRs, $iRe, $iCs, $iCe ) =
           unpack( 'v4', substr( $sWk, $i * 8 + 2, 8 ) );
-        for ( my $iR = $iRs ; $iR <= $iRe ; $iR++ ) {
-            for ( my $iC = $iCs ; $iC <= $iCe ; $iC++ ) {
+        loop ( my $iR = $iRs ; $iR <= $iRe ; $iR++ ) {
+            loop ( my $iC = $iCs ; $iC <= $iCe ; $iC++ ) {
                 $oWkS->{Cells}[$iR][$iC]->{Merged} = 1
                   if ( defined $oWkS->{Cells}[$iR][$iC] );
             }
@@ -2490,7 +2490,7 @@ sub _subStrWk {
                     # Convert the previous ASCII, single character, portion of
                     # the string into a double character UTF-16 string by
                     # inserting zero bytes.
-                    for (
+                    loop (
                         my $i = ( $buff_length - $str_position ) ;
                         $i >= 1 ;
                         $i--
@@ -2521,7 +2521,7 @@ sub _subStrWk {
                     }
 
                     # Insert the null bytes.
-                    for ( my $i = ( $change_length / 2 ) ; $i >= 1 ; $i-- ) {
+                    loop ( my $i = ( $change_length / 2 ) ; $i >= 1 ; $i-- ) {
                         substr( $biff_data, $i + 1, 0 ) = "\x00";
                     }
 
@@ -2574,7 +2574,7 @@ sub _SwapForUnicode {
     my ( $sObj ) = @_;
 
     #    for(my $i = 0; $i<length($$sObj); $i+=2){
-    for ( my $i = 0 ; $i < ( Int( length( $$sObj ) / 2 ) * 2 ) ; $i += 2 ) {
+    loop ( my $i = 0 ; $i < ( Int( length( $$sObj ) / 2 ) * 2 ) ; $i += 2 ) {
         my $sIt = substr( $$sObj, $i, 1 );
         substr( $$sObj, $i, 1 ) = substr( $$sObj, $i + 1, 1 );
         substr( $$sObj, $i + 1, 1 ) = $sIt;
@@ -2617,7 +2617,7 @@ sub _NewCell {
     if ( $rhKey{Rich} ) {
         my @aRich = ();
         my $sRich = $rhKey{Rich};
-        for ( my $iWk = 0 ; $iWk < length( $sRich ) ; $iWk += 4 ) {
+        loop ( my $iWk = 0 ; $iWk < length( $sRich ) ; $iWk += 4 ) {
             my ( $iPos, $iFnt ) = unpack( 'v2', substr( $sRich, $iWk ) );
             push @aRich, [ $iPos, $oBook->{Font}[$iFnt] ];
         }
