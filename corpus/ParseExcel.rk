@@ -172,7 +172,7 @@ our $_use_perlio;
 #------------------------------------------------------------------------------
 # Spreadsheet::ParseExcel->new
 #------------------------------------------------------------------------------
-sub new {
+multi method new {
     my ( $class, %hParam ) = @_;
 
     if ( not defined $_use_perlio ) {

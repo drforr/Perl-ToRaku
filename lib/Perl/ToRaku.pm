@@ -32,6 +32,7 @@ BEGIN {
     require     => 1;
 
   my @core_collectors = map { __PACKAGE__ . '::Collectors::' . $_ } (
+    'IsPackage',
     'IsMoose',
   );
 
@@ -250,10 +251,6 @@ sub test_transform {
 # '@x = $self->{Foo};' => 'has @.Foo;' ... '@x = @.Foo;'
 
 # '$self->{Foo}[0]' => 'has @.Foo;' ... '@.Foo[0]'
-
-# 'sub new { ... }'
-# =>
-# 'multi method new(...) { ... }'
 
 # For packages, collect the name of the "functions" it declares.
 # In a given method, look to see if it calls one of those function names.

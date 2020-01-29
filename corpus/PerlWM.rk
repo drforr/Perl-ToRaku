@@ -19,7 +19,7 @@ use PerlWM::Action;
 
 ############################################################################
 
-sub new {
+multi method new {
 
   my ($proto, %args) = @_;
   my $class = ref($proto) || $proto || $?PACKAGE;
