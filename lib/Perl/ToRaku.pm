@@ -55,9 +55,11 @@ BEGIN {
 
   my @core_transformers = map { __PACKAGE__ . '::Transformers::' . $_ } (
     'BitwiseOperators',
+    'UnaryOperators',
     'Casts',
     'Constant',
     'CoreRakuModules',
+    'ForLoops',
     'HigherOrderCommas',
     'PackageDeclaration',
     'Shebang',
@@ -210,6 +212,10 @@ sub test_transform {
   $self->{ppi}->serialize;
 }
 
+# JMG Some things that came up...
+#
+# $self->SUPER::func(...);
+
 # Note that subroutines may "fool" you into thinking they're methods.
 # Look at ParseExcel.pm's _subStrWk "method".
 # It has '$self' as the first argument.
@@ -255,22 +261,6 @@ sub test_transform {
 # For packages, collect the name of the "functions" it declares.
 # In a given method, look to see if it calls one of those function names.
 # If so, the variable that calls it must be $self.
-
-# ... Then the operators, I guess....
-
-# Drop parens around if... operators.
-
-# for... blocks &c
-#
-# for ( my $i = 0; $i < $x ; $i++ ) { ... }
-# =>
-# for ( 0 .. $x - 1 ) -> $i { ... }
-# or
-# for ^$x -> $i { ... }
-
-# for ( my $i = $l ; $i < $h ; $i++ ) { ... }
-# =>
-# for ( $l .. $h - 1 ) -> $i { ... }
 
 # length( $x )
 # =>

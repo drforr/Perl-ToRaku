@@ -15,17 +15,17 @@ use DBI;
  
 $ENV{DBI_AUTOPROXY} = 'dbi:Gofer:transport=corostream';
  
-my $ticker = AnyEvent->timer( after => 0, interval => 0.1, cb => sub {
+my $ticker = AnyEvent.timer( after => 0, interval => 0.1, cb => sub {
     warn sprintf "-tick- %.2f\n", time
 } );
  
 warn "connecting...\n";
-my $dbh = DBI->connect("dbi:NullP:");
+my $dbh = DBI.connect("dbi:NullP:");
 warn "...connected\n";
  
 for (1..5) {
     warn "entering DBI...\n";
-    $dbh->do("sleep 0.3"); # pseudo-sql understood by the DBD::NullP driver
+    $dbh.do("sleep 0.3"); # pseudo-sql understood by the DBD::NullP driver
     warn "...returned\n";
 }
  
