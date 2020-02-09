@@ -6,7 +6,7 @@ use warnings;
 use Test::More;
 use Perl::ToRaku;
 
-plan tests => 13;
+plan tests => 15;
 
 my $package = 'Perl::ToRaku::Transformers::BinaryOperators';
 my $toRaku  = Perl::ToRaku->new;
@@ -18,6 +18,12 @@ is $toRaku->test_transform( $package, '$x->$y' ),
 
 is $toRaku->test_transform( $package, '$x.$y' ),
    '$x~$y';
+
+is $toRaku->test_transform( $package, '$x=~$y' ),
+   '$x~~$y';
+
+is $toRaku->test_transform( $package, '$x!~$y' ),
+   '$x!~~$y';
 
 is $toRaku->test_transform( $package, '$x.=$y' ),
    '$x~=$y';

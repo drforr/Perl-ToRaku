@@ -1443,7 +1443,7 @@ sub _getustr {
     }
     $len -= $zterm;
     my $text = join( '', map { chr $_ }, unpack( "v$len", substr( $wk, $offset ) ) );
-    $text =~ s/\0.*\z// if ( $zterm );
+    $text ~~ s/\0.*\z// if ( $zterm );
     $_[1] = ( $offset += ($len + $zterm) *2 );
     return $text;
 }
@@ -1522,7 +1522,7 @@ sub _subHyperlink {
     if ( $flags +& 0x8 ) {
         # Cellrefs contain reserved characters, so url-encode
         my $fragment = _getustr( $wk, $offset, 1 );
-        $fragment =~ s/([^\w.~-])/sprintf( '%%%02X', ord( $1 ) )/gems;
+        $fragment ~~ s/([^\w.~-])/sprintf( '%%%02X', ord( $1 ) )/gems;
         $link ~= '#' ~ $fragment;
     }
 
@@ -2600,7 +2600,7 @@ sub _NewCell {
         # Match a range of possible date formats. Note: this isn't important
         # except for reporting. The number will still be converted to a date
         # by ExcelFmt() even if 'Type' isn't set to 'Date'.
-        if ( $FmtStr =~ m{^[dmy][-\\/dmy]*$}i ) {
+        if ( $FmtStr ~~ m{^[dmy][-\\/dmy]*$}i ) {
             $rhKey{Type} = "Date";
         }
     }

@@ -55,6 +55,7 @@ BEGIN {
 
   my @core_transformers = map { __PACKAGE__ . '::Transformers::' . $_ } (
     'BitwiseOperators',
+    'BinaryOperators',
     'UnaryOperators',
     'Casts',
     'Constant',
@@ -215,6 +216,16 @@ sub test_transform {
 # JMG Some things that came up...
 #
 # $self->SUPER::func(...);
+#
+# %x = ( 1, 2, 3, 4 )
+# =>
+# %x = ( 1 => 2, 3 => 4 )
+#
+# @a = '-' x 80 # is ok
+#
+# @a = (1) x 80
+# =>
+# @a = 1 xx 80
 
 # Note that subroutines may "fool" you into thinking they're methods.
 # Look at ParseExcel.pm's _subStrWk "method".

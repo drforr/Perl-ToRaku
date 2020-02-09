@@ -16,6 +16,8 @@ sub transformer {
     '.='  => '~=',
     '->'  => '.',
     'cmp' => 'leg',
+    '=~'  => '~~',
+    '!~'  => '!~~'
   );
 
   # Just in case, make sure the operator is a binary one.
