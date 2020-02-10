@@ -3,8 +3,17 @@ package Perl::ToRaku::Transformers::Whitespace;
 use strict;
 use warnings;
 
-# 'my($x);' => 'my ($x);'
-# 'if($i==0) {}' => 'if ($i==0) {}'
+# 'print($x);'
+# =>
+# 'print ($x);'
+#
+# 'my($x);'
+# =>
+# 'my ($x);'
+#
+# 'if($i==0) {}'
+# =>
+# 'if ($i==0) {}'
 #
 sub transformer {
   my $self = shift;
@@ -12,6 +21,8 @@ sub transformer {
   my $ppi  = $obj->_ppi;
 
   my %map = map { $_ => 1 } (
+    'print',
+
     'if',
     'elsif',
     'unless',

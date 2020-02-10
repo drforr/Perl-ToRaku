@@ -75,6 +75,7 @@ BEGIN {
     'VersionPragma',
     'WarningsPragma',
     'Whitespace',
+    'XOperator'
   );
 
   use Module::Pluggable
@@ -214,6 +215,8 @@ sub test_transform {
 }
 
 # JMG Some things that came up...
+#
+# Maybe change 'use' statements to use Package:from<Perl5>
 #
 # $self->SUPER::func(...);
 #

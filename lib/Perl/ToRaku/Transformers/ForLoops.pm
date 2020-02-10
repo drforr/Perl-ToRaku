@@ -6,7 +6,10 @@ use warnings;
 # 'for ( my $i = 0; $i < 10 ; $i++ ) { ... }'
 # =>
 # 'loop ( my $i = 0; $i < 10 ; $i++ ) { ... }' =>
-# 'for my $x ( @y ) { ... }' # no change
+#
+# 'foreach my $x ( @y ) { ... }'
+# =>
+# 'for my $x ( @y ) { ... }'
 #
 sub transformer {
   my $self = shift;
@@ -17,13 +20,17 @@ sub transformer {
   if ( $word_tokens ) {
     OUTER:
     for my $word_token ( @{ $word_tokens } ) {
-      next unless $word_token->content eq 'for';
-      next unless $word_token->snext_sibling->isa( 'PPI::Structure::For' );
+      next unless $word_token->content eq 'foreach' or
+                  $word_token->content eq 'for';
 
-      my $has_semicolons = $self->_has_semicolons( $word_token->snext_sibling );
-      next unless $has_semicolons;
-    
-      $word_token->set_content( 'loop' );
+      my $has_semicolons =
+        $self->_has_semicolons( $word_token->snext_sibling );
+      if ( $has_semicolons ) {
+        $word_token->set_content( 'loop' );
+      }
+      else {
+        $word_token->set_content( 'for' );
+      }
     }
   }
 }
