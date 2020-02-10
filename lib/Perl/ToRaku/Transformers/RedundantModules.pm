@@ -1,4 +1,4 @@
-package Perl::ToRaku::Transformers::CoreRakuModules;
+package Perl::ToRaku::Transformers::RedundantModules;
 
 use strict;
 use warnings;

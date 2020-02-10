@@ -8,7 +8,7 @@ use Test::More;
 
 plan tests => 3;
 
-my $package = 'Perl::ToRaku::Transformers::CoreRakuModules';
+my $package = 'Perl::ToRaku::Transformers::RedundantModules';
 my $toRaku  = Perl::ToRaku->new;
 
 use_ok $package;
