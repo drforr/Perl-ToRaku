@@ -206,7 +206,7 @@ multi method new {
         $self.SetEventHandlers( \%ProcTbl );
     }
     if ( $hParam{AddHandlers} ) {
-        foreach my $sKey ( keys( %{ $hParam{AddHandlers} } ) ) {
+        for my $sKey ( keys( %{ $hParam{AddHandlers} } ) ) {
             $self.SetEventHandler( $sKey, $hParam{AddHandlers}.{$sKey} );
         }
     }
@@ -240,7 +240,7 @@ sub SetEventHandler {
 sub SetEventHandlers {
     my ( $self, $rhTbl ) = @_;
     $self.{FuncTbl} = Nil;
-    foreach my $sKey ( keys %$rhTbl ) {
+    for my $sKey ( keys %$rhTbl ) {
         $self.{FuncTbl}.{$sKey} = $rhTbl.{$sKey};
     }
 }
@@ -598,12 +598,12 @@ sub parse {
         last if defined $workbook.{_ParseAbort};
     }
 
-    foreach my $worksheet (@{$workbook.{Worksheet}} ) {
+    loop my $worksheet (@{$workbook.{Worksheet}} ) {
         # Install hyperlinks into each cell
         # Range is undocumented for user; allows reuse of data
 
         if ($worksheet.{HyperLinks}) {
-            foreach my $link (@{$worksheet.{HyperLinks}}) {
+            loop my $link (@{$worksheet.{HyperLinks}}) {
                 loop( my $row = $link.[3]; $row <= $link.[4]; $row++ ) {
                     loop( my $col = $link.[5]; $col <= $link.[6]; $col++ ) {
                         $worksheet.{Cells}[$row][$col]{Hyperlink} = $link;
@@ -2193,7 +2193,7 @@ sub _subName {
                 my ( $iSheetW, $raArea ) = _ParseNameArea( substr( $sWk, 16 ) );
                 my @aTtlR = ();
                 my @aTtlC = ();
-                foreach my $raI ( @$raArea ) {
+                for my $raI ( @$raArea ) {
                     if ( $raI.[3] == 0xFF ) {    #Row Title
                         push @aTtlR, [ $raI.[0], $raI.[2] ];
                     }
@@ -2217,7 +2217,7 @@ sub _subName {
                   _ParseNameArea95( substr( $sWk, 15 ) );
                 my @aTtlR = ();
                 my @aTtlC = ();
-                foreach my $raI ( @$raArea ) {
+                for my $raI ( @$raArea ) {
                     if ( $raI.[3] == 0xFF ) {    #Row Title
                         push @aTtlR, [ $raI.[0], $raI.[2] ];
                     }
