@@ -22,14 +22,14 @@ if($opt_debug) {
 }
  
 # PROXY SUPPORT
-$ENV{HTTPS_PROXY} = $opt_proxy;
-$ENV{HTTPS_DEBUG} = $opt_debug;
+$ENV{'HTTPS_PROXY'} = $opt_proxy;
+$ENV{'HTTPS_DEBUG'} = $opt_debug;
  
-$ENV{HTTPS_CERT_FILE} = $opt_cert;
-$ENV{HTTPS_KEY_FILE} = $opt_key;
+$ENV{'HTTPS_CERT_FILE'} = $opt_cert;
+$ENV{'HTTPS_KEY_FILE'} = $opt_key;
  
-$opt_cafile && ( $ENV{HTTPS_CA_FILE} = $opt_cafile );
-$opt_cadir  && ( $ENV{HTTPS_CA_DIR} = $opt_cadir   );
+$opt_cafile && ( $ENV{'HTTPS_CA_FILE'} = $opt_cafile );
+$opt_cadir  && ( $ENV{'HTTPS_CA_DIR'} = $opt_cadir   );
           
 my $url = shift || 'https://www.nodeworks.com';
 my $ua = new LWP::UserAgent;

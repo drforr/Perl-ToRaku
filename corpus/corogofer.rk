@@ -5,15 +5,15 @@
 
 use Time::HiRes qw (time);
  
-BEGIN { $ENV{PERL_ANYEVENT_STRICT} = 1; $ENV{PERL_ANYEVENT_VERBOSE} = 1; }
+BEGIN { $ENV{'PERL_ANYEVENT_STRICT'} = 1; $ENV{'PERL_ANYEVENT_VERBOSE'} = 1; }
  
 use AnyEvent;
  
-BEGIN { $ENV{DBI_TRACE} = 0; $ENV{DBI_PUREPERL} = 0; $ENV{DBI_GOFER_TRACE} = 0; $ENV{DBD_GOFER_TRACE} = 0; };
+BEGIN { $ENV{'DBI_TRACE'} = 0; $ENV{'DBI_PUREPERL'} = 0; $ENV{'DBI_GOFER_TRACE'} = 0; $ENV{'DBD_GOFER_TRACE'} = 0; };
  
 use DBI;
  
-$ENV{DBI_AUTOPROXY} = 'dbi:Gofer:transport=corostream';
+$ENV{'DBI_AUTOPROXY'} = 'dbi:Gofer:transport=corostream';
  
 my $ticker = AnyEvent.timer( after => 0, interval => 0.1, cb => sub {
     warn sprintf "-tick- %.2f\n", time

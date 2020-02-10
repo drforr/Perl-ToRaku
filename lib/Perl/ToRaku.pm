@@ -59,6 +59,7 @@ BEGIN {
     'Casts',
     'Constant',
     'ForLoops',
+    'HashKeys',
     'HigherOrderCommas',
     'PackageDeclaration',
     'RedundantModules',

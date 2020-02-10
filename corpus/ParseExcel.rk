@@ -176,9 +176,9 @@ multi method new {
     my ( $class, %hParam ) = @_;
 
     if ( not defined $_use_perlio ) {
-        if (   exists $Config{useperlio}
-            && defined $Config{useperlio}
-            && $Config{useperlio} eq "define" )
+        if (   exists $Config{'useperlio'}
+            && defined $Config{'useperlio'}
+            && $Config{'useperlio'} eq "define" )
         {
             $_use_perlio = 1;
         }
@@ -191,38 +191,38 @@ multi method new {
 
     # Check ENDIAN(Little: Intel etc. BIG: Sparc etc)
     $BIGENDIAN =
-        ( defined $hParam{Endian} ) ?? $hParam{Endian}
+        ( defined $hParam{'Endian'} ) ?? $hParam{'Endian'}
       !! ( unpack( "H08", pack( "L", 2 ) ) eq '02000000' ) ?? 0
       !!                                                     1;
     my $self = {};
     bless $self, $class;
 
-    $self.{GetContent} = \&_subGetContent;
+    $self.{'GetContent'} = \&_subGetContent;
 
-    if ( $hParam{EventHandlers} ) {
-        $self.SetEventHandlers( $hParam{EventHandlers} );
+    if ( $hParam{'EventHandlers'} ) {
+        $self.SetEventHandlers( $hParam{'EventHandlers'} );
     }
     else {
         $self.SetEventHandlers( \%ProcTbl );
     }
-    if ( $hParam{AddHandlers} ) {
-        for my $sKey ( keys( %{ $hParam{AddHandlers} } ) ) {
-            $self.SetEventHandler( $sKey, $hParam{AddHandlers}.{$sKey} );
+    if ( $hParam{'AddHandlers'} ) {
+        for my $sKey ( keys( %{ $hParam{'AddHandlers'} } ) ) {
+            $self.SetEventHandler( $sKey, $hParam{'AddHandlers'}.{$sKey} );
         }
     }
-    $self.{CellHandler} = $hParam{CellHandler};
-    $self.{NotSetCell}  = $hParam{NotSetCell};
-    $self.{Object}      = $hParam{Object};
+    $self.{'CellHandler'} = $hParam{'CellHandler'};
+    $self.{'NotSetCell'}  = $hParam{'NotSetCell'};
+    $self.{'Object'}      = $hParam{'Object'};
 
 
-    if ( defined $hParam{Password} ) {
-        $self.{Password} = $hParam{Password};
+    if ( defined $hParam{'Password'} ) {
+        $self.{'Password'} = $hParam{'Password'};
     }
     else {
-        $self.{Password} = 'VelvetSweatshop';
+        $self.{'Password'} = 'VelvetSweatshop';
     }
 
-    $self.{_error_status} = ErrorNone;
+    $self.{'_error_status'} = ErrorNone;
     return $self;
 }
 
@@ -231,7 +231,7 @@ multi method new {
 #------------------------------------------------------------------------------
 sub SetEventHandler {
     my ( $self, $key, $sub_ref ) = @_;
-    $self.{FuncTbl}.{$key} = $sub_ref;
+    $self.{'FuncTbl'}.{$key} = $sub_ref;
 }
 
 #------------------------------------------------------------------------------
@@ -239,9 +239,9 @@ sub SetEventHandler {
 #------------------------------------------------------------------------------
 sub SetEventHandlers {
     my ( $self, $rhTbl ) = @_;
-    $self.{FuncTbl} = Nil;
+    $self.{'FuncTbl'} = Nil;
     for my $sKey ( keys %$rhTbl ) {
-        $self.{FuncTbl}.{$sKey} = $rhTbl.{$sKey};
+        $self.{'FuncTbl'}.{$sKey} = $rhTbl.{$sKey};
     }
 }
 
@@ -253,7 +253,7 @@ sub md5state {
     my ( $md5 ) = @_;
     my $s = '';
     loop ( my $i = 0 ; $i < 4 ; $i++ ) {
-        my $v = $md5.{_state}[$i];
+        my $v = $md5.{'_state'}[$i];
         $s ~= chr( $v +& 0xff );
         $s ~= chr( ( $v +> 8 ) +& 0xff );
         $s ~= chr( ( $v +> 16 ) +& 0xff );
@@ -369,12 +369,12 @@ sub SkipBytes {
 
     $block = Int( ( $start + $count ) / REKEY_BLOCK );
 
-    if ( $block != $q.{block} ) {
-        MakeKey( $q.{block} = $block, \$q.{rc4_key}, $q.{md5_ctxt} );
+    if ( $block != $q.{'block'} ) {
+        MakeKey( $q.{'block'} = $block, \$q.{'rc4_key'}, $q.{'md5_ctxt'} );
         $count = ( $start + $count ) % REKEY_BLOCK;
     }
 
-    $q.{rc4_key}.RC4( substr( $scratch, 0, $count ) );
+    $q.{'rc4_key'}.RC4( substr( $scratch, 0, $count ) );
 
     return 1;
 }
@@ -382,7 +382,7 @@ sub SkipBytes {
 sub SetDecrypt {
     my ( $q, $version, $password ) = @_;
 
-    if ( $q.{opcode} != 0x2f ) {
+    if ( $q.{'opcode'} != 0x2f ) {
         return 0;
     }
 
@@ -394,33 +394,33 @@ sub SetDecrypt {
     #if (version < MS_BIFF_V8 || q->data[0] == 0)
     #    return ms_biff_pre_biff8_query_set_decrypt (q, password);
 
-    if ( $q.{length} != sizeof_BIFF_8_FILEPASS ) {
+    if ( $q.{'length'} != sizeof_BIFF_8_FILEPASS ) {
         return 0;
     }
 
     unless (
         VerifyPassword(
             $password,
-            substr( $q.{data}, 6,  16 ),
-            substr( $q.{data}, 22, 16 ),
-            substr( $q.{data}, 38, 16 ),
-            \$q.{md5_ctxt}
+            substr( $q.{'data'}, 6,  16 ),
+            substr( $q.{'data'}, 22, 16 ),
+            substr( $q.{'data'}, 38, 16 ),
+            \$q.{'md5_ctxt'}
         )
       )
     {
         return 0;
     }
 
-    $q.{encryption} = MS_BIFF_CRYPTO_RC4;
-    $q.{block}      = -1;
+    $q.{'encryption'} = MS_BIFF_CRYPTO_RC4;
+    $q.{'block'}      = -1;
 
     # The first record after FILEPASS seems to be unencrypted
-    $q.{dont_decrypt_next_record} = 1;
+    $q.{'dont_decrypt_next_record'} = 1;
 
     # Pretend to decrypt the entire stream up till this point, it was
     # encrypted, but do it anyway to keep the rc4 state in sync
 
-    SkipBytes( $q, 0, $q.{streamPos} );
+    SkipBytes( $q, 0, $q.{'streamPos'} );
 
     return 1;
 }
@@ -429,20 +429,20 @@ sub InitStream {
     my ( $stream_data ) = @_;
     my %q;
 
-    $q{opcode} = 0;
-    $q{length} = 0;
-    $q{data}   = '';
+    $q{'opcode'} = 0;
+    $q{'length'} = 0;
+    $q{'data'}   = '';
 
-    $q{stream}    = $stream_data;              # data stream
-    $q{streamLen} = length( $stream_data );    # stream length
-    $q{streamPos} = 0;                         # stream position
+    $q{'stream'}    = $stream_data;              # data stream
+    $q{'streamLen'} = length( $stream_data );    # stream length
+    $q{'streamPos'} = 0;                         # stream position
 
-    $q{encryption}               = 0;
-    $q{xor_key}                  = '';
-    $q{rc4_key}                  = '';
-    $q{md5_ctxt}                 = '';
-    $q{block}                    = 0;
-    $q{dont_decrypt_next_record} = 0;
+    $q{'encryption'}               = 0;
+    $q{'xor_key'}                  = '';
+    $q{'rc4_key'}                  = '';
+    $q{'md5_ctxt'}                 = '';
+    $q{'block'}                    = 0;
+    $q{'dont_decrypt_next_record'} = 0;
 
     return \%q;
 }
@@ -450,65 +450,65 @@ sub InitStream {
 sub QueryNext {
     my ( $q ) = @_;
 
-    if ( $q.{streamPos} + 4 >= $q.{streamLen} ) {
+    if ( $q.{'streamPos'} + 4 >= $q.{'streamLen'} ) {
         return 0;
     }
 
-    my $data = substr( $q.{stream}, $q.{streamPos}, 4 );
+    my $data = substr( $q.{'stream'}, $q.{'streamPos'}, 4 );
 
-    ( $q.{opcode}, $q.{length} ) = unpack( 'v2', $data );
+    ( $q.{'opcode'}, $q.{'length'} ) = unpack( 'v2', $data );
 
     # No biff record should be larger than around 20,000.
-    if ( $q.{length} >= 20000 ) {
+    if ( $q.{'length'} >= 20000 ) {
         return 0;
     }
 
-    if ( $q.{length} > 0 ) {
-        $q.{data} = substr( $q.{stream}, $q.{streamPos} + 4, $q.{length} );
+    if ( $q.{'length'} > 0 ) {
+        $q.{'data'} = substr( $q.{'stream'}, $q.{'streamPos'} + 4, $q.{'length'} );
     }
     else {
-        $q.{data}                     = Nil;
-        $q.{dont_decrypt_next_record} = 1;
+        $q.{'data'}                     = Nil;
+        $q.{'dont_decrypt_next_record'} = 1;
     }
 
-    if ( $q.{encryption} == MS_BIFF_CRYPTO_RC4 ) {
-        if ( $q.{dont_decrypt_next_record} ) {
-            SkipBytes( $q, $q.{streamPos}, 4 + $q.{length} );
-            $q.{dont_decrypt_next_record} = 0;
+    if ( $q.{'encryption'} == MS_BIFF_CRYPTO_RC4 ) {
+        if ( $q.{'dont_decrypt_next_record'} ) {
+            SkipBytes( $q, $q.{'streamPos'}, 4 + $q.{'length'} );
+            $q.{'dont_decrypt_next_record'} = 0;
         }
         else {
-            my $pos  = $q.{streamPos};
-            my $data = $q.{data};
-            my $len  = $q.{length};
+            my $pos  = $q.{'streamPos'};
+            my $data = $q.{'data'};
+            my $len  = $q.{'length'};
             my $res  = '';
 
             # Pretend to decrypt header.
             SkipBytes( $q, $pos, 4 );
             $pos += 4;
 
-            while ( $q.{block} != Int( ( $pos + $len ) / REKEY_BLOCK ) ) {
+            while ( $q.{'block'} != Int( ( $pos + $len ) / REKEY_BLOCK ) ) {
                 my $step = REKEY_BLOCK - ( $pos % REKEY_BLOCK );
-                $res ~= $q.{rc4_key}.RC4( substr( $data, 0, $step ) );
+                $res ~= $q.{'rc4_key'}.RC4( substr( $data, 0, $step ) );
                 $data = substr( $data, $step );
                 $pos += $step;
                 $len -= $step;
-                MakeKey( ++$q.{block}, \$q.{rc4_key}, $q.{md5_ctxt} );
+                MakeKey( ++$q.{'block'}, \$q.{'rc4_key'}, $q.{'md5_ctxt'} );
             }
 
-            $res ~= $q.{rc4_key}.RC4( substr( $data, 0, $len ) );
-            $q.{data} = $res;
+            $res ~= $q.{'rc4_key'}.RC4( substr( $data, 0, $len ) );
+            $q.{'data'} = $res;
         }
     }
-    elsif ( $q.{encryption} == MS_BIFF_CRYPTO_XOR ) {
+    elsif ( $q.{'encryption'} == MS_BIFF_CRYPTO_XOR ) {
 
         # not implemented
         return 0;
     }
-    elsif ( $q.{encryption} == MS_BIFF_CRYPTO_NONE ) {
+    elsif ( $q.{'encryption'} == MS_BIFF_CRYPTO_NONE ) {
 
     }
 
-    $q.{streamPos} += 4 + $q.{length};
+    $q.{'streamPos'} += 4 + $q.{'length'};
 
     return 1;
 }
@@ -525,20 +525,20 @@ sub parse {
 
     my $workbook = Spreadsheet::ParseExcel::Workbook.new();
     $currentbook = $workbook;
-    $workbook.{SheetCount} = 0;
-    $workbook.{CellHandler} = $self.{CellHandler};
-    $workbook.{NotSetCell}  = $self.{NotSetCell};
-    $workbook.{Object}      = $self.{Object};
-    $workbook.{aColor}      = [ @aColor ];
+    $workbook.{'SheetCount'} = 0;
+    $workbook.{'CellHandler'} = $self.{'CellHandler'};
+    $workbook.{'NotSetCell'}  = $self.{'NotSetCell'};
+    $workbook.{'Object'}      = $self.{'Object'};
+    $workbook.{'aColor'}      = [ @aColor ];
 
     my ( $biff_data, $data_length ) = $self._get_content( $source, $workbook );
     return Nil if not $biff_data;
 
     if ( $formatter ) {
-        $workbook.{FmtClass} = $formatter;
+        $workbook.{'FmtClass'} = $formatter;
     }
     else {
-        $workbook.{FmtClass} = Spreadsheet::ParseExcel::FmtDefault.new();
+        $workbook.{'FmtClass'} = Spreadsheet::ParseExcel::FmtDefault.new();
     }
 
     # Parse the BIFF data.
@@ -546,27 +546,27 @@ sub parse {
 
     while ( QueryNext( $stream ) ) {
 
-        my $record        = $stream.{opcode};
-        my $record_length = $stream.{length};
+        my $record        = $stream.{'opcode'};
+        my $record_length = $stream.{'length'};
 
-        my $record_header = $stream.{data};
+        my $record_header = $stream.{'data'};
 
         # If the file contains a FILEPASS record we assume that it is encrypted
         # and cannot be parsed.
         if ( $record == 0x002F ) {
-            unless ( SetDecrypt( $stream, '', $self.{Password} ) ) {
-                $self.{_error_status} = ErrorFileEncrypted;
+            unless ( SetDecrypt( $stream, '', $self.{'Password'} ) ) {
+                $self.{'_error_status'} = ErrorFileEncrypted;
                 return Nil;
             }
         }
 
         # Special case of a formula String with no string.
-        if (   $workbook.{_PrevPos}
-            && ( defined $self.{FuncTbl}.{$record} )
+        if (   $workbook.{'_PrevPos'}
+            && ( defined $self.{'FuncTbl'}.{$record} )
             && ( $record != 0x207 ) )
         {
-            my $iPos = $workbook.{_PrevPos};
-            $workbook.{_PrevPos} = Nil;
+            my $iPos = $workbook.{'_PrevPos'};
+            $workbook.{'_PrevPos'} = Nil;
 
             my ( $row, $col, $format_index ) = @$iPos;
             _NewCell(
@@ -574,7 +574,7 @@ sub parse {
                 Kind     => 'Formula String',
                 Val      => '',
                 FormatNo => $format_index,
-                Format   => $workbook.{Format}[$format_index],
+                Format   => $workbook.{'Format'}[$format_index],
                 Numeric  => 0,
                 Code     => Nil,
                 Book     => $workbook,
@@ -584,29 +584,29 @@ sub parse {
         # If the BIFF record matches 0x0*09 then it is a BOF record.
         # We reset the _skip_chart flag to ensure we check the sheet type.
         if ( ( $record +& 0xF0FF ) == 0x09 ) {
-            $workbook.{_skip_chart} = 0;
+            $workbook.{'_skip_chart'} = 0;
         }
 
-        if ( defined $self.{FuncTbl}.{$record} && !$workbook.{_skip_chart} )
+        if ( defined $self.{'FuncTbl'}.{$record} && !$workbook.{'_skip_chart'} )
         {
-            $self.{FuncTbl}.{$record}
+            $self.{'FuncTbl'}.{$record}
               .( $workbook, $record, $record_length, $record_header );
         }
 
         $PREFUNC = $record if ( $record != 0x3C );    #Not Continue
 
-        last if defined $workbook.{_ParseAbort};
+        last if defined $workbook.{'_ParseAbort'};
     }
 
-    loop my $worksheet (@{$workbook.{Worksheet}} ) {
+    loop my $worksheet (@{$workbook.{'Worksheet'}} ) {
         # Install hyperlinks into each cell
         # Range is undocumented for user; allows reuse of data
 
-        if ($worksheet.{HyperLinks}) {
-            loop my $link (@{$worksheet.{HyperLinks}}) {
+        if ($worksheet.{'HyperLinks'}) {
+            loop my $link (@{$worksheet.{'HyperLinks'}}) {
                 loop( my $row = $link.[3]; $row <= $link.[4]; $row++ ) {
                     loop( my $col = $link.[5]; $col <= $link.[6]; $col++ ) {
-                        $worksheet.{Cells}[$row][$col]{Hyperlink} = $link;
+                        $worksheet.{'Cells'}[$row][$col]{'Hyperlink'} = $link;
                     }
                 }
             }
@@ -627,7 +627,7 @@ sub _get_content {
     my ( $biff_data, $data_length );
 
     # Reset the error status in case method is called more than once.
-    $self.{_error_status} = ErrorNone;
+    $self.{'_error_status'} = ErrorNone;
  
     my $ref = ref($source);
 
@@ -635,15 +635,15 @@ sub _get_content {
          if ( $ref eq 'SCALAR' ) {
 
              # Specified by a scalar buffer.
-             ( $biff_data, $data_length ) = $self.{GetContent}.( $source );
+             ( $biff_data, $data_length ) = $self.{'GetContent'}.( $source );
 
          }
          elsif ( $ref eq 'ARRAY' ) {
 
              # Specified by file content
-             $workbook.{File} = Nil;
+             $workbook.{'File'} = Nil;
              my $sData = join( '', @$source );
-             ( $biff_data, $data_length ) = $self.{GetContent}.( \$sData );
+             ( $biff_data, $data_length ) = $self.{'GetContent'}.( \$sData );
         }
         else {
 
@@ -671,21 +671,21 @@ sub _get_content {
                  }
              }
 
-             ( $biff_data, $data_length ) = $self.{GetContent}.( \$sBuff );
+             ( $biff_data, $data_length ) = $self.{'GetContent'}.( \$sBuff );
 
          }
     }
     else {
 
         # Specified by filename .
-        $workbook.{File} = $source;
+        $workbook.{'File'} = $source;
 
         if ( !-e $source ) {
-            $self.{_error_status} = ErrorNoFile;
+            $self.{'_error_status'} = ErrorNoFile;
             return Nil;
         }
 
-        ( $biff_data, $data_length ) = $self.{GetContent}.( $source );
+        ( $biff_data, $data_length ) = $self.{'GetContent'}.( $source );
     }
 
     # If the read was successful return the data.
@@ -693,7 +693,7 @@ sub _get_content {
         return ( $biff_data, $data_length );
     }
     else {
-        $self.{_error_status} = ErrorNoExcelData;
+        $self.{'_error_status'} = ErrorNoExcelData;
         return Nil;
     }
 
@@ -717,8 +717,8 @@ sub _subGetContent {
     return ( Nil, Nil ) if ( $#aRes < 0 );
 
     #Hack from Herbert
-    if ( $aRes[0].{Data} ) {
-        return ( $aRes[0].{Data}, length( $aRes[0].{Data} ) );
+    if ( $aRes[0].{'Data'} ) {
+        return ( $aRes[0].{'Data'}, length( $aRes[0].{'Data'} ) );
     }
 
     #Same as OLE::Storage_Lite
@@ -769,49 +769,49 @@ sub _subBOF {
 
     #Workbook Global
     if ( $iDt == 0x0005 ) {
-        $oBook.{Version} = unpack( "v", $sWk );
-        $oBook.{BIFFVersion} =
-          ( $oBook.{Version} == verExcel95 ) ?? verBIFF5 !! verBIFF8;
-        $oBook.{_CurSheet}  = Nil;
-        $oBook.{_CurSheet_} = -1;
+        $oBook.{'Version'} = unpack( "v", $sWk );
+        $oBook.{'BIFFVersion'} =
+          ( $oBook.{'Version'} == verExcel95 ) ?? verBIFF5 !! verBIFF8;
+        $oBook.{'_CurSheet'}  = Nil;
+        $oBook.{'_CurSheet_'} = -1;
     }
 
     #Worksheet or Dialogsheet
     elsif ( $iDt != 0x0020 ) {    #if($iDt == 0x0010)
-        if ( defined $oBook.{_CurSheet_} ) {
-            $oBook.{_CurSheet} = $oBook.{_CurSheet_} + 1;
-            $oBook.{_CurSheet_}++;
+        if ( defined $oBook.{'_CurSheet_'} ) {
+            $oBook.{'_CurSheet'} = $oBook.{'_CurSheet_'} + 1;
+            $oBook.{'_CurSheet_'}++;
 
             (
-                $oBook.{Worksheet}[ $oBook.{_CurSheet} ].{SheetVersion},
-                $oBook.{Worksheet}[ $oBook.{_CurSheet} ].{SheetType},
+                $oBook.{'Worksheet'}[ $oBook.{'_CurSheet'} ].{'SheetVersion'},
+                $oBook.{'Worksheet'}[ $oBook.{'_CurSheet'} ].{'SheetType'},
               )
               = unpack( "v2", $sWk )
               if ( length( $sWk ) > 4 );
         }
         else {
-            $oBook.{BIFFVersion} = Int( $bOp / 0x100 );
-            if (   ( $oBook.{BIFFVersion} == verBIFF2 )
-                || ( $oBook.{BIFFVersion} == verBIFF3 )
-                || ( $oBook.{BIFFVersion} == verBIFF4 ) )
+            $oBook.{'BIFFVersion'} = Int( $bOp / 0x100 );
+            if (   ( $oBook.{'BIFFVersion'} == verBIFF2 )
+                || ( $oBook.{'BIFFVersion'} == verBIFF3 )
+                || ( $oBook.{'BIFFVersion'} == verBIFF4 ) )
             {
-                $oBook.{Version}   = $oBook.{BIFFVersion};
-                $oBook.{_CurSheet} = 0;
-                $oBook.{Worksheet}[ $oBook.{SheetCount} ] =
+                $oBook.{'Version'}   = $oBook.{'BIFFVersion'};
+                $oBook.{'_CurSheet'} = 0;
+                $oBook.{'Worksheet'}[ $oBook.{'SheetCount'} ] =
                   Spreadsheet::ParseExcel::Worksheet.new(
                     _Name    => '',
                     Name     => '',
                     _Book    => $oBook,
-                    _SheetNo => $oBook.{SheetCount},
+                    _SheetNo => $oBook.{'SheetCount'},
                   );
-                $oBook.{SheetCount}++;
+                $oBook.{'SheetCount'}++;
             }
         }
     }
     else {
 
         # Set flag to ignore all chart records until we reach another BOF.
-        $oBook.{_skip_chart} = 1;
+        $oBook.{'_skip_chart'} = 1;
     }
 }
 
@@ -826,7 +826,7 @@ sub _subBlank {
         Kind     => 'BLANK',
         Val      => '',
         FormatNo => $iF,
-        Format   => $oBook.{Format}[$iF],
+        Format   => $oBook.{'Format'}[$iF],
         Numeric  => 0,
         Code     => Nil,
         Book     => $oBook,
@@ -849,7 +849,7 @@ sub _subInteger {
         Kind     => 'INTEGER',
         Val      => $sTxt,
         FormatNo => $iF,
-        Format   => $oBook.{Format}[$iF],
+        Format   => $oBook.{'Format'}[$iF],
         Numeric  => 0,
         Code     => Nil,
         Book     => $oBook,
@@ -872,7 +872,7 @@ sub _subNumber {
         Kind     => 'Number',
         Val      => $dVal,
         FormatNo => $iF,
-        Format   => $oBook.{Format}[$iF],
+        Format   => $oBook.{'Format'}[$iF],
         Numeric  => 1,
         Code     => Nil,
         Book     => $oBook,
@@ -908,7 +908,7 @@ sub _subRString {
             Kind     => 'RString',
             Val      => $sTxt,
             FormatNo => $iF,
-            Format   => $oBook.{Format}[$iF],
+            Format   => $oBook.{'Format'}[$iF],
             Numeric  => 0,
             Code     => '_native_',                        #undef,
             Book     => $oBook,
@@ -921,7 +921,7 @@ sub _subRString {
             Kind     => 'RString',
             Val      => $sTxt,
             FormatNo => $iF,
-            Format   => $oBook.{Format}[$iF],
+            Format   => $oBook.{'Format'}[$iF],
             Numeric  => 0,
             Code     => '_native_',
             Book     => $oBook,
@@ -946,7 +946,7 @@ sub _subBoolErr {
         Kind     => 'BoolError',
         Val      => $sTxt,
         FormatNo => $iF,
-        Format   => $oBook.{Format}[$iF],
+        Format   => $oBook.{'Format'}[$iF],
         Numeric  => 0,
         Code     => Nil,
         Book     => $oBook,
@@ -975,7 +975,7 @@ sub _subRK {
         Kind     => 'RK',
         Val      => $number,
         FormatNo => $format_index,
-        Format   => $workbook.{Format}.[$format_index],
+        Format   => $workbook.{'Format'}.[$format_index],
         Numeric  => 1,
         Code     => Nil,
         Book     => $workbook,
@@ -1016,14 +1016,14 @@ sub _subFormula {
                 Kind     => 'Formula Bool',
                 Val      => $sTxt,
                 FormatNo => $iF,
-                Format   => $oBook.{Format}[$iF],
+                Format   => $oBook.{'Format'}[$iF],
                 Numeric  => 0,
                 Code     => Nil,
                 Book     => $oBook,
             );
         }
         else {    # Result (Reserve Only)
-            $oBook.{_PrevPos} = [ $iR, $iC, $iF ];
+            $oBook.{'_PrevPos'} = [ $iR, $iC, $iF ];
         }
     }
     else {
@@ -1033,7 +1033,7 @@ sub _subFormula {
             Kind     => 'Formula Number',
             Val      => $dVal,
             FormatNo => $iF,
-            Format   => $oBook.{Format}[$iF],
+            Format   => $oBook.{'Format'}[$iF],
             Numeric  => 1,
             Code     => Nil,
             Book     => $oBook,
@@ -1052,18 +1052,18 @@ sub _subString {
 
     #Position (not enough for ARRAY)
 
-    my $iPos = $oBook.{_PrevPos};
+    my $iPos = $oBook.{'_PrevPos'};
     return Nil unless ( $iPos );
-    $oBook.{_PrevPos} = Nil;
+    $oBook.{'_PrevPos'} = Nil;
     my ( $iR, $iC, $iF ) = @$iPos;
 
     my ( $iLen, $sTxt, $sCode );
-    if ( $oBook.{BIFFVersion} == verBIFF8 ) {
+    if ( $oBook.{'BIFFVersion'} == verBIFF8 ) {
         my ( $raBuff, $iLen ) = _convBIFF8String( $oBook, $sWk, 1 );
         $sTxt = $raBuff.[0];
         $sCode = ( $raBuff.[1] ) ?? 'ucs2' !! Nil;
     }
-    elsif ( $oBook.{BIFFVersion} == verBIFF5 ) {
+    elsif ( $oBook.{'BIFFVersion'} == verBIFF5 ) {
         $sCode = '_native_';
         $iLen  = unpack( "v", $sWk );
         $sTxt  = substr( $sWk, 2, $iLen );
@@ -1078,7 +1078,7 @@ sub _subString {
         Kind     => 'String',
         Val      => $sTxt,
         FormatNo => $iF,
-        Format   => $oBook.{Format}[$iF],
+        Format   => $oBook.{'Format'}[$iF],
         Numeric  => 0,
         Code     => $sCode,
         Book     => $oBook,
@@ -1097,7 +1097,7 @@ sub _subLabel {
     my ( $sLbl, $sCode );
 
     #BIFF8
-    if ( $oBook.{BIFFVersion} >= verBIFF8 ) {
+    if ( $oBook.{'BIFFVersion'} >= verBIFF8 ) {
         my ( $raBuff, $iLen, $iStPos, $iLenS ) =
           _convBIFF8String( $oBook, substr( $sWk, 6 ), 1 );
         $sLbl = $raBuff.[0];
@@ -1114,7 +1114,7 @@ sub _subLabel {
         Kind     => 'Label',
         Val      => $sLbl,
         FormatNo => $iF,
-        Format   => $oBook.{Format}[$iF],
+        Format   => $oBook.{'Format'}[$iF],
         Numeric  => 0,
         Code     => $sCode,
         Book     => $oBook,
@@ -1135,7 +1135,7 @@ sub _subMulRK {
     my ( $workbook, $biff_number, $length, $data ) = @_;
 
     # JMN: I don't know why this is here.
-    return if $workbook.{SheetCount} <= 0;
+    return if $workbook.{'SheetCount'} <= 0;
 
     my ( $row, $first_col ) = unpack( "v2", $data );
     my $last_col = unpack( "v", substr( $data, length( $data ) - 2, 2 ) );
@@ -1153,7 +1153,7 @@ sub _subMulRK {
             Kind     => 'MulRK',
             Val      => $number,
             FormatNo => $format_index,
-            Format   => $workbook.{Format}.[$format_index],
+            Format   => $workbook.{'Format'}.[$format_index],
             Numeric  => 1,
             Code     => Nil,
             Book     => $workbook,
@@ -1180,7 +1180,7 @@ sub _subMulBlank {
             Kind     => 'MulBlank',
             Val      => '',
             FormatNo => $iF,
-            Format   => $oBook.{Format}[$iF],
+            Format   => $oBook.{'Format'}[$iF],
             Numeric  => 0,
             Code     => Nil,
             Book     => $oBook,
@@ -1202,13 +1202,13 @@ sub _subLabelSST {
     _NewCell(
         $oBook, $iR, $iC,
         Kind     => 'PackedIdx',
-        Val      => $oBook.{PkgStr}[$iIdx].{Text},
+        Val      => $oBook.{'PkgStr'}[$iIdx].{'Text'},
         FormatNo => $iF,
-        Format   => $oBook.{Format}[$iF],
+        Format   => $oBook.{'Format'}[$iF],
         Numeric  => 0,
-        Code     => ( $oBook.{PkgStr}[$iIdx].{Unicode} ) ?? 'ucs2' !! Nil,
+        Code     => ( $oBook.{'PkgStr'}[$iIdx].{'Unicode'} ) ?? 'ucs2' !! Nil,
         Book     => $oBook,
-        Rich     => $oBook.{PkgStr}[$iIdx].{Rich},
+        Rich     => $oBook.{'PkgStr'}[$iIdx].{'Rich'},
     );
 
     #2.MaxRow, MaxCol, MinRow, MinCol
@@ -1220,7 +1220,7 @@ sub _subLabelSST {
 #------------------------------------------------------------------------------
 sub _subFlg1904 {
     my ( $oBook, $bOp, $bLen, $sWk ) = @_;
-    $oBook.{Flg1904} = unpack( "v", $sWk );
+    $oBook.{'Flg1904'} = unpack( "v", $sWk );
 }
 
 #------------------------------------------------------------------------------
@@ -1228,7 +1228,7 @@ sub _subFlg1904 {
 #------------------------------------------------------------------------------
 sub _subRow {
     my ( $oBook, $bOp, $bLen, $sWk ) = @_;
-    return Nil unless ( defined $oBook.{_CurSheet} );
+    return Nil unless ( defined $oBook.{'_CurSheet'} );
 
     #0. Get Worksheet info (MaxRow, MaxCol, MinRow, MinCol)
     my ( $iR, $iSc, $iEc, $iHght, $undef1, $undef2, $iGr, $iXf ) =
@@ -1236,10 +1236,10 @@ sub _subRow {
     $iEc--;
 
     if ( $iGr +& 0x20 ) {
-        $oBook.{Worksheet}[ $oBook.{_CurSheet} ].{RowHidden}[$iR] = 1;
+        $oBook.{'Worksheet'}[ $oBook.{'_CurSheet'} ].{'RowHidden'}[$iR] = 1;
     }
 
-    $oBook.{Worksheet}[ $oBook.{_CurSheet} ].{RowHeight}[$iR] = $iHght / 20;
+    $oBook.{'Worksheet'}[ $oBook.{'_CurSheet'} ].{'RowHeight'}[$iR] = $iHght / 20;
 
     #2.MaxRow, MaxCol, MinRow, MinCol
     _SetDimension( $oBook, $iR, $iSc, $iEc );
@@ -1250,28 +1250,28 @@ sub _subRow {
 #------------------------------------------------------------------------------
 sub _SetDimension {
     my ( $oBook, $iR, $iSc, $iEc ) = @_;
-    return Nil unless ( defined $oBook.{_CurSheet} );
+    return Nil unless ( defined $oBook.{'_CurSheet'} );
 
     #2.MaxRow, MaxCol, MinRow, MinCol
     #2.1 MinRow
-    $oBook.{Worksheet}[ $oBook.{_CurSheet} ].{MinRow} = $iR
-      unless ( defined $oBook.{Worksheet}[ $oBook.{_CurSheet} ].{MinRow} )
-      and ( $oBook.{Worksheet}[ $oBook.{_CurSheet} ].{MinRow} <= $iR );
+    $oBook.{'Worksheet'}[ $oBook.{'_CurSheet'} ].{'MinRow'} = $iR
+      unless ( defined $oBook.{'Worksheet'}[ $oBook.{'_CurSheet'} ].{'MinRow'} )
+      and ( $oBook.{'Worksheet'}[ $oBook.{'_CurSheet'} ].{'MinRow'} <= $iR );
 
     #2.2 MaxRow
-    $oBook.{Worksheet}[ $oBook.{_CurSheet} ].{MaxRow} = $iR
-      unless ( defined $oBook.{Worksheet}[ $oBook.{_CurSheet} ].{MaxRow} )
-      and ( $oBook.{Worksheet}[ $oBook.{_CurSheet} ].{MaxRow} > $iR );
+    $oBook.{'Worksheet'}[ $oBook.{'_CurSheet'} ].{'MaxRow'} = $iR
+      unless ( defined $oBook.{'Worksheet'}[ $oBook.{'_CurSheet'} ].{'MaxRow'} )
+      and ( $oBook.{'Worksheet'}[ $oBook.{'_CurSheet'} ].{'MaxRow'} > $iR );
 
     #2.3 MinCol
-    $oBook.{Worksheet}[ $oBook.{_CurSheet} ].{MinCol} = $iSc
-      unless ( defined $oBook.{Worksheet}[ $oBook.{_CurSheet} ].{MinCol} )
-      and ( $oBook.{Worksheet}[ $oBook.{_CurSheet} ].{MinCol} <= $iSc );
+    $oBook.{'Worksheet'}[ $oBook.{'_CurSheet'} ].{'MinCol'} = $iSc
+      unless ( defined $oBook.{'Worksheet'}[ $oBook.{'_CurSheet'} ].{'MinCol'} )
+      and ( $oBook.{'Worksheet'}[ $oBook.{'_CurSheet'} ].{'MinCol'} <= $iSc );
 
     #2.4 MaxCol
-    $oBook.{Worksheet}[ $oBook.{_CurSheet} ].{MaxCol} = $iEc
-      unless ( defined $oBook.{Worksheet}[ $oBook.{_CurSheet} ].{MaxCol} )
-      and ( $oBook.{Worksheet}[ $oBook.{_CurSheet} ].{MaxCol} > $iEc );
+    $oBook.{'Worksheet'}[ $oBook.{'_CurSheet'} ].{'MaxCol'} = $iEc
+      unless ( defined $oBook.{'Worksheet'}[ $oBook.{'_CurSheet'} ].{'MaxCol'} )
+      and ( $oBook.{'Worksheet'}[ $oBook.{'_CurSheet'} ].{'MaxCol'} > $iEc );
 
 }
 
@@ -1280,11 +1280,11 @@ sub _SetDimension {
 #------------------------------------------------------------------------------
 sub _subDefaultRowHeight {
     my ( $oBook, $bOp, $bLen, $sWk ) = @_;
-    return Nil unless ( defined $oBook.{_CurSheet} );
+    return Nil unless ( defined $oBook.{'_CurSheet'} );
 
     #1. RowHeight
     my ( $iDum, $iHght ) = unpack( "v2", $sWk );
-    $oBook.{Worksheet}[ $oBook.{_CurSheet} ].{DefRowHeight} = $iHght / 20;
+    $oBook.{'Worksheet'}[ $oBook.{'_CurSheet'} ].{'DefRowHeight'} = $iHght / 20;
 
 }
 
@@ -1294,7 +1294,7 @@ sub _subDefaultRowHeight {
 sub _subStandardWidth {
     my ( $oBook, $bOp, $bLen, $sWk ) = @_;
     my $iW = unpack( "v", $sWk );
-    $oBook.{StandardWidth} = _convert_col_width( $oBook, $iW );
+    $oBook.{'StandardWidth'} = _convert_col_width( $oBook, $iW );
 }
 
 ###############################################################################
@@ -1313,7 +1313,7 @@ sub _subDefColWidth {
     # Adjustment for default Arial 10 width.
     $width = 8.43 if $width == 8;
 
-    $self.{Worksheet}.[ $self.{_CurSheet} ].{DefColWidth} = $width;
+    $self.{'Worksheet'}.[ $self.{'_CurSheet'} ].{'DefColWidth'} = $width;
 }
 
 ###############################################################################
@@ -1356,19 +1356,19 @@ sub _subColInfo {
 
     my ( $oBook, $bOp, $bLen, $sWk ) = @_;
 
-    return Nil unless defined $oBook.{_CurSheet};
+    return Nil unless defined $oBook.{'_CurSheet'};
 
     my ( $iSc, $iEc, $iW, $iXF, $iGr ) = unpack( "v5", $sWk );
 
     loop ( my $i = $iSc ; $i <= $iEc ; $i++ ) {
 
-        $oBook.{Worksheet}[ $oBook.{_CurSheet} ].{ColWidth}[$i] =
+        $oBook.{'Worksheet'}[ $oBook.{'_CurSheet'} ].{'ColWidth'}[$i] =
           _convert_col_width( $oBook, $iW );
 
-        $oBook.{Worksheet}[ $oBook.{_CurSheet} ].{ColFmtNo}[$i] = $iXF;
+        $oBook.{'Worksheet'}[ $oBook.{'_CurSheet'} ].{'ColFmtNo'}[$i] = $iXF;
 
         if ( $iGr +& 0x01 ) {
-            $oBook.{Worksheet}[ $oBook.{_CurSheet} ].{ColHidden}[$i] = 1;
+            $oBook.{'Worksheet'}[ $oBook.{'_CurSheet'} ].{'ColHidden'}[$i] = 1;
         }
     }
 }
@@ -1379,7 +1379,7 @@ sub _subColInfo {
 sub _subWindow1 {
     my ( $workbook, $op, $len, $wk ) = @_;
 
-    return if ( $workbook.{BIFFVersion} <= verBIFF4() );
+    return if ( $workbook.{'BIFFVersion'} <= verBIFF4() );
 
     my (
         $hpos,     $vpos,        $width,
@@ -1387,7 +1387,7 @@ sub _subWindow1 {
         $firsttab, $numselected, $tabbarwidth
     ) = unpack( "v9", $wk );
 
-    $workbook.{ActiveSheet} = $active;
+    $workbook.{'ActiveSheet'} = $active;
 }
 
 #------------------------------------------------------------------------------
@@ -1406,7 +1406,7 @@ sub _subSheetLayout {
 
     return unless ( $rc == 0x0862 );
 
-    $workbook.{Worksheet}[ $workbook.{_CurSheet} ].{TabColor} = $color;
+    $workbook.{'Worksheet'}[ $workbook.{'_CurSheet'} ].{'TabColor'} = $color;
 }
 
 #------------------------------------------------------------------------------
@@ -1489,7 +1489,7 @@ sub _subHyperlink {
             $link = 'file:///';
             # !($flags & 2) = 'relative path'
             if ( !($flags +& 0x2) ) {
-                my $file = $workbook.{File};
+                my $file = $workbook.{'File'};
                 if ( defined $file && length $file ) {
                     $link ~= (fileparse($file))[1];
                 }
@@ -1528,7 +1528,7 @@ sub _subHyperlink {
 
     # Update loop at end of parse() if this changes
 
-    push @{ $workbook.{Worksheet}[ $workbook.{_CurSheet} ].{HyperLinks} }, [
+    push @{ $workbook.{'Worksheet'}[ $workbook.{'_CurSheet'} ].{'HyperLinks'} }, [
                          $desc, $link, $frame, $srow, $erow, $scol, $ecol ];
 }
 
@@ -1558,18 +1558,18 @@ sub _subContinue {
 #------------------------------------------------------------------------------
 sub _subWriteAccess {
     my ( $oBook, $bOp, $bLen, $sWk ) = @_;
-    return if ( defined $oBook.{_Author} );
+    return if ( defined $oBook.{'_Author'} );
 
     #BIFF8
-    if ( $oBook.{BIFFVersion} >= verBIFF8 ) {
-        $oBook.{Author} = _convBIFF8String( $oBook, $sWk );
+    if ( $oBook.{'BIFFVersion'} >= verBIFF8 ) {
+        $oBook.{'Author'} = _convBIFF8String( $oBook, $sWk );
     }
 
     #Before BIFF8
     else {
         my ( $iLen ) = unpack( "c", $sWk );
-        $oBook.{Author} =
-          $oBook.{FmtClass}.TextFmt( substr( $sWk, 1, $iLen ), '_native_' );
+        $oBook.{'Author'} =
+          $oBook.{'FmtClass'}.TextFmt( substr( $sWk, 1, $iLen ), '_native_' );
     }
 }
 
@@ -1608,12 +1608,12 @@ sub _convBIFF8String {
         $iLen *= 2;
         $sStr = substr( $sWk, $iStPos, $iLen );
         _SwapForUnicode( \$sStr );
-        $sStr = $oBook.{FmtClass}.TextFmt( $sStr, 'ucs2' )
+        $sStr = $oBook.{'FmtClass'}.TextFmt( $sStr, 'ucs2' )
           unless ( $iCnvFlg );
     }
     else {                #Not Compressed
         $sStr = substr( $sWk, $iStPos, $iLen );
-        $sStr = $oBook.{FmtClass}.TextFmt( $sStr, Nil ) unless ( $iCnvFlg );
+        $sStr = $oBook.{'FmtClass'}.TextFmt( $sStr, Nil ) unless ( $iCnvFlg );
     }
 
     #4. return
@@ -1661,13 +1661,13 @@ sub _subXF {
     );
 
 
-    if ( $oBook.{BIFFVersion} == verBIFF4 ) {
+    if ( $oBook.{'BIFFVersion'} == verBIFF4 ) {
 
         # Minimal support for Excel 4. We just get the font and format indices
         # so that the cell data value can be formatted.
         ( $iFnt, $iIdx, ) = unpack( "CC", $sWk );
     }
-    elsif ( $oBook.{BIFFVersion} == verBIFF8 ) {
+    elsif ( $oBook.{'BIFFVersion'} == verBIFF8 ) {
         my ( $iGen, $iAlign, $iGen2, $iBdr1, $iBdr2, $iBdr3, $iPtn );
 
         ( $iFnt, $iIdx, $iGen, $iAlign, $iGen2, $iBdr1, $iBdr2, $iBdr3, $iPtn )
@@ -1740,9 +1740,9 @@ sub _subXF {
         $iBdrCR = ( ( $iBdr2 +& 0x3F80 ) / 0x80 ) +& 0x7F;
     }
 
-    push @{ $oBook.{Format} }, Spreadsheet::ParseExcel::Format.new(
+    push @{ $oBook.{'Format'} }, Spreadsheet::ParseExcel::Format.new(
         FontNo => $iFnt,
-        Font   => $oBook.{Font}[$iFnt],
+        Font   => $oBook.{'Font'}[$iFnt],
         FmtIdx => $iIdx,
 
         Lock     => $iLock,
@@ -1775,9 +1775,9 @@ sub _subFormat {
     my ( $oBook, $bOp, $bLen, $sWk ) = @_;
     my $sFmt;
 
-    if ( $oBook.{BIFFVersion} <= verBIFF5 ) {
+    if ( $oBook.{'BIFFVersion'} <= verBIFF5 ) {
         $sFmt = substr( $sWk, 3, unpack( 'c', substr( $sWk, 2, 1 ) ) );
-        $sFmt = $oBook.{FmtClass}.TextFmt( $sFmt, '_native_' );
+        $sFmt = $oBook.{'FmtClass'}.TextFmt( $sFmt, '_native_' );
     }
     else {
         $sFmt = _convBIFF8String( $oBook, substr( $sWk, 2 ) );
@@ -1787,11 +1787,11 @@ sub _subFormat {
 
     # Excel 4 and earlier used an index of 0 to indicate that a built-in format
     # that was stored implicitly.
-    if ( $oBook.{BIFFVersion} <= verBIFF4 && $format_index == 0 ) {
-        $format_index = keys %{ $oBook.{FormatStr} };
+    if ( $oBook.{'BIFFVersion'} <= verBIFF4 && $format_index == 0 ) {
+        $format_index = keys %{ $oBook.{'FormatStr'} };
     }
 
-    $oBook.{FormatStr}.{$format_index} = $sFmt;
+    $oBook.{'FormatStr'}.{$format_index} = $sFmt;
 }
 
 #------------------------------------------------------------------------------
@@ -1802,7 +1802,7 @@ sub _subPalette {
     loop ( my $i = 0 ; $i < unpack( 'v', $sWk ) ; $i++ ) {
 
         #        push @aColor, unpack('H6', substr($sWk, $i*4+2));
-        $oBook.{aColor}[ $i + 8 ] = unpack( 'H6', substr( $sWk, $i * 4 + 2 ) );
+        $oBook.{'aColor'}[ $i + 8 ] = unpack( 'H6', substr( $sWk, $i * 4 + 2 ) );
     }
 }
 
@@ -1814,29 +1814,29 @@ sub _subFont {
     my ( $iHeight, $iAttr, $iCIdx, $iBold, $iSuper, $iUnderline, $sFntName );
     my ( $bBold, $bItalic, $bUnderline, $bStrikeout );
 
-    if ( $oBook.{BIFFVersion} == verBIFF8 ) {
+    if ( $oBook.{'BIFFVersion'} == verBIFF8 ) {
         ( $iHeight, $iAttr, $iCIdx, $iBold, $iSuper, $iUnderline ) =
           unpack( "v5c", $sWk );
         my ( $iSize, $iHigh ) = unpack( 'cc', substr( $sWk, 14, 2 ) );
         if ( $iHigh ) {
             $sFntName = substr( $sWk, 16, $iSize * 2 );
             _SwapForUnicode( \$sFntName );
-            $sFntName = $oBook.{FmtClass}.TextFmt( $sFntName, 'ucs2' );
+            $sFntName = $oBook.{'FmtClass'}.TextFmt( $sFntName, 'ucs2' );
         }
         else {
             $sFntName = substr( $sWk, 16, $iSize );
-            $sFntName = $oBook.{FmtClass}.TextFmt( $sFntName, '_native_' );
+            $sFntName = $oBook.{'FmtClass'}.TextFmt( $sFntName, '_native_' );
         }
         $bBold      = ( $iBold >= 0x2BC ) ?? 1 !! 0;
         $bItalic    = ( $iAttr +& 0x02 )   ?? 1 !! 0;
         $bStrikeout = ( $iAttr +& 0x08 )   ?? 1 !! 0;
         $bUnderline = ( $iUnderline )     ?? 1 !! 0;
     }
-    elsif ( $oBook.{BIFFVersion} == verBIFF5 ) {
+    elsif ( $oBook.{'BIFFVersion'} == verBIFF5 ) {
         ( $iHeight, $iAttr, $iCIdx, $iBold, $iSuper, $iUnderline ) =
           unpack( "v5c", $sWk );
         $sFntName =
-          $oBook.{FmtClass}
+          $oBook.{'FmtClass'}
           .TextFmt( substr( $sWk, 15, unpack( "c", substr( $sWk, 14, 1 ) ) ),
             '_native_' );
         $bBold      = ( $iBold >= 0x2BC ) ?? 1 !! 0;
@@ -1856,7 +1856,7 @@ sub _subFont {
 
         $sFntName = substr( $sWk, 5, unpack( "c", substr( $sWk, 4, 1 ) ) );
     }
-    push @{ $oBook.{Font} }, Spreadsheet::ParseExcel::Font.new(
+    push @{ $oBook.{'Font'} }, Spreadsheet::ParseExcel::Font.new(
         Height         => $iHeight / 20.0,
         Attr           => $iAttr,
         Color          => $iCIdx,
@@ -1871,7 +1871,7 @@ sub _subFont {
     );
 
     #Skip Font[4]
-    push @{ $oBook.{Font} }, {} if ( scalar( @{ $oBook.{Font} } ) == 4 );
+    push @{ $oBook.{'Font'} }, {} if ( scalar( @{ $oBook.{'Font'} } ) == 4 );
 
 }
 
@@ -1884,36 +1884,36 @@ sub _subBoundSheet {
     $iKind +&= 0x0F;
     return if ( ( $iKind != 0x00 ) && ( $iKind != 0x01 ) );
 
-    if ( $oBook.{BIFFVersion} >= verBIFF8 ) {
+    if ( $oBook.{'BIFFVersion'} >= verBIFF8 ) {
         my ( $iSize, $iUni ) = unpack( "cc", substr( $sWk, 6, 2 ) );
         my $sWsName = substr( $sWk, 8 );
         if ( $iUni +& 0x01 ) {
             _SwapForUnicode( \$sWsName );
-            $sWsName = $oBook.{FmtClass}.TextFmt( $sWsName, 'ucs2' );
+            $sWsName = $oBook.{'FmtClass'}.TextFmt( $sWsName, 'ucs2' );
         }
-        $oBook.{Worksheet}[ $oBook.{SheetCount} ] =
+        $oBook.{'Worksheet'}[ $oBook.{'SheetCount'} ] =
           Spreadsheet::ParseExcel::Worksheet.new(
             Name        => $sWsName,
             Kind        => $iKind,
             _Pos        => $iPos,
             _Book       => $oBook,
-            _SheetNo    => $oBook.{SheetCount},
+            _SheetNo    => $oBook.{'SheetCount'},
             SheetHidden => $iGr +& 0x03
           );
     }
     else {
-        $oBook.{Worksheet}[ $oBook.{SheetCount} ] =
+        $oBook.{'Worksheet'}[ $oBook.{'SheetCount'} ] =
           Spreadsheet::ParseExcel::Worksheet.new(
             Name =>
-              $oBook.{FmtClass}.TextFmt( substr( $sWk, 7 ), '_native_' ),
+              $oBook.{'FmtClass'}.TextFmt( substr( $sWk, 7 ), '_native_' ),
             Kind        => $iKind,
             _Pos        => $iPos,
             _Book       => $oBook,
-            _SheetNo    => $oBook.{SheetCount},
+            _SheetNo    => $oBook.{'SheetCount'},
             SheetHidden => $iGr +& 0x03
           );
     }
-    $oBook.{SheetCount}++;
+    $oBook.{'SheetCount'}++;
 }
 
 #------------------------------------------------------------------------------
@@ -1921,18 +1921,18 @@ sub _subBoundSheet {
 #------------------------------------------------------------------------------
 sub _subHeader {
     my ( $oBook, $bOp, $bLen, $sWk ) = @_;
-    return Nil unless ( defined $oBook.{_CurSheet} );
+    return Nil unless ( defined $oBook.{'_CurSheet'} );
     my $sW;
 
     if ( !defined $sWk ) {
-        $oBook.{Worksheet}[ $oBook.{_CurSheet} ].{Header} = Nil;
+        $oBook.{'Worksheet'}[ $oBook.{'_CurSheet'} ].{'Header'} = Nil;
         return;
     }
 
     #BIFF8
-    if ( $oBook.{BIFFVersion} >= verBIFF8 ) {
+    if ( $oBook.{'BIFFVersion'} >= verBIFF8 ) {
         $sW = _convBIFF8String( $oBook, $sWk );
-        $oBook.{Worksheet}[ $oBook.{_CurSheet} ].{Header} =
+        $oBook.{'Worksheet'}[ $oBook.{'_CurSheet'} ].{'Header'} =
           ( $sW eq "\x00" ) ?? Nil !! $sW;
     }
 
@@ -1940,8 +1940,8 @@ sub _subHeader {
     else {
         my ( $iLen ) = unpack( "c", $sWk );
         $sW =
-          $oBook.{FmtClass}.TextFmt( substr( $sWk, 1, $iLen ), '_native_' );
-        $oBook.{Worksheet}[ $oBook.{_CurSheet} ].{Header} =
+          $oBook.{'FmtClass'}.TextFmt( substr( $sWk, 1, $iLen ), '_native_' );
+        $oBook.{'Worksheet'}[ $oBook.{'_CurSheet'} ].{'Header'} =
           ( $sW eq "\x00\x00\x00" ) ?? Nil !! $sW;
     }
 }
@@ -1951,18 +1951,18 @@ sub _subHeader {
 #------------------------------------------------------------------------------
 sub _subFooter {
     my ( $oBook, $bOp, $bLen, $sWk ) = @_;
-    return Nil unless ( defined $oBook.{_CurSheet} );
+    return Nil unless ( defined $oBook.{'_CurSheet'} );
     my $sW;
 
     if ( !defined $sWk ) {
-        $oBook.{Worksheet}[ $oBook.{_CurSheet} ].{Footer} = Nil;
+        $oBook.{'Worksheet'}[ $oBook.{'_CurSheet'} ].{'Footer'} = Nil;
         return;
     }
 
     #BIFF8
-    if ( $oBook.{BIFFVersion} >= verBIFF8 ) {
+    if ( $oBook.{'BIFFVersion'} >= verBIFF8 ) {
         $sW = _convBIFF8String( $oBook, $sWk );
-        $oBook.{Worksheet}[ $oBook.{_CurSheet} ].{Footer} =
+        $oBook.{'Worksheet'}[ $oBook.{'_CurSheet'} ].{'Footer'} =
           ( $sW eq "\x00" ) ?? Nil !! $sW;
     }
 
@@ -1970,8 +1970,8 @@ sub _subFooter {
     else {
         my ( $iLen ) = unpack( "c", $sWk );
         $sW =
-          $oBook.{FmtClass}.TextFmt( substr( $sWk, 1, $iLen ), '_native_' );
-        $oBook.{Worksheet}[ $oBook.{_CurSheet} ].{Footer} =
+          $oBook.{'FmtClass'}.TextFmt( substr( $sWk, 1, $iLen ), '_native_' );
+        $oBook.{'Worksheet'}[ $oBook.{'_CurSheet'} ].{'Footer'} =
           ( $sW eq "\x00\x00\x00" ) ?? Nil !! $sW;
     }
 }
@@ -1984,10 +1984,10 @@ sub _subHPageBreak {
     my @aBreak;
     my $iCnt = unpack( "v", $sWk );
 
-    return Nil unless ( defined $oBook.{_CurSheet} );
+    return Nil unless ( defined $oBook.{'_CurSheet'} );
 
     #BIFF8
-    if ( $oBook.{BIFFVersion} >= verBIFF8 ) {
+    if ( $oBook.{'BIFFVersion'} >= verBIFF8 ) {
         loop ( my $i = 0 ; $i < $iCnt ; $i++ ) {
             my ( $iRow, $iColB, $iColE ) =
               unpack( 'v3', substr( $sWk, 2 + $i * 6, 6 ) );
@@ -2007,7 +2007,7 @@ sub _subHPageBreak {
         }
     }
     @aBreak = sort { $^a <=> $^b }, @aBreak;
-    $oBook.{Worksheet}[ $oBook.{_CurSheet} ].{HPageBreak} = \@aBreak;
+    $oBook.{'Worksheet'}[ $oBook.{'_CurSheet'} ].{'HPageBreak'} = \@aBreak;
 }
 
 #------------------------------------------------------------------------------
@@ -2015,13 +2015,13 @@ sub _subHPageBreak {
 #------------------------------------------------------------------------------
 sub _subVPageBreak {
     my ( $oBook, $bOp, $bLen, $sWk ) = @_;
-    return Nil unless ( defined $oBook.{_CurSheet} );
+    return Nil unless ( defined $oBook.{'_CurSheet'} );
 
     my @aBreak;
     my $iCnt = unpack( "v", $sWk );
 
     #BIFF8
-    if ( $oBook.{BIFFVersion} >= verBIFF8 ) {
+    if ( $oBook.{'BIFFVersion'} >= verBIFF8 ) {
         loop ( my $i = 0 ; $i < $iCnt ; $i++ ) {
             my ( $iCol, $iRowB, $iRowE ) =
               unpack( 'v3', substr( $sWk, 2 + $i * 6, 6 ) );
@@ -2041,7 +2041,7 @@ sub _subVPageBreak {
         }
     }
     @aBreak = sort { $^a <=> $^b }, @aBreak;
-    $oBook.{Worksheet}[ $oBook.{_CurSheet} ].{VPageBreak} = \@aBreak;
+    $oBook.{'Worksheet'}[ $oBook.{'_CurSheet'} ].{'VPageBreak'} = \@aBreak;
 }
 
 #------------------------------------------------------------------------------
@@ -2049,26 +2049,26 @@ sub _subVPageBreak {
 #------------------------------------------------------------------------------
 sub _subMargin {
     my ( $oBook, $bOp, $bLen, $sWk ) = @_;
-    return Nil unless ( defined $oBook.{_CurSheet} );
+    return Nil unless ( defined $oBook.{'_CurSheet'} );
 
     # The "Mergin" options are a workaround for a backward compatible typo.
 
     my $dWk = _convDval( substr( $sWk, 0, 8 ) );
     if ( $bOp == 0x26 ) {
-        $oBook.{Worksheet}[ $oBook.{_CurSheet} ].{LeftMergin} = $dWk;
-        $oBook.{Worksheet}[ $oBook.{_CurSheet} ].{LeftMargin} = $dWk;
+        $oBook.{'Worksheet'}[ $oBook.{'_CurSheet'} ].{'LeftMergin'} = $dWk;
+        $oBook.{'Worksheet'}[ $oBook.{'_CurSheet'} ].{'LeftMargin'} = $dWk;
     }
     elsif ( $bOp == 0x27 ) {
-        $oBook.{Worksheet}[ $oBook.{_CurSheet} ].{RightMergin} = $dWk;
-        $oBook.{Worksheet}[ $oBook.{_CurSheet} ].{RightMargin} = $dWk;
+        $oBook.{'Worksheet'}[ $oBook.{'_CurSheet'} ].{'RightMergin'} = $dWk;
+        $oBook.{'Worksheet'}[ $oBook.{'_CurSheet'} ].{'RightMargin'} = $dWk;
     }
     elsif ( $bOp == 0x28 ) {
-        $oBook.{Worksheet}[ $oBook.{_CurSheet} ].{TopMergin} = $dWk;
-        $oBook.{Worksheet}[ $oBook.{_CurSheet} ].{TopMargin} = $dWk;
+        $oBook.{'Worksheet'}[ $oBook.{'_CurSheet'} ].{'TopMergin'} = $dWk;
+        $oBook.{'Worksheet'}[ $oBook.{'_CurSheet'} ].{'TopMargin'} = $dWk;
     }
     elsif ( $bOp == 0x29 ) {
-        $oBook.{Worksheet}[ $oBook.{_CurSheet} ].{BottomMergin} = $dWk;
-        $oBook.{Worksheet}[ $oBook.{_CurSheet} ].{BottomMargin} = $dWk;
+        $oBook.{'Worksheet'}[ $oBook.{'_CurSheet'} ].{'BottomMergin'} = $dWk;
+        $oBook.{'Worksheet'}[ $oBook.{'_CurSheet'} ].{'BottomMargin'} = $dWk;
     }
 }
 
@@ -2077,10 +2077,10 @@ sub _subMargin {
 #------------------------------------------------------------------------------
 sub _subHcenter {
     my ( $oBook, $bOp, $bLen, $sWk ) = @_;
-    return Nil unless ( defined $oBook.{_CurSheet} );
+    return Nil unless ( defined $oBook.{'_CurSheet'} );
 
     my $iWk = unpack( "v", $sWk );
-    $oBook.{Worksheet}[ $oBook.{_CurSheet} ].{HCenter} = $iWk;
+    $oBook.{'Worksheet'}[ $oBook.{'_CurSheet'} ].{'HCenter'} = $iWk;
 
 }
 
@@ -2089,10 +2089,10 @@ sub _subHcenter {
 #------------------------------------------------------------------------------
 sub _subVcenter {
     my ( $oBook, $bOp, $bLen, $sWk ) = @_;
-    return Nil unless ( defined $oBook.{_CurSheet} );
+    return Nil unless ( defined $oBook.{'_CurSheet'} );
 
     my $iWk = unpack( "v", $sWk );
-    $oBook.{Worksheet}[ $oBook.{_CurSheet} ].{VCenter} = $iWk;
+    $oBook.{'Worksheet'}[ $oBook.{'_CurSheet'} ].{'VCenter'} = $iWk;
 }
 
 #------------------------------------------------------------------------------
@@ -2100,10 +2100,10 @@ sub _subVcenter {
 #------------------------------------------------------------------------------
 sub _subPrintGridlines {
     my ( $oBook, $bOp, $bLen, $sWk ) = @_;
-    return Nil unless ( defined $oBook.{_CurSheet} );
+    return Nil unless ( defined $oBook.{'_CurSheet'} );
 
     my $iWk = unpack( "v", $sWk );
-    $oBook.{Worksheet}[ $oBook.{_CurSheet} ].{PrintGrid} = $iWk;
+    $oBook.{'Worksheet'}[ $oBook.{'_CurSheet'} ].{'PrintGrid'} = $iWk;
 
 }
 
@@ -2112,10 +2112,10 @@ sub _subPrintGridlines {
 #------------------------------------------------------------------------------
 sub _subPrintHeaders {
     my ( $oBook, $bOp, $bLen, $sWk ) = @_;
-    return Nil unless ( defined $oBook.{_CurSheet} );
+    return Nil unless ( defined $oBook.{'_CurSheet'} );
 
     my $iWk = unpack( "v", $sWk );
-    $oBook.{Worksheet}[ $oBook.{_CurSheet} ].{PrintHeaders} = $iWk;
+    $oBook.{'Worksheet'}[ $oBook.{'_CurSheet'} ].{'PrintHeaders'} = $iWk;
 }
 
 #------------------------------------------------------------------------------
@@ -2123,42 +2123,42 @@ sub _subPrintHeaders {
 #------------------------------------------------------------------------------
 sub _subSETUP {
     my ( $oBook, $bOp, $bLen, $sWk ) = @_;
-    return Nil unless ( defined $oBook.{_CurSheet} );
+    return Nil unless ( defined $oBook.{'_CurSheet'} );
 
     # Workaround for some apps and older Excels that don't write a
     # complete SETUP record.
     return Nil if $bLen != 34;
 
-    my $oWkS = $oBook.{Worksheet}[ $oBook.{_CurSheet} ];
+    my $oWkS = $oBook.{'Worksheet'}[ $oBook.{'_CurSheet'} ];
     my $iGrBit;
 
     (
-        $oWkS.{PaperSize}, $oWkS.{Scale},     $oWkS.{PageStart},
-        $oWkS.{FitWidth},  $oWkS.{FitHeight}, $iGrBit,
-        $oWkS.{Res},       $oWkS.{VRes},
+        $oWkS.{'PaperSize'}, $oWkS.{'Scale'},     $oWkS.{'PageStart'},
+        $oWkS.{'FitWidth'},  $oWkS.{'FitHeight'}, $iGrBit,
+        $oWkS.{'Res'},       $oWkS.{'VRes'},
     ) = unpack( 'v8', $sWk );
 
-    $oWkS.{HeaderMargin} = _convDval( substr( $sWk, 16, 8 ) );
-    $oWkS.{FooterMargin} = _convDval( substr( $sWk, 24, 8 ) );
-    $oWkS.{Copis} = unpack( 'v2', substr( $sWk, 32, 2 ) );
-    $oWkS.{LeftToRight} = ( ( $iGrBit +& 0x01 ) ?? 1 !! 0 );
-    $oWkS.{Landscape}   = ( ( $iGrBit +& 0x02 ) ?? 1 !! 0 );
-    $oWkS.{NoPls}       = ( ( $iGrBit +& 0x04 ) ?? 1 !! 0 );
-    $oWkS.{NoColor}     = ( ( $iGrBit +& 0x08 ) ?? 1 !! 0 );
-    $oWkS.{Draft}       = ( ( $iGrBit +& 0x10 ) ?? 1 !! 0 );
-    $oWkS.{Notes}       = ( ( $iGrBit +& 0x20 ) ?? 1 !! 0 );
-    $oWkS.{NoOrient}    = ( ( $iGrBit +& 0x40 ) ?? 1 !! 0 );
-    $oWkS.{UsePage}     = ( ( $iGrBit +& 0x80 ) ?? 1 !! 0 );
+    $oWkS.{'HeaderMargin'} = _convDval( substr( $sWk, 16, 8 ) );
+    $oWkS.{'FooterMargin'} = _convDval( substr( $sWk, 24, 8 ) );
+    $oWkS.{'Copis'} = unpack( 'v2', substr( $sWk, 32, 2 ) );
+    $oWkS.{'LeftToRight'} = ( ( $iGrBit +& 0x01 ) ?? 1 !! 0 );
+    $oWkS.{'Landscape'}   = ( ( $iGrBit +& 0x02 ) ?? 1 !! 0 );
+    $oWkS.{'NoPls'}       = ( ( $iGrBit +& 0x04 ) ?? 1 !! 0 );
+    $oWkS.{'NoColor'}     = ( ( $iGrBit +& 0x08 ) ?? 1 !! 0 );
+    $oWkS.{'Draft'}       = ( ( $iGrBit +& 0x10 ) ?? 1 !! 0 );
+    $oWkS.{'Notes'}       = ( ( $iGrBit +& 0x20 ) ?? 1 !! 0 );
+    $oWkS.{'NoOrient'}    = ( ( $iGrBit +& 0x40 ) ?? 1 !! 0 );
+    $oWkS.{'UsePage'}     = ( ( $iGrBit +& 0x80 ) ?? 1 !! 0 );
 
     # The NoPls flag indicates that the values have not been taken from an
     # actual printer and thus may not be accurate.
 
     # Set default scale if NoPls otherwise it may be an invalid value of 0XFF.
-    $oWkS.{Scale} = 100 if $oWkS.{NoPls};
+    $oWkS.{'Scale'} = 100 if $oWkS.{'NoPls'};
 
     # Workaround for a backward compatible typo.
-    $oWkS.{HeaderMergin} = $oWkS.{HeaderMargin};
-    $oWkS.{FooterMergin} = $oWkS.{FooterMargin};
+    $oWkS.{'HeaderMergin'} = $oWkS.{'HeaderMargin'};
+    $oWkS.{'FooterMergin'} = $oWkS.{'FooterMargin'};
 
 }
 
@@ -2176,7 +2176,7 @@ sub _subName {
     if ( ( $iGrBit +& 0x20 ) && ( $cCh == 1 ) ) {
 
         #BIFF8
-        if ( $oBook.{BIFFVersion} >= verBIFF8 ) {
+        if ( $oBook.{'BIFFVersion'} >= verBIFF8 ) {
             my $iName  = unpack( 'n', substr( $sWk, 14 ) );
             my $iSheet = unpack( 'v', substr( $sWk, 8 ) ) - 1;
 
@@ -2187,7 +2187,7 @@ sub _subName {
 
             if ( $iName == 6 ) {    #PrintArea
                 my ( $iSheetW, $raArea ) = _ParseNameArea( substr( $sWk, 16 ) );
-                $oBook.{PrintArea}[$iSheet] = $raArea;
+                $oBook.{'PrintArea'}[$iSheet] = $raArea;
             }
             elsif ( $iName == 7 ) {    #Title
                 my ( $iSheetW, $raArea ) = _ParseNameArea( substr( $sWk, 16 ) );
@@ -2201,7 +2201,7 @@ sub _subName {
                         push @aTtlC, [ $raI.[1], $raI.[3] ];
                     }
                 }
-                $oBook.{PrintTitle}[$iSheet] =
+                $oBook.{'PrintTitle'}[$iSheet] =
                   { Row => \@aTtlR, Column => \@aTtlC };
             }
         }
@@ -2210,7 +2210,7 @@ sub _subName {
             if ( $iName == 6 ) {                  #PrintArea
                 my ( $iSheet, $raArea ) =
                   _ParseNameArea95( substr( $sWk, 15 ) );
-                $oBook.{PrintArea}[$iSheet] = $raArea;
+                $oBook.{'PrintArea'}[$iSheet] = $raArea;
             }
             elsif ( $iName == 7 ) {               #Title
                 my ( $iSheet, $raArea ) =
@@ -2225,7 +2225,7 @@ sub _subName {
                         push @aTtlC, [ $raI.[1], $raI.[3] ];
                     }
                 }
-                $oBook.{PrintTitle}[$iSheet] =
+                $oBook.{'PrintTitle'}[$iSheet] =
                   { Row => \@aTtlR, Column => \@aTtlC };
             }
         }
@@ -2311,9 +2311,9 @@ sub _ParseNameArea95 {
 #------------------------------------------------------------------------------
 sub _subWSBOOL {
     my ( $oBook, $bOp, $bLen, $sWk ) = @_;
-    return Nil unless ( defined $oBook.{_CurSheet} );
+    return Nil unless ( defined $oBook.{'_CurSheet'} );
 
-    $oBook.{Worksheet}[ $oBook.{_CurSheet} ].{PageFit} =
+    $oBook.{'Worksheet'}[ $oBook.{'_CurSheet'} ].{'PageFit'} =
       ( ( unpack( 'v', $sWk ) +& 0x100 ) ?? 1 !! 0 );
 }
 
@@ -2322,21 +2322,21 @@ sub _subWSBOOL {
 #------------------------------------------------------------------------------
 sub _subMergeArea {
     my ( $oBook, $bOp, $bLen, $sWk ) = @_;
-    return Nil unless ( defined $oBook.{_CurSheet} );
+    return Nil unless ( defined $oBook.{'_CurSheet'} );
 
     my $iCnt = unpack( "v", $sWk );
-    my $oWkS = $oBook.{Worksheet}[ $oBook.{_CurSheet} ];
-    $oWkS.{MergedArea} = [] unless ( defined $oWkS.{MergedArea} );
+    my $oWkS = $oBook.{'Worksheet'}[ $oBook.{'_CurSheet'} ];
+    $oWkS.{'MergedArea'} = [] unless ( defined $oWkS.{'MergedArea'} );
     loop ( my $i = 0 ; $i < $iCnt ; $i++ ) {
         my ( $iRs, $iRe, $iCs, $iCe ) =
           unpack( 'v4', substr( $sWk, $i * 8 + 2, 8 ) );
         loop ( my $iR = $iRs ; $iR <= $iRe ; $iR++ ) {
             loop ( my $iC = $iCs ; $iC <= $iCe ; $iC++ ) {
-                $oWkS.{Cells}[$iR][$iC].{Merged} = 1
-                  if ( defined $oWkS.{Cells}[$iR][$iC] );
+                $oWkS.{'Cells'}[$iR][$iC].{'Merged'} = 1
+                  if ( defined $oWkS.{'Cells'}[$iR][$iC] );
             }
         }
-        push @{ $oWkS.{MergedArea} }, [ $iRs, $iCs, $iRe, $iCe ];
+        push @{ $oWkS.{'MergedArea'} }, [ $iRs, $iCs, $iRe, $iCe ];
     }
 }
 
@@ -2444,17 +2444,17 @@ sub _subStrWk {
 
         # We are reading a CONTINUE record.
 
-        if ( $self.{_buffer} eq '' ) {
+        if ( $self.{'_buffer'} eq '' ) {
 
             # A CONTINUE block with no previous SST.
-            $self.{_buffer} ~= $biff_data;
+            $self.{'_buffer'} ~= $biff_data;
         }
-        elsif ( !defined $self.{_string_continued} ) {
+        elsif ( !defined $self.{'_string_continued'} ) {
 
             # The CONTINUE block starts with a new (non-continued) string.
 
             # Strip the Grbit byte and store the string data.
-            $self.{_buffer} ~= substr $biff_data, 1;
+            $self.{'_buffer'} ~= substr $biff_data, 1;
         }
         else {
 
@@ -2464,19 +2464,19 @@ sub _subStrWk {
             # the continued string section is single bytes or (1) double bytes.
             my $grbit = ord $biff_data;
 
-            my ( $str_position, $str_length ) = @{ $self.{_previous_info} };
-            my $buff_length = length $self.{_buffer};
+            my ( $str_position, $str_length ) = @{ $self.{'_previous_info'} };
+            my $buff_length = length $self.{'_buffer'};
 
             if ( $buff_length >= ( $str_position + $str_length ) ) {
 
                 # Not in a string.
-                $self.{_buffer} ~= $biff_data;
+                $self.{'_buffer'} ~= $biff_data;
             }
-            elsif ( ( $self.{_string_continued} +& 0x01 ) == ( $grbit +& 0x01 ) )
+            elsif ( ( $self.{'_string_continued'} +& 0x01 ) == ( $grbit +& 0x01 ) )
             {
 
                 # Same encoding as the previous block of the string.
-                $self.{_buffer} ~= substr( $biff_data, 1 );
+                $self.{'_buffer'} ~= substr( $biff_data, 1 );
             }
             else {
 
@@ -2484,8 +2484,8 @@ sub _subStrWk {
                 if ( $grbit +& 0x01 ) {
 
                     # Current block is UTF-16, previous was ASCII.
-                    my ( Nil, $cch ) = unpack 'vc', $self.{_buffer};
-                    substr( $self.{_buffer}, 2, 1 ) = pack( 'C', $cch +| 0x01 );
+                    my ( Nil, $cch ) = unpack 'vc', $self.{'_buffer'};
+                    substr( $self.{'_buffer'}, 2, 1 ) = pack( 'C', $cch +| 0x01 );
 
                     # Convert the previous ASCII, single character, portion of
                     # the string into a double character UTF-16 string by
@@ -2496,7 +2496,7 @@ sub _subStrWk {
                         $i--
                       )
                     {
-                        substr( $self.{_buffer}, $str_position + $i, 0 ) =
+                        substr( $self.{'_buffer'}, $str_position + $i, 0 ) =
                           "\x00";
                     }
 
@@ -2528,40 +2528,40 @@ sub _subStrWk {
                 }
 
                 # Strip the Grbit byte and store the string data.
-                $self.{_buffer} ~= substr $biff_data, 1;
+                $self.{'_buffer'} ~= substr $biff_data, 1;
             }
         }
     }
     else {
 
         # Not a CONTINUE block therefore an SST block.
-        $self.{_buffer} ~= $biff_data;
+        $self.{'_buffer'} ~= $biff_data;
     }
 
     # Reset the state variables.
-    $self.{_string_continued} = Nil;
-    $self.{_previous_info}    = Nil;
+    $self.{'_string_continued'} = Nil;
+    $self.{'_previous_info'}    = Nil;
 
     # Extract out any full strings from the current buffer leaving behind a
     # partial string that is continued into the next block, or an empty
     # buffer is no string is continued.
-    while ( length $self.{_buffer} >= 4 ) {
+    while ( length $self.{'_buffer'} >= 4 ) {
         my ( $str_info, $length, $str_position, $str_length ) =
-          _convBIFF8String( $self, $self.{_buffer}, 1 );
+          _convBIFF8String( $self, $self.{'_buffer'}, 1 );
 
         if ( defined $str_info.[0] ) {
-            push @{ $self.{PkgStr} },
+            push @{ $self.{'PkgStr'} },
               {
                 Text    => $str_info.[0],
                 Unicode => $str_info.[1],
                 Rich    => $str_info.[2],
                 Ext     => $str_info.[3],
               };
-            $self.{_buffer} = substr( $self.{_buffer}, $length );
+            $self.{'_buffer'} = substr( $self.{'_buffer'}, $length );
         }
         else {
-            $self.{_string_continued} = $str_info.[1];
-            $self.{_previous_info} = [ $str_position, $str_length ];
+            $self.{'_string_continued'} = $str_info.[1];
+            $self.{'_previous_info'} = [ $str_position, $str_length ];
             last;
         }
     }
@@ -2587,59 +2587,59 @@ sub _SwapForUnicode {
 sub _NewCell {
     my ( $oBook, $iR, $iC, %rhKey ) = @_;
     my ( $sWk, $iLen );
-    return Nil unless ( defined $oBook.{_CurSheet} );
+    return Nil unless ( defined $oBook.{'_CurSheet'} );
 
-    my $FmtClass = $oBook.{FmtClass};
-    $rhKey{Type} =
-      $FmtClass.ChkType( $rhKey{Numeric}, $rhKey{Format}{FmtIdx} );
-    my $FmtStr = $oBook.{FormatStr}{ $rhKey{Format}{FmtIdx} };
+    my $FmtClass = $oBook.{'FmtClass'};
+    $rhKey{'Type'} =
+      $FmtClass.ChkType( $rhKey{'Numeric'}, $rhKey{'Format'}{'FmtIdx'} );
+    my $FmtStr = $oBook.{'FormatStr'}{ $rhKey{'Format'}{'FmtIdx'} };
 
     # Set "Date" type if required for numbers in a MulRK BIFF block.
-    if ( defined $FmtStr && $rhKey{Type} eq "Numeric" ) {
+    if ( defined $FmtStr && $rhKey{'Type'} eq "Numeric" ) {
 
         # Match a range of possible date formats. Note: this isn't important
         # except for reporting. The number will still be converted to a date
         # by ExcelFmt() even if 'Type' isn't set to 'Date'.
         if ( $FmtStr ~~ m{^[dmy][-\\/dmy]*$}i ) {
-            $rhKey{Type} = "Date";
+            $rhKey{'Type'} = "Date";
         }
     }
 
     my $oCell = Spreadsheet::ParseExcel::Cell.new(
-        Val      => $rhKey{Val},
-        FormatNo => $rhKey{FormatNo},
-        Format   => $rhKey{Format},
-        Code     => $rhKey{Code},
-        Type     => $rhKey{Type},
+        Val      => $rhKey{'Val'},
+        FormatNo => $rhKey{'FormatNo'},
+        Format   => $rhKey{'Format'},
+        Code     => $rhKey{'Code'},
+        Type     => $rhKey{'Type'},
     );
-    $oCell.{_Kind} = $rhKey{Kind};
-    $oCell.{_Value} = $FmtClass.ValFmt( $oCell, $oBook );
-    if ( $rhKey{Rich} ) {
+    $oCell.{'_Kind'} = $rhKey{'Kind'};
+    $oCell.{'_Value'} = $FmtClass.ValFmt( $oCell, $oBook );
+    if ( $rhKey{'Rich'} ) {
         my @aRich = ();
-        my $sRich = $rhKey{Rich};
+        my $sRich = $rhKey{'Rich'};
         loop ( my $iWk = 0 ; $iWk < length( $sRich ) ; $iWk += 4 ) {
             my ( $iPos, $iFnt ) = unpack( 'v2', substr( $sRich, $iWk ) );
-            push @aRich, [ $iPos, $oBook.{Font}[$iFnt] ];
+            push @aRich, [ $iPos, $oBook.{'Font'}[$iFnt] ];
         }
-        $oCell.{Rich} = \@aRich;
+        $oCell.{'Rich'} = \@aRich;
     }
 
-    if ( defined $oBook.{CellHandler} ) {
-        if ( defined $oBook.{Object} ) {
+    if ( defined $oBook.{'CellHandler'} ) {
+        if ( defined $oBook.{'Object'} ) {
             
-            ref( $oBook.{CellHandler} ) eq "CODE"
-              ?? $oBook.{CellHandler}.(
-                $_Object, $oBook, $oBook.{_CurSheet}, $iR, $iC, $oCell
+            ref( $oBook.{'CellHandler'} ) eq "CODE"
+              ?? $oBook.{'CellHandler'}.(
+                $_Object, $oBook, $oBook.{'_CurSheet'}, $iR, $iC, $oCell
               )
-              !! $oBook.{CellHandler}.callback( $_Object, $oBook, $oBook.{_CurSheet},
+              !! $oBook.{'CellHandler'}.callback( $_Object, $oBook, $oBook.{'_CurSheet'},
                 $iR, $iC, $oCell );
         }
         else {
-            $oBook.{CellHandler}.( $oBook, $oBook.{_CurSheet}, $iR, $iC, $oCell );
+            $oBook.{'CellHandler'}.( $oBook, $oBook.{'_CurSheet'}, $iR, $iC, $oCell );
         }
     }
-    unless ( $oBook.{NotSetCell} ) {
-        $oBook.{Worksheet}[ $oBook.{_CurSheet} ].{Cells}[$iR][$iC] = $oCell;
+    unless ( $oBook.{'NotSetCell'} ) {
+        $oBook.{'Worksheet'}[ $oBook.{'_CurSheet'} ].{'Cells'}[$iR][$iC] = $oCell;
     }
     return $oCell;
 }
@@ -2673,7 +2673,7 @@ sub error {
 
     my $self = shift;
 
-    my $parse_error = $self.{_error_status};
+    my $parse_error = $self.{'_error_status'};
 
     if ( exists $error_strings{$parse_error} ) {
         return $error_strings{$parse_error};
@@ -2694,7 +2694,7 @@ sub error_code {
 
     my $self = shift;
 
-    return $self.{_error_status};
+    return $self.{'_error_status'};
 }
 
 
