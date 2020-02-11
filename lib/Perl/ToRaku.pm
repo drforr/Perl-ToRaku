@@ -65,6 +65,7 @@ BEGIN {
     'RedundantModules',
     'RedundantPragmas',
     'Shebang',
+    'Sigils',
     'SortVariables',
     'SpecialLiterals',
     'TernaryOperator',
