@@ -12,7 +12,7 @@
 use Spreadsheet::ParseExcel;
 
 
-my $filename = $ARGV[0] or die "Must specify filename to parse.\n";
+my $filename = @ARGV[0] or die "Must specify filename to parse.\n";
 my $parser   = Spreadsheet::ParseExcel.new();
 my $workbook = $parser.parse( $filename );
 

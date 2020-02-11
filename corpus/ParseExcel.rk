@@ -176,9 +176,9 @@ multi method new {
     my ( $class, %hParam ) = @_;
 
     if ( not defined $_use_perlio ) {
-        if (   exists $Config{'useperlio'}
-            && defined $Config{'useperlio'}
-            && $Config{'useperlio'} eq "define" )
+        if (   exists %Config{'useperlio'}
+            && defined %Config{'useperlio'}
+            && %Config{'useperlio'} eq "define" )
         {
             $_use_perlio = 1;
         }
@@ -191,7 +191,7 @@ multi method new {
 
     # Check ENDIAN(Little: Intel etc. BIG: Sparc etc)
     $BIGENDIAN =
-        ( defined $hParam{'Endian'} ) ?? $hParam{'Endian'}
+        ( defined %hParam{'Endian'} ) ?? %hParam{'Endian'}
       !! ( unpack( "H08", pack( "L", 2 ) ) eq '02000000' ) ?? 0
       !!                                                     1;
     my $self = {};
@@ -199,24 +199,24 @@ multi method new {
 
     $self.{'GetContent'} = \&_subGetContent;
 
-    if ( $hParam{'EventHandlers'} ) {
-        $self.SetEventHandlers( $hParam{'EventHandlers'} );
+    if ( %hParam{'EventHandlers'} ) {
+        $self.SetEventHandlers( %hParam{'EventHandlers'} );
     }
     else {
         $self.SetEventHandlers( \%ProcTbl );
     }
-    if ( $hParam{'AddHandlers'} ) {
-        for my $sKey ( keys( %{ $hParam{'AddHandlers'} } ) ) {
-            $self.SetEventHandler( $sKey, $hParam{'AddHandlers'}.{$sKey} );
+    if ( %hParam{'AddHandlers'} ) {
+        for my $sKey ( keys( %{ %hParam{'AddHandlers'} } ) ) {
+            $self.SetEventHandler( $sKey, %hParam{'AddHandlers'}.{$sKey} );
         }
     }
-    $self.{'CellHandler'} = $hParam{'CellHandler'};
-    $self.{'NotSetCell'}  = $hParam{'NotSetCell'};
-    $self.{'Object'}      = $hParam{'Object'};
+    $self.{'CellHandler'} = %hParam{'CellHandler'};
+    $self.{'NotSetCell'}  = %hParam{'NotSetCell'};
+    $self.{'Object'}      = %hParam{'Object'};
 
 
-    if ( defined $hParam{'Password'} ) {
-        $self.{'Password'} = $hParam{'Password'};
+    if ( defined %hParam{'Password'} ) {
+        $self.{'Password'} = %hParam{'Password'};
     }
     else {
         $self.{'Password'} = 'VelvetSweatshop';
@@ -429,20 +429,20 @@ sub InitStream {
     my ( $stream_data ) = @_;
     my %q;
 
-    $q{'opcode'} = 0;
-    $q{'length'} = 0;
-    $q{'data'}   = '';
+    %q{'opcode'} = 0;
+    %q{'length'} = 0;
+    %q{'data'}   = '';
 
-    $q{'stream'}    = $stream_data;              # data stream
-    $q{'streamLen'} = length( $stream_data );    # stream length
-    $q{'streamPos'} = 0;                         # stream position
+    %q{'stream'}    = $stream_data;              # data stream
+    %q{'streamLen'} = length( $stream_data );    # stream length
+    %q{'streamPos'} = 0;                         # stream position
 
-    $q{'encryption'}               = 0;
-    $q{'xor_key'}                  = '';
-    $q{'rc4_key'}                  = '';
-    $q{'md5_ctxt'}                 = '';
-    $q{'block'}                    = 0;
-    $q{'dont_decrypt_next_record'} = 0;
+    %q{'encryption'}               = 0;
+    %q{'xor_key'}                  = '';
+    %q{'rc4_key'}                  = '';
+    %q{'md5_ctxt'}                 = '';
+    %q{'block'}                    = 0;
+    %q{'dont_decrypt_next_record'} = 0;
 
     return \%q;
 }
@@ -717,8 +717,8 @@ sub _subGetContent {
     return ( Nil, Nil ) if ( $#aRes < 0 );
 
     #Hack from Herbert
-    if ( $aRes[0].{'Data'} ) {
-        return ( $aRes[0].{'Data'}, length( $aRes[0].{'Data'} ) );
+    if ( @aRes[0].{'Data'} ) {
+        return ( @aRes[0].{'Data'}, length( @aRes[0].{'Data'} ) );
     }
 
     #Same as OLE::Storage_Lite
@@ -1444,7 +1444,7 @@ sub _getustr {
     $len -= $zterm;
     my $text = join( '', map { chr $_ }, unpack( "v$len", substr( $wk, $offset ) ) );
     $text ~~ s/\0.*\z// if ( $zterm );
-    $_[1] = ( $offset += ($len + $zterm) *2 );
+    @_[1] = ( $offset += ($len + $zterm) *2 );
     return $text;
 }
 
@@ -2590,33 +2590,33 @@ sub _NewCell {
     return Nil unless ( defined $oBook.{'_CurSheet'} );
 
     my $FmtClass = $oBook.{'FmtClass'};
-    $rhKey{'Type'} =
-      $FmtClass.ChkType( $rhKey{'Numeric'}, $rhKey{'Format'}{'FmtIdx'} );
-    my $FmtStr = $oBook.{'FormatStr'}{ $rhKey{'Format'}{'FmtIdx'} };
+    %rhKey{'Type'} =
+      $FmtClass.ChkType( %rhKey{'Numeric'}, %rhKey{'Format'}{'FmtIdx'} );
+    my $FmtStr = $oBook.{'FormatStr'}{ %rhKey{'Format'}{'FmtIdx'} };
 
     # Set "Date" type if required for numbers in a MulRK BIFF block.
-    if ( defined $FmtStr && $rhKey{'Type'} eq "Numeric" ) {
+    if ( defined $FmtStr && %rhKey{'Type'} eq "Numeric" ) {
 
         # Match a range of possible date formats. Note: this isn't important
         # except for reporting. The number will still be converted to a date
         # by ExcelFmt() even if 'Type' isn't set to 'Date'.
         if ( $FmtStr ~~ m{^[dmy][-\\/dmy]*$}i ) {
-            $rhKey{'Type'} = "Date";
+            %rhKey{'Type'} = "Date";
         }
     }
 
     my $oCell = Spreadsheet::ParseExcel::Cell.new(
-        Val      => $rhKey{'Val'},
-        FormatNo => $rhKey{'FormatNo'},
-        Format   => $rhKey{'Format'},
-        Code     => $rhKey{'Code'},
-        Type     => $rhKey{'Type'},
+        Val      => %rhKey{'Val'},
+        FormatNo => %rhKey{'FormatNo'},
+        Format   => %rhKey{'Format'},
+        Code     => %rhKey{'Code'},
+        Type     => %rhKey{'Type'},
     );
-    $oCell.{'_Kind'} = $rhKey{'Kind'};
+    $oCell.{'_Kind'} = %rhKey{'Kind'};
     $oCell.{'_Value'} = $FmtClass.ValFmt( $oCell, $oBook );
-    if ( $rhKey{'Rich'} ) {
+    if ( %rhKey{'Rich'} ) {
         my @aRich = ();
-        my $sRich = $rhKey{'Rich'};
+        my $sRich = %rhKey{'Rich'};
         loop ( my $iWk = 0 ; $iWk < length( $sRich ) ; $iWk += 4 ) {
             my ( $iPos, $iFnt ) = unpack( 'v2', substr( $sRich, $iWk ) );
             push @aRich, [ $iPos, $oBook.{'Font'}[$iFnt] ];
@@ -2656,7 +2656,7 @@ sub ColorIdxToRGB {
 
 
     unless ( defined $currentbook ) {
-	return ( ( defined $aColor[$iIdx] ) ?? $aColor[$iIdx] !! $aColor[0] );
+	return ( ( defined @aColor[$iIdx] ) ?? @aColor[$iIdx] !! @aColor[0] );
     }
 
     return $currentbook.color_idx_to_rgb( $iIdx );
@@ -2675,8 +2675,8 @@ sub error {
 
     my $parse_error = $self.{'_error_status'};
 
-    if ( exists $error_strings{$parse_error} ) {
-        return $error_strings{$parse_error};
+    if ( exists %error_strings{$parse_error} ) {
+        return %error_strings{$parse_error};
     }
     else {
         return 'Unknown parse error';

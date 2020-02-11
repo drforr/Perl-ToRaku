@@ -13,14 +13,14 @@ my $toRaku  = Perl::ToRaku->new;
 
 use_ok $package;
 
-is $toRaku->test_transform( $package, q{$a{"foo"}} ),
-   q{$a{"foo"}};
+is $toRaku->test_transform( $package, q{$a { "foo" }} ),
+   q{$a { "foo" }};
 
-is $toRaku->test_transform( $package, q{$a{'foo'}} ),
-   q{$a{'foo'}};
+is $toRaku->test_transform( $package, q{$a { 'foo' }} ),
+   q{$a { 'foo' }};
 
-is $toRaku->test_transform( $package, q{$a{foo}} ),
-   q{$a{'foo'}};
+is $toRaku->test_transform( $package, q{$a { foo }} ),
+   q{$a { 'foo' }};
 
 # XXX This needs work
 #
@@ -28,7 +28,7 @@ is $toRaku->test_transform( $package, q{$a{foo}} ),
 #   q{$oBook.{FormatStr}{ $rhKey{Format}{FmtIdx} }} ),
 #   q{$oBook.{'FormatStr'}{ $rhKey{'Format'}{'FmtIdx'} }};
 
-is $toRaku->test_transform( $package, '1/=1' ),
-   '1/=1';
+is $toRaku->test_transform( $package, '1 /= 1' ),
+   '1 /= 1';
 
 done_testing;

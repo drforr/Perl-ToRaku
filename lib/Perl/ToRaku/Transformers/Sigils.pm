@@ -16,7 +16,8 @@ sub transformer {
   my $array_indices = $ppi->find( 'PPI::Token::Symbol' );
   if ( $array_indices ) {
     for my $array_index ( @{ $array_indices } ) {
-      if ( $array_index->snext_sibling->isa( 'PPI::Structure::Subscript' ) ) {
+      if ( $array_index->snext_sibling and
+           $array_index->snext_sibling->isa( 'PPI::Structure::Subscript' ) ) {
         if ( $array_index->snext_sibling->start->content eq '{' ) {
           my $new_content = $array_index->content;
           $new_content =~ s{ \$ }{\%}x;

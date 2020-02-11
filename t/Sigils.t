@@ -17,19 +17,19 @@ subtest 'initialization', sub {
   is $toRaku->test_transform( $package, q{$a = '';} ),
      q{$a = '';};
 
-  is $toRaku->test_transform( $package, q{@a = ();} ),
-     q{@a = ();};
+  is $toRaku->test_transform( $package, q{@a = ( );} ),
+     q{@a = ( );};
 
-  is $toRaku->test_transform( $package, q{%a = ();} ),
-     q{%a = ();};
+  is $toRaku->test_transform( $package, q{%a = ( );} ),
+     q{%a = ( );};
 };
 
 subtest 'scalar assignment', sub {
   is $toRaku->test_transform( $package, q{$a = '';} ),
      q{$a = '';};
 
-  is $toRaku->test_transform( $package, q{$a = [];} ),
-     q{$a = [];};
+  is $toRaku->test_transform( $package, q{$a = [ ];} ),
+     q{$a = [ ];};
 
   is $toRaku->test_transform( $package, q{$a = [ 0 ];} ),
      q{$a = [ 0 ];};
@@ -98,14 +98,14 @@ subtest 'reference assignment', sub {
 };
 
 subtest 'slice assignment', sub {
-  is $toRaku->test_transform( $package, q{$a [ 0, 1 ] = ( 'a', 'b' );} ),
-    q{@a [ 0, 1 ] = ( 'a', 'b' );};
+  is $toRaku->test_transform( $package, q{$a [ 0, 1 ] = ( 'a' , 'b' );} ),
+    q{@a [ 0, 1 ] = ( 'a' , 'b' );};
 
-  is $toRaku->test_transform( $package, q{$a { 'a', 'b' } = ( 'a', 'b' );} ),
-    q{%a { 'a', 'b' } = ( 'a', 'b' );};
+  is $toRaku->test_transform( $package, q{$a { 'a' , 'b' } = ( 'a' , 'b' );} ),
+    q{%a { 'a' , 'b' } = ( 'a' , 'b' );};
 
-  is $toRaku->test_transform( $package, q{$a { qw(a b) } = ( 'a', 'b' );} ),
-    q{%a { qw(a b) } = ( 'a', 'b' );};
+  is $toRaku->test_transform( $package, q{$a { qw(a b) } = ( 'a' , 'b' );} ),
+    q{%a { qw(a b) } = ( 'a' , 'b' );};
 };
 
 
