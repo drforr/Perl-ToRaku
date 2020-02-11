@@ -206,7 +206,7 @@ multi method new {
         $self.SetEventHandlers( \%ProcTbl );
     }
     if ( %hParam{'AddHandlers'} ) {
-        for my $sKey ( keys( %{ %hParam{'AddHandlers'} } ) ) {
+        for my $sKey ( keys( %( %hParam{'AddHandlers'} ) ) ) {
             $self.SetEventHandler( $sKey, %hParam{'AddHandlers'}.{$sKey} );
         }
     }
@@ -283,7 +283,7 @@ sub MakeKey {
 
     my $s = md5state( $md5 );
 
-    ${$key} = Crypt::RC4.new( $s );
+    $($key) = Crypt::RC4.new( $s );
 }
 
 sub VerifyPassword {
@@ -341,11 +341,11 @@ sub VerifyPassword {
     substr( $pwarray, 57, 1 )  = "\x0a";
 
     $md5.add( $pwarray );
-    ${$valContext} = md5state( $md5 );
+    $($valContext) = md5state( $md5 );
 
     my $key;
 
-    MakeKey( 0, \$key, ${$valContext} );
+    MakeKey( 0, \$key, $($valContext) );
 
     my $salt       = $key.RC4( $salt_data );
     my $hashedsalt = $key.RC4( $hashedsalt_data );
@@ -598,12 +598,12 @@ sub parse {
         last if defined $workbook.{'_ParseAbort'};
     }
 
-    loop my $worksheet (@{$workbook.{'Worksheet'}} ) {
+    loop my $worksheet (@($workbook.{'Worksheet'}) ) {
         # Install hyperlinks into each cell
         # Range is undocumented for user; allows reuse of data
 
         if ($worksheet.{'HyperLinks'}) {
-            loop my $link (@{$worksheet.{'HyperLinks'}}) {
+            loop my $link (@($worksheet.{'HyperLinks'})) {
                 loop( my $row = $link.[3]; $row <= $link.[4]; $row++ ) {
                     loop( my $col = $link.[5]; $col <= $link.[6]; $col++ ) {
                         $worksheet.{'Cells'}[$row][$col]{'Hyperlink'} = $link;
@@ -1528,7 +1528,7 @@ sub _subHyperlink {
 
     # Update loop at end of parse() if this changes
 
-    push @{ $workbook.{'Worksheet'}[ $workbook.{'_CurSheet'} ].{'HyperLinks'} }, [
+    push @( $workbook.{'Worksheet'}[ $workbook.{'_CurSheet'} ].{'HyperLinks'} ), [
                          $desc, $link, $frame, $srow, $erow, $scol, $ecol ];
 }
 
@@ -1740,7 +1740,7 @@ sub _subXF {
         $iBdrCR = ( ( $iBdr2 +& 0x3F80 ) / 0x80 ) +& 0x7F;
     }
 
-    push @{ $oBook.{'Format'} }, Spreadsheet::ParseExcel::Format.new(
+    push @( $oBook.{'Format'} ), Spreadsheet::ParseExcel::Format.new(
         FontNo => $iFnt,
         Font   => $oBook.{'Font'}[$iFnt],
         FmtIdx => $iIdx,
@@ -1788,7 +1788,7 @@ sub _subFormat {
     # Excel 4 and earlier used an index of 0 to indicate that a built-in format
     # that was stored implicitly.
     if ( $oBook.{'BIFFVersion'} <= verBIFF4 && $format_index == 0 ) {
-        $format_index = keys %{ $oBook.{'FormatStr'} };
+        $format_index = keys %( $oBook.{'FormatStr'} );
     }
 
     $oBook.{'FormatStr'}.{$format_index} = $sFmt;
@@ -1856,7 +1856,7 @@ sub _subFont {
 
         $sFntName = substr( $sWk, 5, unpack( "c", substr( $sWk, 4, 1 ) ) );
     }
-    push @{ $oBook.{'Font'} }, Spreadsheet::ParseExcel::Font.new(
+    push @( $oBook.{'Font'} ), Spreadsheet::ParseExcel::Font.new(
         Height         => $iHeight / 20.0,
         Attr           => $iAttr,
         Color          => $iCIdx,
@@ -1871,7 +1871,7 @@ sub _subFont {
     );
 
     #Skip Font[4]
-    push @{ $oBook.{'Font'} }, {} if ( scalar( @{ $oBook.{'Font'} } ) == 4 );
+    push @( $oBook.{'Font'} ), {} if ( scalar( @( $oBook.{'Font'} ) ) == 4 );
 
 }
 
@@ -2336,7 +2336,7 @@ sub _subMergeArea {
                   if ( defined $oWkS.{'Cells'}[$iR][$iC] );
             }
         }
-        push @{ $oWkS.{'MergedArea'} }, [ $iRs, $iCs, $iRe, $iCe ];
+        push @( $oWkS.{'MergedArea'} ), [ $iRs, $iCs, $iRe, $iCe ];
     }
 }
 
@@ -2464,7 +2464,7 @@ sub _subStrWk {
             # the continued string section is single bytes or (1) double bytes.
             my $grbit = ord $biff_data;
 
-            my ( $str_position, $str_length ) = @{ $self.{'_previous_info'} };
+            my ( $str_position, $str_length ) = @( $self.{'_previous_info'} );
             my $buff_length = length $self.{'_buffer'};
 
             if ( $buff_length >= ( $str_position + $str_length ) ) {
@@ -2550,7 +2550,7 @@ sub _subStrWk {
           _convBIFF8String( $self, $self.{'_buffer'}, 1 );
 
         if ( defined $str_info.[0] ) {
-            push @{ $self.{'PkgStr'} },
+            push @( $self.{'PkgStr'} ),
               {
                 Text    => $str_info.[0],
                 Unicode => $str_info.[1],

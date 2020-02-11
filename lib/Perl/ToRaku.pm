@@ -58,6 +58,7 @@ BEGIN {
     'BinaryOperators',
     'Casts',
     'Constant',
+    'Dereferences',
     'ForLoops',
     'HashKeys',
     'HigherOrderCommas',
