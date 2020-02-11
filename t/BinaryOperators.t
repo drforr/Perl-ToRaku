@@ -6,12 +6,27 @@ use warnings;
 use Test::More;
 use Perl::ToRaku;
 
-plan tests => 18;
+plan tests => 21;
 
 my $package = 'Perl::ToRaku::Transformers::BinaryOperators';
 my $toRaku  = Perl::ToRaku->new;
 
 use_ok $package;
+
+# Heavy sigh. $# {...} and $#{...} are respectively
+# Token::Magic and Token::Cast objects.
+#
+
+# So they need to be tested independently.
+#
+is $toRaku->test_transform( $package, '$# { $a }' ),
+   '@ { $a }.elems';
+
+is $toRaku->test_transform( $package, '$#{$a}' ),
+   '@{$a}.elems';
+
+is $toRaku->test_transform( $package, '$#a' ),
+   '@a.elems';
 
 is $toRaku->test_transform( $package, 'new Foo( 2 )' ),
    'Foo.new( 2 )';
