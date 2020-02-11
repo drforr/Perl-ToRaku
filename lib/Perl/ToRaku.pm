@@ -219,16 +219,6 @@ sub test_transform {
 # Maybe change 'use' statements to use Package:from<Perl5>
 #
 # $self->SUPER::func(...);
-#
-# %x = ( 1, 2, 3, 4 )
-# =>
-# %x = ( 1 => 2, 3 => 4 )
-#
-# @a = '-' x 80 # is ok
-#
-# @a = (1) x 80
-# =>
-# @a = 1 xx 80
 
 # Note that subroutines may "fool" you into thinking they're methods.
 # Look at ParseExcel.pm's _subStrWk "method".
