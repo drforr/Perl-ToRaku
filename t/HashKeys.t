@@ -6,7 +6,7 @@ use warnings;
 use Test::More;
 use Perl::ToRaku;
 
-plan tests => 5;
+plan tests => 8;
 
 my $package = 'Perl::ToRaku::Transformers::HashKeys';
 my $toRaku  = Perl::ToRaku->new;
@@ -16,11 +16,20 @@ use_ok $package;
 is $toRaku->test_transform( $package, q{$a { "foo" }} ),
    q{$a { "foo" }};
 
+is $toRaku->test_transform( $package, q{$a{"foo"}} ),
+   q{$a{"foo"}};
+
 is $toRaku->test_transform( $package, q{$a { 'foo' }} ),
    q{$a { 'foo' }};
 
+is $toRaku->test_transform( $package, q{$a{'foo'}} ),
+   q{$a{'foo'}};
+
 is $toRaku->test_transform( $package, q{$a { foo }} ),
    q{$a { 'foo' }};
+
+is $toRaku->test_transform( $package, q{$a{foo}} ),
+   q{$a{'foo'}};
 
 # XXX This needs work
 #
