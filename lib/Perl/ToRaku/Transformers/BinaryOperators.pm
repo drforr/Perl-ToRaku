@@ -34,6 +34,7 @@ sub transformer {
   _fixup_array_index_as_deref( $ppi );
   _fixup_array_index( $ppi );
   _fixup_new( $ppi );
+  _fixup_length( $ppi );
 
   # This may *look* like a transitive loop, but it's not because it's all
   # happening at once.
@@ -127,7 +128,6 @@ sub _fixup_array_index_as_deref_no_ws {
   }
 }
 
-
 sub _fixup_array_index {
   my $ppi = shift;
 
@@ -143,6 +143,31 @@ sub _fixup_array_index {
 
       my $new_arrow = PPI::Token::Operator->new( '->' );
       $array_index->insert_after( $new_arrow );
+    }
+  }
+}
+
+sub _fixup_length {
+  my $ppi = shift;
+
+  my $list_structures = $ppi->find( 'PPI::Structure::List' );
+  if ( $list_structures ) {
+    for my $list_structure ( @{ $list_structures } ) {
+      next unless $list_structure->sprevious_sibling and
+                  $list_structure->sprevious_sibling->content eq 'length';
+
+      my $new_chars = PPI::Token::Word->new( 'chars' );
+      $list_structure->insert_after( $new_chars );
+
+      my $new_arrow = PPI::Token::Operator->new( '->' );
+      $list_structure->insert_after( $new_arrow );
+
+      $list_structure->previous_sibling->delete;
+      if ( $list_structure->previous_sibling and
+           $list_structure->previous_sibling->isa( 'PPI::Token::Word' ) and
+           $list_structure->previous_sibling->content eq 'length' ) {
+        $list_structure->previous_sibling->remove;
+      }
     }
   }
 }

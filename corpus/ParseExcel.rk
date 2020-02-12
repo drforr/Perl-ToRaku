@@ -293,7 +293,7 @@ sub VerifyPassword {
     my $i;
     my $md5 = Digest::Perl::MD5.new();
 
-    loop ( $i = 0 ; $i < length( $password ) ; $i++ ) {
+    loop ( $i = 0 ; $i < ( $password ).chars ; $i++ ) {
         my $o = ord( substr( $password, $i, 1 ) );
         substr( $pwarray, 2 * $i, 1 ) = chr( $o +& 0xff );
         substr( $pwarray, 2 * $i + 1, 1 ) = chr( ( $o +> 8 ) +& 0xff );
@@ -434,7 +434,7 @@ sub InitStream {
     %q{'data'}   = '';
 
     %q{'stream'}    = $stream_data;              # data stream
-    %q{'streamLen'} = length( $stream_data );    # stream length
+    %q{'streamLen'} = ( $stream_data ).chars;    # stream length
     %q{'streamPos'} = 0;                         # stream position
 
     %q{'encryption'}               = 0;
@@ -714,11 +714,11 @@ sub _subGetContent {
         ],
         1, 1
     );
-    return ( Nil, Nil ) if ( $#aRes < 0 );
+    return ( Nil, Nil ) if ( @aRes.elems < 0 );
 
     #Hack from Herbert
     if ( @aRes[0].{'Data'} ) {
-        return ( @aRes[0].{'Data'}, length( @aRes[0].{'Data'} ) );
+        return ( @aRes[0].{'Data'}, ( @aRes[0].{'Data'} ).chars );
     }
 
     #Same as OLE::Storage_Lite
@@ -757,7 +757,7 @@ sub _subGetContent {
 
     #Not Excel file (simple method)
     return ( Nil, Nil ) if ( substr( $sBuff, 0, 1 ) ne "\x09" );
-    return ( $sBuff, length( $sBuff ) );
+    return ( $sBuff, ( $sBuff ).chars );
 }
 
 #------------------------------------------------------------------------------
@@ -787,7 +787,7 @@ sub _subBOF {
                 $oBook.{'Worksheet'}[ $oBook.{'_CurSheet'} ].{'SheetType'},
               )
               = unpack( "v2", $sWk )
-              if ( length( $sWk ) > 4 );
+              if ( ( $sWk ).chars > 4 );
         }
         else {
             $oBook.{'BIFFVersion'} = Int( $bOp / 0x100 );
@@ -902,7 +902,7 @@ sub _subRString {
     $sTxt = substr( $sWk, 8, $iL );
 
     #Has STRUN
-    if ( length( $sWk ) > ( 8 + $iL ) ) {
+    if ( ( $sWk ).chars > ( 8 + $iL ) ) {
         _NewCell(
             $oBook, $iR, $iC,
             Kind     => 'RString',
@@ -1138,7 +1138,7 @@ sub _subMulRK {
     return if $workbook.{'SheetCount'} <= 0;
 
     my ( $row, $first_col ) = unpack( "v2", $data );
-    my $last_col = unpack( "v", substr( $data, length( $data ) - 2, 2 ) );
+    my $last_col = unpack( "v", substr( $data, ( $data ).chars - 2, 2 ) );
 
     # Iterate over the RK array and decode the data.
     my $pos = 4;
@@ -1171,7 +1171,7 @@ sub _subMulRK {
 sub _subMulBlank {
     my ( $oBook, $bOp, $bLen, $sWk ) = @_;
     my ( $iR, $iSc ) = unpack( "v2", $sWk );
-    my $iEc = unpack( "v", substr( $sWk, length( $sWk ) - 2, 2 ) );
+    my $iEc = unpack( "v", substr( $sWk, ( $sWk ).chars - 2, 2 ) );
     my $iPos = 4;
     loop ( my $iC = $iSc ; $iC <= $iEc ; $iC++ ) {
         my $iF = unpack( 'v', substr( $sWk, $iPos, 2 ) );
@@ -1620,7 +1620,7 @@ sub _convBIFF8String {
     if ( wantarray ) {
 
         #4.1 Get Rich and Ext
-        if ( length( $sWk ) < $iStPos + $iLen + $iRichCnt * 4 + $iExtCnt ) {
+        if ( ( $sWk ).chars < $iStPos + $iLen + $iRichCnt * 4 + $iExtCnt ) {
             return (
                 [ Nil, $iHigh, Nil, Nil ],
                 $iStPos + $iLen + $iRichCnt * 4 + $iExtCnt,
@@ -2574,7 +2574,7 @@ sub _SwapForUnicode {
     my ( $sObj ) = @_;
 
     #    for(my $i = 0; $i<length($$sObj); $i+=2){
-    loop ( my $i = 0 ; $i < ( Int( length( $$sObj ) / 2 ) * 2 ) ; $i += 2 ) {
+    loop ( my $i = 0 ; $i < ( Int( ( $$sObj ).chars / 2 ) * 2 ) ; $i += 2 ) {
         my $sIt = substr( $$sObj, $i, 1 );
         substr( $$sObj, $i, 1 ) = substr( $$sObj, $i + 1, 1 );
         substr( $$sObj, $i + 1, 1 ) = $sIt;
@@ -2617,7 +2617,7 @@ sub _NewCell {
     if ( %rhKey{'Rich'} ) {
         my @aRich = ();
         my $sRich = %rhKey{'Rich'};
-        loop ( my $iWk = 0 ; $iWk < length( $sRich ) ; $iWk += 4 ) {
+        loop ( my $iWk = 0 ; $iWk < ( $sRich ).chars ; $iWk += 4 ) {
             my ( $iPos, $iFnt ) = unpack( 'v2', substr( $sRich, $iWk ) );
             push @aRich, [ $iPos, $oBook.{'Font'}[$iFnt] ];
         }

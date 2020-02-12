@@ -12,3 +12,13 @@ if I number the things, I'll either not like where they are run or
 what order they're run in, so I'll just keep the numbers off all the
 t/$Transformer::Name.t tests. It means they'll run at the end, but
 all of the core tests *should* be run anyway...
+
+Something else to point out is that because of the way PPI operates, I can
+get away with writing each test "only" twice - once with abolutely no
+whitespace between tokens, and once with whitespace between every possible
+token.
+
+This is mainly to make sure that I don't accidentally use the
+'sprevious_sibling' version of a method call when I meant 'previous_sibling'.
+One version treats whitespace as significant, and the other version doesn't.
+And I don't want to worry about which means which.

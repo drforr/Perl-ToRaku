@@ -266,10 +266,6 @@ sub test_transform {
 # In a given method, look to see if it calls one of those function names.
 # If so, the variable that calls it must be $self.
 
-# length( $x )
-# =>
-# $x.chars # XXX or $x.bytes ?
-
 1;
 
 =head1 NAME
