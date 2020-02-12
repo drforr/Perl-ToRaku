@@ -59,6 +59,7 @@ BEGIN {
     'Casts',
     'Constant',
     'Dereferences',
+    'Exists',
     'ForLoops',
     'HashKeys',
     'HigherOrderCommas',
@@ -234,10 +235,6 @@ sub test_transform {
 # 'sub Name { my ( $x ) = @_; my $y = shift; ... }'
 # =>
 # 'sub Name( $x, $y ) { ... }'
-
-# 'if ( exists $error_strings{$parse_error} )'
-# =>
-# 'if ( %error_strings{$parse_error}:defined )'
 
 # Does pack() exist?
 #
