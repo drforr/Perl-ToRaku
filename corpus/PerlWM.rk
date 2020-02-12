@@ -84,7 +84,7 @@ sub configure_request {
   my ($self, $event) = @_;
   my $xe = $event.{'xevent'};
   $self.{'x'}.ConfigureWindow($xe.{'window'},
-			      map { exists $xe.{$_}??($_=>$xe.{$_})!!() 
+			      map { $xe.{$_}:exists??($_=>$xe.{$_})!!() 
 				  }, qw (x y width height 
 				       border_width sibling stack_mode));
 }

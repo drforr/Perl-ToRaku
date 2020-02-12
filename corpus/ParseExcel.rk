@@ -176,7 +176,7 @@ multi method new {
     my ( $class, %hParam ) = @_;
 
     if ( not defined $_use_perlio ) {
-        if (   exists %Config{'useperlio'}
+        if (   %Config{'useperlio'}:exists
             && defined %Config{'useperlio'}
             && %Config{'useperlio'} eq "define" )
         {
@@ -2675,7 +2675,7 @@ sub error {
 
     my $parse_error = $self.{'_error_status'};
 
-    if ( exists %error_strings{$parse_error} ) {
+    if ( %error_strings{$parse_error}:exists ) {
         return %error_strings{$parse_error};
     }
     else {
