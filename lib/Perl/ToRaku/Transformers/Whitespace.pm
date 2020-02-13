@@ -15,6 +15,11 @@ use warnings;
 # =>
 # 'if ($i==0) {}'
 #
+sub short_description {
+  <<'_EOS_';
+Add whitespace after 'print', 'if' etc. so Raku doesn't confuse with methods.
+_EOS_
+}
 sub is_core { 1 }
 sub transformer {
   my $self = shift;

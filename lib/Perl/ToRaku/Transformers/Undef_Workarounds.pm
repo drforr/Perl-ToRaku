@@ -6,6 +6,11 @@ use warnings;
 # 'undef;'                     => 'Nil;'
 # '( $sWk & 32 ) ? undef : 3;' => '( $sWk & 32 ) ? Nil : 3;' # XXX The workaround
 #
+sub short_description {
+  <<'_EOS_';
+Fix some PPI problems with the 'undef' keywords.
+_EOS_
+}
 sub is_core { 1 }
 sub transformer {
   my $self = shift;

@@ -13,6 +13,11 @@ use warnings;
 # =>
 # 'verExcel95 ?? verBIFF5 !! verBIFF8' - PPI workaround
 #
+sub short_description {
+  <<'_EOS_';
+Fix a few PPI bugs with the ternary operator.
+_EOS_
+}
 sub is_core { 1 }
 sub transformer {
   my $self = shift;

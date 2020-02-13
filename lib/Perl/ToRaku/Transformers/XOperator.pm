@@ -9,6 +9,11 @@ use warnings;
 # =>
 # '(1) xx 2'
 #
+sub short_description {
+  <<'_EOS_';
+Change Perl-style 'x' to 'xx' if you're doing the '(1) x 80' Perl "trick".
+_EOS_
+}
 sub is_core { 1 }
 sub transformer {
   my $self = shift;

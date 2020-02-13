@@ -11,6 +11,11 @@ use warnings;
 #
 # 'for my $x ( @y ) { ... }' => no change
 #
+sub short_description {
+  <<'_EOS_';
+Change Perl 'for' and 'foreach' names to Raku 'for' and 'loop' style.
+_EOS_
+}
 sub is_core { 1 }
 sub transformer {
   my $self = shift;

@@ -31,6 +31,11 @@ use warnings;
 # 'no warnings "vars";'           => ''
 # 'no warnings qw( vars refs );'  => ''
 #
+sub short_description {
+  <<'_EOS_';
+Remove redundant pragmas like 'strict', 'warning' and 'utf8'.
+_EOS_
+}
 sub is_core { 1 }
 sub transformer {
   my $self = shift;

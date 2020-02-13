@@ -7,6 +7,11 @@ use warnings;
 # =>
 # 'constant FOO = 1;'
 #
+sub short_description {
+  <<'_EOS_';
+Change Perl 'use constant' declarations to Raku 'constant' style.
+_EOS_
+}
 sub is_core { 1 }
 sub transformer {
   my $self = shift;

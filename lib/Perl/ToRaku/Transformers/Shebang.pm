@@ -7,6 +7,11 @@ use warnings;
 # '#!/usr/bin/perl'     => '#!/usr/bin/env raku'
 # '#!/usr/bin/env perl' => '#!/usr/bin/env raku'
 #
+sub short_description {
+  <<'_EOS_';
+Rewrite Perl #! line into Raku style
+_EOS_
+}
 sub is_core { 1 }
 sub transformer {
   my $self = shift;

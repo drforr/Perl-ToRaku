@@ -5,6 +5,11 @@ use warnings;
 
 # 'sort{ $a cmp $b }' => 'sort{ $^a cmp $^b }'
 #
+sub short_description {
+  <<'_EOS_';
+Change Perl-style sort variables '$a', '$b' into Raku-style '$^a', '$^b'.
+_EOS_
+}
 sub is_core { 1 }
 sub transformer {
   my $self = shift;

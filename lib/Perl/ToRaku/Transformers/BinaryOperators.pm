@@ -25,6 +25,11 @@ use warnings;
 # 'Foo->new(2)' => 'Foo.new(2)'
 # '$x->$y' => '$x.$y' # And so on.
 #
+sub short_description {
+  <<'_EOS_';
+Change Perl binary operators like '->' and '.' into Raku '.' and '~' style.
+_EOS_
+}
 sub is_core { 1 }
 sub transformer {
   my $self = shift;

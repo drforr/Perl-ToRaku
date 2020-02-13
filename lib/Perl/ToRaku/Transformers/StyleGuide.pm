@@ -26,6 +26,16 @@ use warnings;
 # =>
 # 'What the Raku version of your code should look like afterwards.'
 #
+
+# This should only matter if you're using the 'Transformers' namespace, but
+# please don't do that as I'd prefer to have some control. I can't stop anyone,
+# but I can at least ask.
+#
+sub short_description {
+  <<'_EOS_';
+An (at most) 80-char description of what the transformer does.
+_EOS_
+}
 sub is_core { 'Is this a core module? 1 No? 0' }
 sub transformer {
   my $self = shift; # Chosen over @_ purely at random.

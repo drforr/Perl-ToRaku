@@ -9,6 +9,11 @@ use Carp qw(carp);
 # 'package My::Name v1.2.3;'          => 'unit class My::Name:ver<1.2.3>;'
 # 'package My::Name; use base "foo";' => 'unit class My::Name is foo;'
 #
+sub short_description {
+  <<'_EOS_';
+Change Perl package declaration (with version and parents) to Raku style.
+_EOS_
+}
 sub is_core { 1 }
 sub transformer {
   my $self = shift;

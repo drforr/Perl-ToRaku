@@ -8,6 +8,11 @@ use warnings;
 # 'use IO::Handle "vars";'          => ''
 # 'use IO::Handle qw( vars refs );' => ''
 #
+sub short_description {
+  <<'_EOS_';
+Remove redundant module invocations like 'IO::Handle'.
+_EOS_
+}
 sub is_core { 1 }
 sub transformer {
   my $self = shift;

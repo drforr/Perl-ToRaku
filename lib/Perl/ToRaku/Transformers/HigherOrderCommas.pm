@@ -9,6 +9,11 @@ use warnings;
 # 'grep{ ... } @foo' => 'grep{ ... }, @foo'
 # 'sort{ ... } @foo' => 'sort{ ... }, @foo'
 #
+sub short_description {
+  <<'_EOS_';
+Insert comma between 'map{}' and the variable.
+_EOS_
+}
 sub is_core { 1 }
 sub transformer {
   my $self = shift;

@@ -3,11 +3,15 @@ package Perl::ToRaku::Transformers::Dereferences;
 use strict;
 use warnings;
 
-# %foo    --> %foo
-# $foo{a} --> %foo{a} # Note it does not pointify braces.
-# @foo    --> @foo
-# $foo[1] --> @foo[1]
+# '$ { $x }' => '$ ( $x )'
+# '@ { $x }' => '@ ( $x )'
+# '% { $x }' => '% ( $x )'
 #
+sub short_description {
+  <<'_EOS_';
+Change Perl '${$x}' dereferences into Raku '$($x)' style.
+_EOS_
+}
 sub is_core { 1 }
 sub transformer {
   my $self = shift;

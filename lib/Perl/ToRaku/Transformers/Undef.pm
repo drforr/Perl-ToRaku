@@ -6,6 +6,11 @@ use warnings;
 # 'undef;'                     => 'Nil;'
 # '( $sWk & 32 ) ? undef : 3;' => '( $sWk & 32 ) ? Nil : 3;'
 #
+sub short_description {
+  <<'_EOS_';
+Change Perl-style 'undef' to Raku-style 'Nil'.
+_EOS_
+}
 sub is_core { 1 }
 sub transformer {
   my $self = shift;

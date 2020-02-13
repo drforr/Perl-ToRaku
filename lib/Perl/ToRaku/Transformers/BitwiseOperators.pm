@@ -7,6 +7,11 @@ use warnings;
 # =>
 # '1 +& 3'
 #
+sub short_description {
+  <<'_EOS_';
+Change Perl bitwise operators like '&' into Raku '+&' style.
+_EOS_
+}
 sub is_core { 1 }
 sub transformer {
   my $self = shift;

@@ -6,6 +6,11 @@ use warnings;
 # 'int (...)' => 'Int(...)'
 # 'int(...)' => 'Int(...)'
 #
+sub short_description {
+  <<'_EOS_';
+Change Perl 'int()' to Raku 'Int()' "cast" style.
+_EOS_
+}
 sub is_core { 1 }
 sub transformer {
   my $self = shift;

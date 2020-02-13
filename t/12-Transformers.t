@@ -34,12 +34,21 @@ BEGIN {
     require     => 1;
 }
 
-for my $plugin ( core_transformers ) {
+my @core_transformers = core_transformers;
+for my $plugin ( @core_transformers ) {
   my $plugin_name = $plugin;
   $plugin_name    =~ s{ ^ Perl::ToRaku::Transformers:: }{}x;
 
   ok $plugin->can( 'transformer' ), "$plugin_name has transformer()";
   ok $plugin->can( 'is_core' ),     "$plugin_name can tell you if it's core";
+  ok $plugin->can( 'short_description' ),
+     "$plugin_name has a short description";
+  ok length( $plugin->short_description() ) <= 80,
+     "short description for $plugin_name is at most 80 glyphs";
 }
 
-done_testing( (keys %transformers) * 3 + 1 );
+plan tests => 1 +
+              scalar( keys %transformers ) +
+	      scalar( @core_transformers ) * 4;
+
+done_testing;

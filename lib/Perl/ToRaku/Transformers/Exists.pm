@@ -6,6 +6,11 @@ use warnings;
 # 'exists $q { a }' => '$q { a }:exists'
 # 'exists $q{a}' => '$q{a}:exists'
 #
+sub short_description {
+  <<'_EOS_';
+Change Perl 'exists' builtin to Raku ':exists' adverb.
+_EOS_
+}
 sub is_core { 1 }
 sub transformer {
   my $self = shift;

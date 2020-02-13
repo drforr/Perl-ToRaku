@@ -8,6 +8,11 @@ use warnings;
 # @foo    --> @foo
 # $foo[1] --> @foo[1]
 #
+sub short_description {
+  <<'_EOS_';
+Change Perl sigil usage '$a[0]' to Raku-style '@a[0]'.
+_EOS_
+}
 sub is_core { 1 }
 sub transformer {
   my $self = shift;

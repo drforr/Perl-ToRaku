@@ -9,6 +9,11 @@ use warnings;
 #
 # q{$a{foo}} => q{$a{'foo'}}; # unless 'foo' is a constant...
 #
+sub short_description {
+  <<'_EOS_';
+Change Perl bareword '$a{foo}' hash key to Raku quoted style C<$a{'foo'}>.
+_EOS_
+}
 sub is_core { 1 }
 sub transformer {
   my $self = shift;

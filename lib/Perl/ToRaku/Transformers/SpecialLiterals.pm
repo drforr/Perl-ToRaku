@@ -8,6 +8,11 @@ use warnings;
 # '__LINE__' => '$?LINE'
 # '__PACKAGE__' => '$?PACKAGE'
 #
+sub short_description {
+  <<'_EOS_';
+Change Perl-style '__END__' literals to Raku style.
+_EOS_
+}
 sub is_core { 1 }
 sub transformer {
   my $self = shift;

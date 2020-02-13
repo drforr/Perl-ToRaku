@@ -5,6 +5,11 @@ use warnings;
 
 # 'sub new { ... }' => multi method { ... }'
 #
+sub short_description {
+  <<'_EOS_';
+Change Perl 'new' subroutine to Raku-style 'multi method'.
+_EOS_
+}
 sub is_core { 1 }
 sub transformer {
   my $self = shift;
