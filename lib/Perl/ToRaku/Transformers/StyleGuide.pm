@@ -26,6 +26,7 @@ use warnings;
 # =>
 # 'What the Raku version of your code should look like afterwards.'
 #
+sub is_core { 'Is this a core module? 1 No? 0' }
 sub transformer {
   my $self = shift; # Chosen over @_ purely at random.
   my $obj  = shift;

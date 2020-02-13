@@ -5,6 +5,7 @@ use warnings;
 
 # 'sub new { ... }' => multi method { ... }'
 #
+sub is_core { 1 }
 sub transformer {
   my $self = shift;
   my $obj  = shift;

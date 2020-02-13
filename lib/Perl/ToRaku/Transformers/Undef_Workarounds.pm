@@ -6,6 +6,7 @@ use warnings;
 # 'undef;'                     => 'Nil;'
 # '( $sWk & 32 ) ? undef : 3;' => '( $sWk & 32 ) ? Nil : 3;' # XXX The workaround
 #
+sub is_core { 1 }
 sub transformer {
   my $self = shift;
   my $obj  = shift;

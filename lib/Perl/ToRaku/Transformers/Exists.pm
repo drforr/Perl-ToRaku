@@ -6,6 +6,7 @@ use warnings;
 # 'exists $q { a }' => '$q { a }:exists'
 # 'exists $q{a}' => '$q{a}:exists'
 #
+sub is_core { 1 }
 sub transformer {
   my $self = shift;
   my $obj  = shift;

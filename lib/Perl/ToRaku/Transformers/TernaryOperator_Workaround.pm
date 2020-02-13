@@ -13,6 +13,7 @@ use warnings;
 # =>
 # 'verExcel95 ?? verBIFF5 !! verBIFF8' - PPI workaround
 #
+sub is_core { 1 }
 sub transformer {
   my $self = shift;
   my $obj  = shift;

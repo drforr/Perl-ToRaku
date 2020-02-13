@@ -6,6 +6,7 @@ use warnings;
 # 'int (...)' => 'Int(...)'
 # 'int(...)' => 'Int(...)'
 #
+sub is_core { 1 }
 sub transformer {
   my $self = shift;
   my $obj  = shift;

@@ -9,6 +9,7 @@ use warnings;
 # 'grep{ ... } @foo' => 'grep{ ... }, @foo'
 # 'sort{ ... } @foo' => 'sort{ ... }, @foo'
 #
+sub is_core { 1 }
 sub transformer {
   my $self = shift;
   my $obj  = shift;

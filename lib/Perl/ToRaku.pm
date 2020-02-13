@@ -8,94 +8,35 @@ use Carp qw(croak);
 use File::Slurp;
 use PPI;
 
-BEGIN {
-  my @core_validators = map { __PACKAGE__ . '::Validators::' . $_ } (
-    'NoOverloadPragma',
-    'NoMultiplePackages',
-  );
+use Module::Pluggable
+  sub_name    => 'validators',
+  search_path => 'Perl::ToRaku::Validators',
+  require     => 1;
 
-  use Module::Pluggable
-    sub_name    => 'core_validators',
-    search_path => 'Perl::ToRaku::Validators',
-    only        => \@core_validators,
-    require     => 1;
+use Module::Pluggable
+  sub_name    => 'user_validators',
+  search_path => 'Perl::ToRaku::ValidatorsX',
+  require     => 1;
 
-  use Module::Pluggable
-    sub_name    => 'optional_validators',
-    search_path => 'Perl::ToRaku::Validators',
-    except      => \@core_validators,
-    require     => 1;
+use Module::Pluggable
+  sub_name    => 'collectors',
+  search_path => 'Perl::ToRaku::Collectors',
+  require     => 1;
 
-  use Module::Pluggable
-    sub_name    => 'user_validators',
-    search_path => 'Perl::ToRaku::ValidatorsX',
-    require     => 1;
+use Module::Pluggable
+  sub_name    => 'user_collectors',
+  search_path => 'Perl::ToRaku::CollectorsX',
+  require     => 1;
 
-  my @core_collectors = map { __PACKAGE__ . '::Collectors::' . $_ } (
-    'IsPackage',
-    'IsMoose',
-  );
+use Module::Pluggable
+  sub_name    => 'transformers',
+  search_path => 'Perl::ToRaku::Transformers',
+  require     => 1;
 
-  use Module::Pluggable
-    sub_name    => 'core_collectors',
-    search_path => 'Perl::ToRaku::Collectors',
-    only        => \@core_collectors,
-    require     => 1;
-
-  use Module::Pluggable
-    sub_name    => 'optional_collectors',
-    search_path => 'Perl::ToRaku::Collectors',
-    except      => \@core_collectors,
-    require     => 1;
-
-  use Module::Pluggable
-    sub_name    => 'user_collectors',
-    search_path => 'Perl::ToRaku::CollectorsX',
-    require     => 1;
-
-  my @core_transformers = map { __PACKAGE__ . '::Transformers::' . $_ } (
-    'BitwiseOperators',
-    'BinaryOperators',
-    'Casts',
-    'Constant',
-    'Dereferences',
-    'Exists',
-    'ForLoops',
-    'HashKeys',
-    'HigherOrderCommas',
-    'PackageDeclaration',
-    'RedundantModules',
-    'RedundantPragmas',
-    'Shebang',
-    'Sigils',
-    'SortVariables',
-    'SpecialLiterals',
-    'TernaryOperator',
-    'TernaryOperator_Workaround',
-    'UnaryOperators',
-    'Undef',
-    'Undef_Workarounds',
-    'Whitespace',
-    'XOperator'
-  );
-
-  use Module::Pluggable
-    sub_name    => 'core_transformers',
-    search_path => 'Perl::ToRaku::Transformers',
-    only        => \@core_transformers,
-    require     => 1;
-
-  use Module::Pluggable
-    sub_name    => 'optional_transformers',
-    search_path => 'Perl::ToRaku::Transformers',
-    except      => \@core_transformers,
-    require     => 1;
-
-  use Module::Pluggable
-    sub_name    => 'user_transformers',
-    search_path => 'Perl::ToRaku::TransformersX',
-    require     => 1;
-}
+use Module::Pluggable
+  sub_name    => 'user_transformers',
+  search_path => 'Perl::ToRaku::TransformersX',
+  require     => 1;
 
 # Argument to pass in:
 #   --remove-redundant-parentheses-around-conditions
@@ -132,13 +73,24 @@ sub _validate {
   my $ppi      = $self->{ppi};
 
   my @message;
+  my @core_validators;
+  my @optional_validators;
 
-  for my $plugin ( $self->core_validators ) {
+  for my $plugin ( $self->validators ) {
+    if ( $plugin->is_core ) {
+      push @core_validators, $plugin;
+    }
+    else {
+      push @optional_validators, $plugin;
+    }
+  }
+
+  for my $plugin ( @core_validators ) {
     my $message = $plugin->validator( $self );
     push @message, $message if $message;
   }
 
-  for my $plugin ( $self->optional_validators ) {
+  for my $plugin ( @optional_validators ) {
     my $message = $plugin->validator( $self );
     push @message, $message if $message;
   }
@@ -155,11 +107,23 @@ sub _collect {
   my ( $self ) = @_;
   my $ppi      = $self->{ppi};
 
-  for my $plugin ( $self->core_collectors ) {
+  my @core_collectors;
+  my @optional_collectors;
+
+  for my $plugin ( $self->collectors ) {
+    if ( $plugin->is_core ) {
+      push @core_collectors, $plugin;
+    }
+    else {
+      push @optional_collectors, $plugin;
+    }
+  }
+
+  for my $plugin ( @core_collectors ) {
     $plugin->collector( $self );
   }
 
-  for my $plugin ( $self->optional_collectors ) {
+  for my $plugin ( @optional_collectors ) {
     $plugin->collector( $self );
   }
 
@@ -180,11 +144,23 @@ sub transform {
 
   $self->_collect;
 
-  for my $plugin ( $self->core_transformers ) {
+  my @core_transformers;
+  my @optional_transformers;
+
+  for my $plugin ( $self->transformers ) {
+    if ( $plugin->is_core ) {
+      push @core_transformers, $plugin;
+    }
+    else {
+      push @optional_transformers, $plugin;
+    }
+  }
+
+  for my $plugin ( @core_transformers ) {
     $plugin->transformer( $self );
   }
 
-  for my $plugin ( $self->optional_transformers ) {
+  for my $plugin ( @optional_transformers ) {
     $plugin->transformer( $self );
   }
 

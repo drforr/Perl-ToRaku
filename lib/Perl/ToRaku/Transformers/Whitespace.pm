@@ -15,6 +15,7 @@ use warnings;
 # =>
 # 'if ($i==0) {}'
 #
+sub is_core { 1 }
 sub transformer {
   my $self = shift;
   my $obj  = shift;

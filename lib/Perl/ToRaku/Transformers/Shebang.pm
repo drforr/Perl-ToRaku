@@ -7,6 +7,7 @@ use warnings;
 # '#!/usr/bin/perl'     => '#!/usr/bin/env raku'
 # '#!/usr/bin/env perl' => '#!/usr/bin/env raku'
 #
+sub is_core { 1 }
 sub transformer {
   my $self = shift;
   my $obj  = shift;

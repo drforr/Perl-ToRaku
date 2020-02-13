@@ -5,6 +5,7 @@ use warnings;
 
 # 'use overload' # Return 1 if it uses overload pragma
 #
+sub is_core { 1 }
 sub validator {
   my $self = shift;
   my $obj  = shift;

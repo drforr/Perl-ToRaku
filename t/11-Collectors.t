@@ -28,4 +28,19 @@ for my $collector ( sort keys %collectors ) {
   ok exists $tests{ $collector }, "$collector.pm has a test";
 }
 
-done_testing;
+BEGIN {
+  use Module::Pluggable
+    sub_name    => 'core_collectors',
+    search_path => 'Perl::ToRaku::Collectors',
+    require     => 1;
+}
+
+for my $plugin ( core_collectors ) {
+  my $plugin_name = $plugin;
+  $plugin_name    =~ s{ ^ Perl::ToRaku::Collectors:: }{}x;
+
+  ok $plugin->can( 'collector' ), "$plugin_name has collector()";
+  ok $plugin->can( 'is_core' ),   "$plugin_name can tell you if it's core";
+}
+
+done_testing( (keys %collectors) * 3 + 1 );

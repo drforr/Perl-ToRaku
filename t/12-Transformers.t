@@ -27,4 +27,19 @@ for my $transformer ( sort keys %transformers ) {
   ok exists $tests{ $transformer }, "$transformer.pm has a test";
 }
 
-done_testing;
+BEGIN {
+  use Module::Pluggable
+    sub_name    => 'core_transformers',
+    search_path => 'Perl::ToRaku::Transformers',
+    require     => 1;
+}
+
+for my $plugin ( core_transformers ) {
+  my $plugin_name = $plugin;
+  $plugin_name    =~ s{ ^ Perl::ToRaku::Transformers:: }{}x;
+
+  ok $plugin->can( 'transformer' ), "$plugin_name has transformer()";
+  ok $plugin->can( 'is_core' ),     "$plugin_name can tell you if it's core";
+}
+
+done_testing( (keys %transformers) * 3 + 1 );

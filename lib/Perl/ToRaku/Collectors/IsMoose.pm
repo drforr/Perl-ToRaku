@@ -7,6 +7,7 @@ use warnings;
 # 'use Moose;'       # Is this used?
 # 'use Moose::Role;' # Is this used?
 #
+sub is_core { 1 }
 sub collector {
   my $self = shift;
   my $obj  = shift;

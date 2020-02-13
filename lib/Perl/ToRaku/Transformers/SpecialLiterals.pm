@@ -8,6 +8,7 @@ use warnings;
 # '__LINE__' => '$?LINE'
 # '__PACKAGE__' => '$?PACKAGE'
 #
+sub is_core { 1 }
 sub transformer {
   my $self = shift;
   my $obj  = shift;

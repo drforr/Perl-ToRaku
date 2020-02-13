@@ -5,6 +5,7 @@ use warnings;
 
 # 'package Foo' # Return 1 if we have no multiple packages
 #
+sub is_core { 1 }
 sub validator {
   my $self = shift;
   my $obj  = shift;

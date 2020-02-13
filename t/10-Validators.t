@@ -28,4 +28,19 @@ for my $validator ( sort keys %validators ) {
   ok exists $tests{ $validator }, "$validator.pm has a test";
 }
 
-done_testing;
+BEGIN {
+  use Module::Pluggable
+    sub_name    => 'core_validators',
+    search_path => 'Perl::ToRaku::Validators',
+    require     => 1;
+}
+
+for my $plugin ( core_validators ) {
+  my $plugin_name = $plugin;
+  $plugin_name    =~ s{ ^ Perl::ToRaku::Validators:: }{}x;
+
+  ok $plugin->can( 'validator' ), "$plugin_name has validate()";
+  ok $plugin->can( 'is_core' ),   "$plugin_name can tell you if it's core";
+}
+
+done_testing( (keys %validators) * 3 + 1 );

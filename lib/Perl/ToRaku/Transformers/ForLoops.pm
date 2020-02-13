@@ -11,6 +11,7 @@ use warnings;
 #
 # 'for my $x ( @y ) { ... }' => no change
 #
+sub is_core { 1 }
 sub transformer {
   my $self = shift;
   my $obj  = shift;

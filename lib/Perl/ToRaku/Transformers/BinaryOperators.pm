@@ -25,6 +25,7 @@ use warnings;
 # 'Foo->new(2)' => 'Foo.new(2)'
 # '$x->$y' => '$x.$y' # And so on.
 #
+sub is_core { 1 }
 sub transformer {
   my $self = shift;
   my $obj  = shift;

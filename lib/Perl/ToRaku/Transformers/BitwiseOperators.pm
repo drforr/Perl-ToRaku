@@ -7,6 +7,7 @@ use warnings;
 # =>
 # '1 +& 3'
 #
+sub is_core { 1 }
 sub transformer {
   my $self = shift;
   my $obj  = shift;

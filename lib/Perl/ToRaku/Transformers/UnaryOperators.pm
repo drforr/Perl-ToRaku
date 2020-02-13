@@ -15,6 +15,7 @@ use warnings;
 # =>    # In most cases  ?^$a doesn't appear to be needed.
 # '?^$a'
 #
+sub is_core { 1 }
 sub transformer {
   my $self = shift;
   my $obj  = shift;

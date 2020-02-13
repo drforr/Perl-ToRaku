@@ -8,6 +8,7 @@ use warnings;
 # 'use IO::Handle "vars";'          => ''
 # 'use IO::Handle qw( vars refs );' => ''
 #
+sub is_core { 1 }
 sub transformer {
   my $self = shift;
   my $obj  = shift;

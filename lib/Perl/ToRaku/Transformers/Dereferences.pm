@@ -8,6 +8,7 @@ use warnings;
 # @foo    --> @foo
 # $foo[1] --> @foo[1]
 #
+sub is_core { 1 }
 sub transformer {
   my $self = shift;
   my $obj  = shift;

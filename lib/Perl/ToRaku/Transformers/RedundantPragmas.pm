@@ -31,6 +31,7 @@ use warnings;
 # 'no warnings "vars";'           => ''
 # 'no warnings qw( vars refs );'  => ''
 #
+sub is_core { 1 }
 sub transformer {
   my $self = shift;
   my $obj  = shift;

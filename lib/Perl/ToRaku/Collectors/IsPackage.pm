@@ -5,6 +5,7 @@ use warnings;
 
 # 'package My::Name;' # Is the file a package?
 #
+sub is_core { 1 }
 sub collector {
   my $self = shift;
   my $obj  = shift;

@@ -9,6 +9,7 @@ use Carp qw(carp);
 # 'package My::Name v1.2.3;' => 'unit class My::Name:ver<1.2.3>;'
 # 'package My::Name; use base "foo";' => 'unit class My::Name is foo;'
 #
+sub is_core { 1 }
 sub transformer {
   my $self         = shift;
   my $obj          = shift;
