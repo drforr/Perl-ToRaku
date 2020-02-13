@@ -5,19 +5,19 @@ use warnings;
 
 use Carp qw(carp);
 
-# 'package My::Name;' => 'unit class My::Name'
-# 'package My::Name v1.2.3;' => 'unit class My::Name:ver<1.2.3>;'
+# 'package My::Name;'                 => 'unit class My::Name'
+# 'package My::Name v1.2.3;'          => 'unit class My::Name:ver<1.2.3>;'
 # 'package My::Name; use base "foo";' => 'unit class My::Name is foo;'
 #
 sub is_core { 1 }
 sub transformer {
-  my $self         = shift;
-  my $obj          = shift;
-  my $ppi          = $obj->_ppi;
-  my $package_stmt = $ppi->find_first( 'PPI::Statement::Package' );
+  my $self = shift;
+  my $obj  = shift;
+  my $ppi  = $obj->_ppi;
 
-  return unless defined $package_stmt and $package_stmt;
+  return unless defined( $obj->{is_package} );
 
+  my $package_stmt    = $ppi->find_first( 'PPI::Statement::Package' );
   my @parent_packages = _get_parent_packages( $ppi );
 
   # This isn't hard once you visualize the process, but I'll do it in steps.

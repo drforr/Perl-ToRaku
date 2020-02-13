@@ -187,6 +187,7 @@ sub test_transform {
   my ( $self, $package, $text ) = @_;
   $self->{ppi} = PPI::Document->new( \$text );
 
+  $self->_collect();
   $package->transformer( $self );
   $self->{ppi}->serialize;
 }
