@@ -3,15 +3,24 @@ package Perl::ToRaku::Transformers::BitwiseOperators;
 use strict;
 use warnings;
 
-# '1 & 3'
-# =>
-# '1 +& 3'
-#
+sub long_description {
+  <<'_EOS_';
+Change Perl bitwise operators into Raku bitwise operators.
+
+1 & 3 ==> 1 +& 3
+1 | 3 ==> 1 +| 3
+1 ^ 3 ==> 1 +^ 3
+
+(and the ^= versions as well)
+_EOS_
+}
 sub short_description {
   <<'_EOS_';
 Change Perl bitwise operators like '&' into Raku '+&' style.
 _EOS_
 }
+sub run_before { }
+sub run_after { }
 sub is_core { 1 }
 sub transformer {
   my $self = shift;

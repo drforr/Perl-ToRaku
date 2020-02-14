@@ -3,14 +3,20 @@ package Perl::ToRaku::Transformers::Exists;
 use strict;
 use warnings;
 
-# 'exists $q { a }' => '$q { a }:exists'
-# 'exists $q{a}' => '$q{a}:exists'
-#
-sub short_description {
+sub long_description {
   <<'_EOS_';
-Change Perl 'exists' builtin to Raku ':exists' adverb.
+Change Perl 'exists' builtin to Raku adverb ':exists'
+
+exists $q{a} ==> $q{a}:exists
 _EOS_
 }
+sub short_description {
+  <<'_EOS_';
+Change Perl 'exists' builtin to Raku adverb ':exists'.
+_EOS_
+}
+sub run_before { }
+sub run_after { }
 sub is_core { 1 }
 sub transformer {
   my $self = shift;

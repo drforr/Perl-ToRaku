@@ -3,17 +3,22 @@ package Perl::ToRaku::Transformers::HigherOrderCommas;
 use strict;
 use warnings;
 
-# 'grep &bar,....' shouldn't be caught, but we test for it...
+sub long_description {
+  <<'_EOS_';
+Add a comma between the block and iteration variable of map{}, grep{}, sort{}.
 
-# 'map{ ... } @foo' => 'map{ ... }, @foo'
-# 'grep{ ... } @foo' => 'grep{ ... }, @foo'
-# 'sort{ ... } @foo' => 'sort{ ... }, @foo'
-#
+map{ }  @foo ==> map{ },  @foo
+grep{ } @foo ==> grep{ }, @foo
+sort{ } @foo ==> sort{ }, @foo
+_EOS_
+}
 sub short_description {
   <<'_EOS_';
 Insert comma between 'map{}' and the variable.
 _EOS_
 }
+sub run_before { }
+sub run_after { }
 sub is_core { 1 }
 sub transformer {
   my $self = shift;

@@ -3,21 +3,23 @@ package Perl::ToRaku::Transformers::TernaryOperator_Workaround;
 use strict;
 use warnings;
 
-# XXX This may be solved by now...
-# XXX There's a known case we have to solve somehow... just look for an undef
-# XXX ( 0x00 == 0x00 ) ?? undef !! 1;
-#                         ^
-#                         |
+sub long_description {
+  <<'_EOS_';
+Handle an edge case in PPI where ': bareword' get treated as a label.
 
-# 'verExcel95 ? verBIFF5 : verBIFF8'
-# =>
-# 'verExcel95 ?? verBIFF5 !! verBIFF8' - PPI workaround
-#
+It should be treated as a colon of the ternary operator and a bareword, but
+right now it doesn't. This should already be filed as a bug, but may not be.
+
+verExcel95 ? verBIFF5 : verBIFF8 ==> verExcel95 ?? verBIFF5 !! verBIFF8
+_EOS_
+}
 sub short_description {
   <<'_EOS_';
 Fix a few PPI bugs with the ternary operator.
 _EOS_
 }
+sub run_before { }
+sub run_after { }
 sub is_core { 1 }
 sub transformer {
   my $self = shift;

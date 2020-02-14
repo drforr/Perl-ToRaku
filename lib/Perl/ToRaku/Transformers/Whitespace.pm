@@ -3,23 +3,22 @@ package Perl::ToRaku::Transformers::Whitespace;
 use strict;
 use warnings;
 
-# 'print($x);'
-# =>
-# 'print ($x);'
-#
-# 'my($x);'
-# =>
-# 'my ($x);'
-#
-# 'if($i==0) {}'
-# =>
-# 'if ($i==0) {}'
-#
+sub long_description {
+  <<'_EOS_';
+Add some whitespace where Raku needs it for builtins.
+
+print($x)    ==> print ($x) 
+my($x)       ==> my ($x)
+if($i==0) {} ==> if ($i==0) {}
+_EOS_
+}
 sub short_description {
   <<'_EOS_';
 Add whitespace after 'print', 'if' etc. so Raku doesn't confuse with methods.
 _EOS_
 }
+sub run_before { }
+sub run_after { }
 sub is_core { 1 }
 sub transformer {
   my $self = shift;

@@ -9,11 +9,29 @@ use Carp qw(carp);
 # 'package My::Name v1.2.3;'          => 'unit class My::Name:ver<1.2.3>;'
 # 'package My::Name; use base "foo";' => 'unit class My::Name is foo;'
 #
+sub long_description {
+  <<'_EOS_';
+Convert package declaration into Raku 'unit class'.
+
+It also captures the version (if any) specified as C<our $VERSION> and any
+superclasses with 'use base' or 'use parent'. It doesn't really need to do
+this, but it uses information from the IsPackage collector in order to do its
+job.
+
+Since this particular translator can run at any time and remove the
+evidence that there was a package here at all, it's best that other translators
+rely on the IsPackage output if they need to know whether they're in a 
+package or not. This translator also removes things such as the package version
+and any parents it might have, so that's another reason to rely on IsPackage.
+_EOS_
+}
 sub short_description {
   <<'_EOS_';
 Change Perl package declaration (with version and parents) to Raku style.
 _EOS_
 }
+sub run_before { }
+sub run_after { }
 sub is_core { 1 }
 sub transformer {
   my $self = shift;

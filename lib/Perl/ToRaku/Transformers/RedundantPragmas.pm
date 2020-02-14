@@ -31,11 +31,29 @@ use warnings;
 # 'no warnings "vars";'           => ''
 # 'no warnings qw( vars refs );'  => ''
 #
+sub long_description {
+  <<'_EOS_';
+Just like RedundantModules, this removes pragmas that Raku either doesn't need
+or has turned on all the time, like 'strict' and 'warnings'.
+
+(it also removes all the qw() &c) And just like RedundantModules, it keeps the
+newline intact. This design decision may change later on.
+
+use 5.008    ==> ''
+use utf8     ==> ''
+use strict   ==> ''
+no strict    ==> ''
+use warnings ==> ''
+no warnings  ==> ''
+_EOS_
+}
 sub short_description {
   <<'_EOS_';
 Remove redundant pragmas like 'strict', 'warning' and 'utf8'.
 _EOS_
 }
+sub run_before { }
+sub run_after { }
 sub is_core { 1 }
 sub transformer {
   my $self = shift;

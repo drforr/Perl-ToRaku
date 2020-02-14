@@ -3,15 +3,20 @@ package Perl::ToRaku::Transformers::TernaryOperator;
 use strict;
 use warnings;
 
-# '1 ? 2 : 3'
-# =>
-# '1 ?? 2 !! 3'
-#
+sub long_description {
+  <<'_EOS_';
+Change Perl-style ternary expressions to Raku style.
+
+1 ? 2 : 3 ==> 1 ?? 2 !! 3
+_EOS_
+}
 sub short_description {
   <<'_EOS_';
 Change the Perl ternary operator to Raku style.
 _EOS_
 }
+sub run_before { }
+sub run_after { }
 sub is_core { 1 }
 sub transformer {
   my $self = shift;

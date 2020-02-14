@@ -3,14 +3,20 @@ package Perl::ToRaku::Transformers::Undef_Workarounds;
 use strict;
 use warnings;
 
-# 'undef;'                     => 'Nil;'
-# '( $sWk & 32 ) ? undef : 3;' => '( $sWk & 32 ) ? Nil : 3;' # XXX The workaround
-#
+sub long_description {
+  <<'_EOS_';
+Workaround for a PPI bug - ': undef' is treated as a label even with '?'...
+
+( $sWk & 32 ) ? undef : 3 ==> ( $sWk & 32 ) ? Nil : 3
+_EOS_
+}
 sub short_description {
   <<'_EOS_';
 Fix some PPI problems with the 'undef' keywords.
 _EOS_
 }
+sub run_before { }
+sub run_after { }
 sub is_core { 1 }
 sub transformer {
   my $self = shift;

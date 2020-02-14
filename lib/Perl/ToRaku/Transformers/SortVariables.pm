@@ -3,13 +3,20 @@ package Perl::ToRaku::Transformers::SortVariables;
 use strict;
 use warnings;
 
-# 'sort{ $a cmp $b }' => 'sort{ $^a cmp $^b }'
-#
+sub long_description {
+  <<'_EOS_';
+Change Perl's $a and $b variables to Raku special $^a and $^b.
+
+sort{ $a cmp $b } ==> sort{ $^a cmp $^b }
+_EOS_
+}
 sub short_description {
   <<'_EOS_';
 Change Perl-style sort variables '$a', '$b' into Raku-style '$^a', '$^b'.
 _EOS_
 }
+sub run_before { }
+sub run_after { }
 sub is_core { 1 }
 sub transformer {
   my $self = shift;

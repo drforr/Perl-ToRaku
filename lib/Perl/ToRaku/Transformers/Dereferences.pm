@@ -3,15 +3,22 @@ package Perl::ToRaku::Transformers::Dereferences;
 use strict;
 use warnings;
 
-# '$ { $x }' => '$ ( $x )'
-# '@ { $x }' => '@ ( $x )'
-# '% { $x }' => '% ( $x )'
-#
+sub long_description {
+  <<'_EOS_';
+Convert Perl dereference "operator" into Raku dereference style.
+
+${ $x } ==> $( $x )
+@{ $x } ==> @( $x )
+%{ $x } ==> %( $x )
+_EOS_
+}
 sub short_description {
   <<'_EOS_';
 Change Perl '${$x}' dereferences into Raku '$($x)' style.
 _EOS_
 }
+sub run_before { }
+sub run_after { }
 sub is_core { 1 }
 sub transformer {
   my $self = shift;

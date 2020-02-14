@@ -26,17 +26,42 @@ use warnings;
 # =>
 # 'What the Raku version of your code should look like afterwards.'
 #
-
-# This should only matter if you're using the 'Transformers' namespace, but
-# please don't do that as I'd prefer to have some control. I can't stop anyone,
-# but I can at least ask.
 #
+sub long_description {
+  <<'_EOS_';
+Start of a longer description
+
+Some more text about what's going on
+
+Perl text ==> Raku text
+_EOS_
+}
+
 sub short_description {
   <<'_EOS_';
 An (at most) 80-char description of what the transformer does.
 _EOS_
 }
+
+# Make sure to run this module before any of these listed modules.
+#
+sub run_before { 'list of modules stripped of "..Transformers" to run before' }
+
+# Make sure to run this module after all of these listed modules.
+#
+sub run_after { }
+
+# Is this module core?
+# This should only matter if you're using the 'Transformers' namespace, but
+# please don't do that as I'd prefer to have some control. I can't stop anyone,
+# but I can at least ask.
+#
+# Only matters in the ::Transformer:: namespace.
+#
 sub is_core { 'Is this a core module? 1 No? 0' }
+
+# The actual transformation this module does.
+#
 sub transformer {
   my $self = shift; # Chosen over @_ purely at random.
   my $obj  = shift;

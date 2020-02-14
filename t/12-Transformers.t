@@ -45,10 +45,14 @@ for my $plugin ( @core_transformers ) {
      "$plugin_name has a short description";
   ok length( $plugin->short_description() ) <= 80,
      "short description for $plugin_name is at most 80 glyphs";
+  ok $plugin->can( 'long_description' ),
+     "$plugin_name has a long description";
+  ok $plugin->can( 'run_before' ), "$plugin_name has run_before()";
+  ok $plugin->can( 'run_after' ), "$plugin_name has run_after()";
 }
 
 plan tests => 1 +
               scalar( keys %transformers ) +
-	      scalar( @core_transformers ) * 4;
+	      scalar( @core_transformers ) * 7;
 
 done_testing;

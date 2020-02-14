@@ -3,19 +3,21 @@ package Perl::ToRaku::Transformers::ForLoops;
 use strict;
 use warnings;
 
-# 'foreach my $x ( @y ) { ... }' => 'for my $x ( @y ) { ... }'
-#
-# 'for ( my $i = 0; $i < 10 ; $i++ ) { ... }'
-# =>
-# 'loop ( my $i = 0; $i < 10 ; $i++ ) { ... }'
-#
-# 'for my $x ( @y ) { ... }' => no change
-#
+sub long_description {
+  <<'_EOS_';
+Rename Perl C-style for() to 'loop', everything else to Raku 'loop'
+
+foreach my $x ( @y ) { }              ==> for my $x ( @y ) { }
+for ( my $i = 0; $i < 10 ; $i++ ) { } ==> loop ( my $i = 0; $i < 10 ; $i++ ) { }
+_EOS_
+}
 sub short_description {
   <<'_EOS_';
 Change Perl 'for' and 'foreach' names to Raku 'for' and 'loop' style.
 _EOS_
 }
+sub run_before { }
+sub run_after { }
 sub is_core { 1 }
 sub transformer {
   my $self = shift;

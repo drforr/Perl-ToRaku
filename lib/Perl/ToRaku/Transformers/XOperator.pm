@@ -3,17 +3,23 @@ package Perl::ToRaku::Transformers::XOperator;
 use strict;
 use warnings;
 
-# '1 x 2' # No change
-#
-# '(1) x 2'
-# =>
-# '(1) xx 2'
-#
+sub long_description {
+  <<'_EOS_';
+The special case where 'x' can create a list gets its own op in Raku.
+
+This transformer doesn't remove the parens, just adds the needed 'x'.
+
+1 x 2   ==> 1 x 2
+(1) x 2 ==> (1) xx 2
+_EOS_
+}
 sub short_description {
   <<'_EOS_';
 Change Perl-style 'x' to 'xx' if you're doing the '(1) x 80' Perl "trick".
 _EOS_
 }
+sub run_before { }
+sub run_after { }
 sub is_core { 1 }
 sub transformer {
   my $self = shift;

@@ -3,16 +3,26 @@ package Perl::ToRaku::Transformers::Sigils;
 use strict;
 use warnings;
 
-# %foo    --> %foo
-# $foo{a} --> %foo{a} # Note it does not pointify braces.
-# @foo    --> @foo
-# $foo[1] --> @foo[1]
-#
+sub long_description {
+  <<'_EOS_';
+Change Perl sigils to Raku style.
+
+Only affects the sigils themselves, changing the brace style to <> is done
+in another transformer.
+
+%foo    ==> %foo
+$foo{a} ==> %foo{a}
+@foo    ==> @foo
+$foo[1] ==> @foo[1]
+_EOS_
+}
 sub short_description {
   <<'_EOS_';
 Change Perl sigil usage '$a[0]' to Raku-style '@a[0]'.
 _EOS_
 }
+sub run_before { }
+sub run_after { }
 sub is_core { 1 }
 sub transformer {
   my $self = shift;

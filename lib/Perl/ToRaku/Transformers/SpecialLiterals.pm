@@ -3,16 +3,23 @@ package Perl::ToRaku::Transformers::SpecialLiterals;
 use strict;
 use warnings;
 
-# '__END__' => '=finish'
-# '__FILE__' => '$?FILE'
-# '__LINE__' => '$?LINE'
-# '__PACKAGE__' => '$?PACKAGE'
-#
+sub long_description {
+  <<'_EOS_';
+Change Perl-style __END__ &c into Raku equivalents.
+
+__END__     => =finish
+__FILE__    => $?FILE
+__LINE__    => $?LINE
+__PACKAGE__ => $?PACKAGE
+_EOS_
+}
 sub short_description {
   <<'_EOS_';
 Change Perl-style '__END__' literals to Raku style.
 _EOS_
 }
+sub run_before { }
+sub run_after { }
 sub is_core { 1 }
 sub transformer {
   my $self = shift;

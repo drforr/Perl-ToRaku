@@ -3,14 +3,21 @@ package Perl::ToRaku::Transformers::Casts;
 use strict;
 use warnings;
 
-# 'int (...)' => 'Int(...)'
-# 'int(...)' => 'Int(...)'
-#
+sub long_description {
+  <<'_EOS_';
+Converts 'int()' "cast" to Raku 'Int()' "type cast".
+
+int ( 1 / 3 ) ==> Int( 1 / 3 )
+int( 1 / 3 ) ==> Int( 1 / 3 )
+_EOS_
+}
 sub short_description {
   <<'_EOS_';
 Change Perl 'int()' to Raku 'Int()' "cast" style.
 _EOS_
 }
+sub run_before { }
+sub run_after { }
 sub is_core { 1 }
 sub transformer {
   my $self = shift;

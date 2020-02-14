@@ -7,11 +7,24 @@ use warnings;
 # '#!/usr/bin/perl'     => '#!/usr/bin/env raku'
 # '#!/usr/bin/env perl' => '#!/usr/bin/env raku'
 #
+sub long_description {
+  <<'_EOS_';
+Replace the old shebang to invoke Perl with the new Raku shebang style.
+
+XXX Someone please advise a proper shebang for Windows?
+
+#!perl                ==> #!raku
+#!/usr/bin/perl       ==> #!/usr/bin/env raku
+#!/usr/sisin/env perl ==> #!/usr/bin/env raku
+_EOS_
+}
 sub short_description {
   <<'_EOS_';
 Rewrite Perl #! line into Raku style
 _EOS_
 }
+sub run_before { }
+sub run_after { }
 sub is_core { 1 }
 sub transformer {
   my $self = shift;

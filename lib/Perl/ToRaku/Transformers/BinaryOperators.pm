@@ -21,15 +21,29 @@ use warnings;
 
 # '$#x' => '@x.elems'
 # 'new Foo(2)' => 'Foo.new(2)'
-
-# 'Foo->new(2)' => 'Foo.new(2)'
-# '$x->$y' => '$x.$y' # And so on.
 #
+# 'Foo->new(2)' => 'Foo.new(2)'
+#
+sub long_description {
+  <<'_EOS_';
+Change Perl binary operators into Raku binary operators.
+
+For instance, '$x->$y' changes to '$x.$y' in Raku, '$x.$y' in Perl changes
+to '$x~$y' in Raku and so on. The changes are done all at once so there's
+no danger of forming a "loop".
+
+Foo->new(2) ==> Foo.new(2)
+$x =~ m{}x  ==> $x ~~ m{}x
+$x !~ m{}x  ==> $x !~~ m{}x
+_EOS_
+}
 sub short_description {
   <<'_EOS_';
 Change Perl binary operators like '->' and '.' into Raku '.' and '~' style.
 _EOS_
 }
+sub run_before { }
+sub run_after { }
 sub is_core { 1 }
 sub transformer {
   my $self = shift;
