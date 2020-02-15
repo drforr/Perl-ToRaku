@@ -19,11 +19,6 @@ use warnings;
 # need to be run as *part* of the operator changeover.
 #
 
-# '$#x' => '@x.elems'
-# 'new Foo(2)' => 'Foo.new(2)'
-#
-# 'Foo->new(2)' => 'Foo.new(2)'
-#
 sub long_description {
   <<'_EOS_';
 Change Perl binary operators into Raku binary operators.
@@ -35,6 +30,8 @@ no danger of forming a "loop".
 Foo->new(2) ==> Foo.new(2)
 $x =~ m{}x  ==> $x ~~ m{}x
 $x !~ m{}x  ==> $x !~~ m{}x
+$#{ $x }    ==> $( $x ).elems
+$#x         ==> $x.elems
 _EOS_
 }
 sub short_description {
@@ -53,7 +50,6 @@ sub transformer {
   _fixup_array_index_as_deref_no_ws( $ppi );
   _fixup_array_index_as_deref( $ppi );
   _fixup_array_index( $ppi );
-  _fixup_new( $ppi );
 
   # This may *look* like a transitive loop, but it's not because it's all
   # happening at once.

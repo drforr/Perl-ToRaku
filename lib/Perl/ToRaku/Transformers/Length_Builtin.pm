@@ -63,8 +63,8 @@ sub transformer {
       my $new_chars = PPI::Token::Word->new( 'chars' );
       $list_structure->insert_after( $new_chars );
 
-      my $new_arrow = PPI::Token::Operator->new( '.' );
-      $list_structure->insert_after( $new_arrow );
+      my $new_dot = PPI::Token::Operator->new( '.' );
+      $list_structure->insert_after( $new_dot );
 
       $list_structure->previous_sibling->delete;
       if ( $list_structure->previous_sibling and
