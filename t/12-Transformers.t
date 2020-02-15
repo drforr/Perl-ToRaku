@@ -5,54 +5,62 @@ use warnings;
 
 use Test::More;
 
+plan tests => 2;
+
+# Collect the names of the existing transformers for tests later.
+#
 my %transformers;
 opendir my $lib_dir, 'lib/Perl/ToRaku/Transformers' or die $!;
-%transformers = map { $_ => 1 }
+%transformers = map { $_ => undef }
                 map { s{ \.pm $ }{}x; $_ }
                 grep { $_ !~ m{ ^ \. }x }
                 readdir $lib_dir;
 closedir $lib_dir;
 
-my %tests;
-opendir my $test_dir, 't' or die $!;
-%tests = map { $_ => 1 }
-         map { s{ \.t $ }{}x; $_ }
-         grep { m{ ^ [A-Z][a-zA-Z0-9_]*\.t }x }
-         readdir $test_dir;
-closedir $test_dir;
+subtest 'All transformers have test files', sub {
+  plan tests => 1 + scalar( keys %transformers );
 
-is keys %transformers, keys %tests;
+  my %tests;
+  opendir my $test_dir, 't' or die $!;
+  %tests = map { $_ => undef }
+           map { s{ \.t $ }{}x; $_ }
+           grep { m{ ^ [A-Z][a-zA-Z0-9_]*\.t }x }
+           readdir $test_dir;
+  closedir $test_dir;
 
-for my $transformer ( sort keys %transformers ) {
-  ok exists $tests{ $transformer }, "$transformer.pm has a test";
-}
+  is keys %transformers, keys %tests;
+
+  for my $transformer ( sort keys %transformers ) {
+    ok exists $tests{ $transformer }, "$transformer.pm has a test";
+  }
+};
 
 BEGIN {
   use Module::Pluggable
-    sub_name    => 'core_transformers',
+    sub_name    => 'transformers',
     search_path => 'Perl::ToRaku::Transformers',
     require     => 1;
 }
 
-my @core_transformers = core_transformers;
-for my $plugin ( @core_transformers ) {
-  my $plugin_name = $plugin;
-  $plugin_name    =~ s{ ^ Perl::ToRaku::Transformers:: }{}x;
+subtest 'All transformers have common methods', sub {
+  plan tests => scalar( keys %transformers ) * 7;
 
-  ok $plugin->can( 'transformer' ), "$plugin_name has transformer()";
-  ok $plugin->can( 'is_core' ),     "$plugin_name can tell you if it's core";
-  ok $plugin->can( 'short_description' ),
-     "$plugin_name has a short description";
-  ok length( $plugin->short_description() ) <= 80,
-     "short description for $plugin_name is at most 80 glyphs";
-  ok $plugin->can( 'long_description' ),
-     "$plugin_name has a long description";
-  ok $plugin->can( 'run_before' ), "$plugin_name has run_before()";
-  ok $plugin->can( 'run_after' ), "$plugin_name has run_after()";
-}
+  my @transformers = transformers;
+  for my $plugin ( @transformers ) {
+    my $plugin_name = $plugin;
+    $plugin_name    =~ s{ ^ Perl::ToRaku::Transformers:: }{}x;
 
-plan tests => 1 +
-              scalar( keys %transformers ) +
-	      scalar( @core_transformers ) * 7;
+    ok $plugin->can( 'transformer' ), "$plugin_name has transformer()";
+    ok $plugin->can( 'is_core' ),     "$plugin_name can tell you if it's core";
+    ok $plugin->can( 'short_description' ),
+       "$plugin_name has a short description";
+    ok length( $plugin->short_description() ) <= 80,
+       "short description for $plugin_name is at most 80 glyphs";
+    ok $plugin->can( 'long_description' ),
+       "$plugin_name has a long description";
+    ok $plugin->can( 'run_before' ), "$plugin_name has run_before()";
+    ok $plugin->can( 'run_after' ), "$plugin_name has run_after()";
+  }
+};
 
 done_testing;
