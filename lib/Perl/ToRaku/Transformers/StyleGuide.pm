@@ -58,7 +58,7 @@ sub run_after { }
 #
 # Only matters in the ::Transformer:: namespace.
 #
-sub is_core { 'Is this a core module? 1 No? 0' }
+sub is_core { 0 }
 
 # The actual transformation this module does.
 #
