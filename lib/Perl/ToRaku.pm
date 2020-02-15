@@ -84,15 +84,15 @@ sub _topological_sort {
       run_after  => [ $plugin->run_after ]
     };
   }
-# use YAML;warn Dump(\%plugins);
+# use YAML;die Dump(\%plugins);
 
-  # Populate 'run_before' for all plugins
-  #
   for my $key ( keys %plugins ) {
     for my $after ( @{ $plugins{$key}{run_after} } ) {
+      next if grep { $key } @{ $plugins{$after}{run_before} };
       push @{ $plugins{$after}{run_before} }, $key;
     }
     for my $before ( @{ $plugins{$key}{run_before} } ) {
+      next if grep { $key } @{ $plugins{$before}{run_before} };
       push @{ $plugins{$before}{run_after} }, $key;
     }
   }
@@ -120,7 +120,7 @@ sub _topological_sort {
   # (also, if it's not in the list of sorted plugins...)
   #
   for my $key ( keys %plugins ) {
-    next if @{ $plugins{$key}{run_after} };
+    next unless @{ $plugins{$key}{run_after} };
     push @sorted_plugins, $plugins{$key}{plugin};
     $sorted_plugin_names{$key} = 1;
     delete $plugins{$key};
