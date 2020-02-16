@@ -79,76 +79,49 @@ sub _topological_sort {
     my $plugin_name = $plugin;
     $plugin_name =~ s{ ^ Perl::ToRaku::Transformers:: }{}x;
     $plugins{$plugin_name} = {
-      plugin     => $plugin,
-      run_before => [ $plugin->run_before ],
-      run_after  => [ $plugin->run_after ]
+      plugin       => $plugin,
+      depends_upon => [ $plugin->depends_upon ]
     };
   }
 # use YAML;die Dump(\%plugins);
 
-  for my $key ( keys %plugins ) {
-    for my $after ( @{ $plugins{$key}{run_after} } ) {
-      next if grep { $key } @{ $plugins{$after}{run_before} };
-      push @{ $plugins{$after}{run_before} }, $key;
+  {
+    my @remove_plugins;
+    for my $name ( keys %plugins ) {
+      next if @{ $plugins{$name}{depends_upon} };
+      push @sorted_plugins, $plugins{$name}{plugin};
+      push @remove_plugins, $name;
     }
-    for my $before ( @{ $plugins{$key}{run_before} } ) {
-      next if grep { $key } @{ $plugins{$before}{run_before} };
-      push @{ $plugins{$before}{run_after} }, $key;
+    for my $name ( @remove_plugins ) {
+      delete $plugins{$name};
     }
   }
-#  use YAML;warn Dump(\%plugins);
 
-  # Now, 'run_before' and 'run_after' are completely populated, and
-  # if $plugins{Foo}{run_before} ~~ [ 'Bar' ] then
-  # $plugins{Bar}{run_after} ~~ [ 'Foo' ], so both keys are populated.
-  #
-  # If a plugin isn't referenced by 'run_before' or 'run_after' then
-  # it doesn't matter when it gets run, so start by running those.
-  #
-  for my $key ( keys %plugins ) {
-    next if @{ $plugins{$key}{run_after} };
-    next if @{ $plugins{$key}{run_before} };
-    push @sorted_plugins, $plugins{$key}{plugin};
-    $sorted_plugin_names{$key} = 1;
-    delete $plugins{$key};
-  }
-
-  # This may be a wee bit redundant, but now...
-  # If a plugin doesn't have 'run_after', then it can also run before
-  # other referenced plugins.
-  #
-  # (also, if it's not in the list of sorted plugins...)
-  #
-  for my $key ( keys %plugins ) {
-    next unless @{ $plugins{$key}{run_after} };
-    push @sorted_plugins, $plugins{$key}{plugin};
-    $sorted_plugin_names{$key} = 1;
-    delete $plugins{$key};
-  }
-
-  # Finally, if a plugin *does* have a 'run_after'...
-  # Then make sure all of its dependencies are resolved, then add it.
-  #
-  # Since we're modifying %plugins, bail out after each pass, and since
-  # there's a chance the count might *not* go down between successive
-  # iterations, for the moment keep a count of the number of times through
-  # the loop. There's an easier way to d thi, but later...
-  #
-  my $count = 10;
+  my $safety_catch = scalar keys %plugins;
   while ( keys %plugins ) {
-    last if $count-- <= 0;
-
-    OUTER:
-    for my $key ( keys %plugins ) {
-      for my $after ( @{ $plugins{$key}{run_after} } ) {
-	next if $sorted_plugin_names{$after};
-	next OUTER;
+    last if $safety_catch-- <= 0;
+    my @remove_plugins;
+    for my $name ( keys %plugins ) {
+      my $missing = 0;
+      for my $dependency ( @{ $plugins{$name}{depends_upon} } ) {
+	next if grep { $dependency } @sorted_plugins;
+	$missing = 1;
+	last;
       }
-      push @sorted_plugins, $plugins{$key}{plugin};
-      $sorted_plugin_names{$key} = 1;
-      delete $plugins{$key};
+      next if $missing;
+      push @sorted_plugins, $plugins{$name}{plugin};
+      push @remove_plugins, $name;
+    }
+    for my $name ( @remove_plugins ) {
+      delete $plugins{$name};
     }
   }
+  if ( $safety_catch <= 0 ) {
+    die "Caught loop in plugins, this is bad.";
+  }
+
+# use YAML; die Dump(\@sorted_plugins);
+ use YAML; warn Dump(\@sorted_plugins);
 
   if ( keys %plugins ) {
     die "Can't completely order the list of plugins given: conflicts below\n" .

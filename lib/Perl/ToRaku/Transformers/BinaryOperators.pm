@@ -30,8 +30,6 @@ no danger of forming a "loop".
 Foo->new(2) ==> Foo.new(2)
 $x =~ m{}x  ==> $x ~~ m{}x
 $x !~ m{}x  ==> $x !~~ m{}x
-$#{ $x }    ==> $( $x ).elems
-$#x         ==> $x.elems
 _EOS_
 }
 sub short_description {
@@ -39,17 +37,12 @@ sub short_description {
 Change Perl binary operators like '->' and '.' into Raku '.' and '~' style.
 _EOS_
 }
-sub run_before { }
-sub run_after { }
+sub depends_upon { }
 sub is_core { 1 }
 sub transformer {
   my $self = shift;
   my $obj  = shift;
   my $ppi  = $obj->_ppi;
-
-  _fixup_array_index_as_deref_no_ws( $ppi );
-  _fixup_array_index_as_deref( $ppi );
-  _fixup_array_index( $ppi );
 
   # This may *look* like a transitive loop, but it's not because it's all
   # happening at once.
@@ -73,91 +66,6 @@ sub transformer {
 
       my $new_content = $map{ $operator_token->content };
       $operator_token->set_content( $new_content );
-    }
-  }
-}
-
-sub _fixup_new {
-  my $ppi = shift;
-
-  my $statements = $ppi->find( 'PPI::Statement' );
-  if ( $statements ) {
-    for my $statement ( @{ $statements } ) {
-      next unless $statement->first_element->content eq 'new';
-
-      my $new_new = PPI::Token::Word->new( 'new' );
-      $statement->first_element->snext_sibling->insert_after( $new_new );
-
-      my $new_arrow = PPI::Token::Operator->new( '->' );
-      $statement->first_element->snext_sibling->insert_after( $new_arrow );
-
-      my $first_element = $statement->first_element;
-
-      if ( $first_element->next_sibling->isa( 'PPI::Token::Whitespace' ) ) {
-        $first_element->next_sibling->delete();
-      }
-      $first_element->delete();
-    }
-  }
-}
-
-# Ah, '$#{...}' and '$# {...}' use Token::Cast and Token::Magic...
-#
-sub _fixup_array_index_as_deref {
-  my $ppi = shift;
-
-  my $cast_tokens = $ppi->find( 'PPI::Token::Magic' );
-  if ( $cast_tokens ) {
-    for my $cast_token ( @{ $cast_tokens } ) {
-      next unless $cast_token->content eq '$#';
-
-      my $new_content = '@';
-      $cast_token->set_content( $new_content );
-
-      my $new_elems = PPI::Token::Word->new( 'elems' );
-      $cast_token->snext_sibling->insert_after( $new_elems );
-
-      my $new_arrow = PPI::Token::Operator->new( '->' );
-      $cast_token->snext_sibling->insert_after( $new_arrow );
-    }
-  }
-}
-
-sub _fixup_array_index_as_deref_no_ws {
-  my $ppi = shift;
-
-  my $cast_tokens = $ppi->find( 'PPI::Token::Cast' );
-  if ( $cast_tokens ) {
-    for my $cast_token ( @{ $cast_tokens } ) {
-      next unless $cast_token->content eq '$#';
-
-      my $new_content = '@';
-      $cast_token->set_content( $new_content );
-
-      my $new_elems = PPI::Token::Word->new( 'elems' );
-      $cast_token->snext_sibling->insert_after( $new_elems );
-
-      my $new_arrow = PPI::Token::Operator->new( '->' );
-      $cast_token->snext_sibling->insert_after( $new_arrow );
-    }
-  }
-}
-
-sub _fixup_array_index {
-  my $ppi = shift;
-
-  my $array_indices = $ppi->find( 'PPI::Token::ArrayIndex' );
-  if ( $array_indices ) {
-    for my $array_index ( @{ $array_indices } ) {
-      my $new_content = $array_index->content;
-      $new_content =~ s{ ^ \$\# }{@}x;
-      $array_index->set_content( $new_content );
-
-      my $new_elems = PPI::Token::Word->new( 'elems' );
-      $array_index->insert_after( $new_elems );
-
-      my $new_arrow = PPI::Token::Operator->new( '->' );
-      $array_index->insert_after( $new_arrow );
     }
   }
 }

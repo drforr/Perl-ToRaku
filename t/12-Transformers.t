@@ -43,7 +43,7 @@ BEGIN {
 }
 
 subtest 'All transformers have common methods', sub {
-  plan tests => scalar( keys %transformers ) * 7;
+  plan tests => scalar( keys %transformers ) * 6;
 
   my @transformers = transformers;
   for my $plugin ( @transformers ) {
@@ -58,8 +58,7 @@ subtest 'All transformers have common methods', sub {
        "short description for $plugin_name is at most 80 glyphs";
     ok $plugin->can( 'long_description' ),
        "$plugin_name has a long description";
-    ok $plugin->can( 'run_before' ), "$plugin_name has run_before()";
-    ok $plugin->can( 'run_after' ), "$plugin_name has run_after()";
+    ok $plugin->can( 'depends_upon' ), "$plugin_name has depends_upon()";
   }
 };
 

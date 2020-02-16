@@ -19,8 +19,7 @@ sub short_description {
 Change Perl unary operators like '~$a' to Raku-style '+^$a'.
 _EOS_
 }
-sub run_before { }
-sub run_after { }
+sub depends_upon { }
 sub is_core { 1 }
 sub transformer {
   my $self = shift;

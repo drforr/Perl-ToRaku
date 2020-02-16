@@ -18,8 +18,7 @@ sub short_description {
 Change Perl-style 'x' to 'xx' if you're doing the '(1) x 80' Perl "trick".
 _EOS_
 }
-sub run_before { }
-sub run_after { }
+sub depends_upon { }
 sub is_core { 1 }
 sub transformer {
   my $self = shift;

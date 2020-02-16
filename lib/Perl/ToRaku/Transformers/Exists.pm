@@ -15,8 +15,7 @@ sub short_description {
 Change Perl 'exists' builtin to Raku adverb ':exists'.
 _EOS_
 }
-sub run_before { }
-sub run_after { }
+sub depends_upon { }
 sub is_core { 1 }
 sub transformer {
   my $self = shift;

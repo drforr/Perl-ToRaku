@@ -25,8 +25,7 @@ sub short_description {
 Remove redundant module invocations like 'IO::Handle'.
 _EOS_
 }
-sub run_before { }
-sub run_after { }
+sub depends_upon { }
 sub is_core { 1 }
 sub transformer {
   my $self = shift;

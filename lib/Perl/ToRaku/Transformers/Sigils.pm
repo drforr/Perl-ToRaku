@@ -21,8 +21,7 @@ sub short_description {
 Change Perl sigil usage '$a[0]' to Raku-style '@a[0]'.
 _EOS_
 }
-sub run_before { }
-sub run_after { }
+sub depends_upon { }
 sub is_core { 1 }
 sub transformer {
   my $self = shift;
@@ -50,27 +49,3 @@ sub transformer {
 }
 
 1;
-
-#    if ( $elem->isa('PPI::Token::ArrayIndex') ) {
-#        my $content = $elem->content;
-#
-#        $content =~ s{\$#}{};
-#
-#        $elem->insert_before(
-#            PPI::Token::Symbol->new('@' . $content)
-#        );
-#        $elem->insert_before(
-#            PPI::Token::Symbol->new('.')
-#        );
-#        $elem->insert_before(
-#            PPI::Token::Word->new('end')
-#        );
-#        $elem->delete;
-#    }
-#    else {
-#        return if $elem->raw_type eq '@';
-#        return if $elem->raw_type eq '%';
-#    }
-#}
-#
-#1;

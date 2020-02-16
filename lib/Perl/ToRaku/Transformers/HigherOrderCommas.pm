@@ -17,8 +17,7 @@ sub short_description {
 Insert comma between 'map{}' and the variable.
 _EOS_
 }
-sub run_before { }
-sub run_after { }
+sub depends_upon { }
 sub is_core { 1 }
 sub transformer {
   my $self = shift;

@@ -46,8 +46,7 @@ sub short_description {
 Change Perl length() builtin to Raku method.
 _EOS_
 }
-sub run_before { }
-sub run_after { 'BinaryOperators' }
+sub depends_upon { 'BinaryOperators' }
 sub is_core { 1 }
 sub transformer {
   my $self = shift;
@@ -57,8 +56,8 @@ sub transformer {
   my $list_structures = $ppi->find( 'PPI::Structure::List' );
   if ( $list_structures ) {
     for my $list_structure ( @{ $list_structures } ) {
-      next unless $list_structure->sprevious_sibling and
-                  $list_structure->sprevious_sibling->content eq 'length';
+      next unless $list_structure->sprevious_sibling;
+      next unless $list_structure->sprevious_sibling->content eq 'length';
 
       my $new_chars = PPI::Token::Word->new( 'chars' );
       $list_structure->insert_after( $new_chars );

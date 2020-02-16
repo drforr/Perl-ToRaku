@@ -43,13 +43,9 @@ An (at most) 80-char description of what the transformer does.
 _EOS_
 }
 
-# Make sure to run this module before any of these listed modules.
-#
-sub run_before { 'list of modules stripped of "..Transformers" to run before' }
-
 # Make sure to run this module after all of these listed modules.
 #
-sub run_after { }
+sub depends_upon { }
 
 # Is this module core?
 # This should only matter if you're using the 'Transformers' namespace, but

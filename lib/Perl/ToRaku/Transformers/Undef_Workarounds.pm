@@ -15,8 +15,7 @@ sub short_description {
 Fix some PPI problems with the 'undef' keywords.
 _EOS_
 }
-sub run_before { }
-sub run_after { }
+sub depends_upon { }
 sub is_core { 1 }
 sub transformer {
   my $self = shift;

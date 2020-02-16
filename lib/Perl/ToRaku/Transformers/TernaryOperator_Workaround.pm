@@ -18,8 +18,7 @@ sub short_description {
 Fix a few PPI bugs with the ternary operator.
 _EOS_
 }
-sub run_before { }
-sub run_after { }
+sub depends_upon { }
 sub is_core { 1 }
 sub transformer {
   my $self = shift;

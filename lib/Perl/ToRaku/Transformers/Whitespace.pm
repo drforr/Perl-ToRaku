@@ -17,8 +17,7 @@ sub short_description {
 Add whitespace after 'print', 'if' etc. so Raku doesn't confuse with methods.
 _EOS_
 }
-sub run_before { }
-sub run_after { }
+sub depends_upon { }
 sub is_core { 1 }
 sub transformer {
   my $self = shift;

@@ -30,8 +30,7 @@ sub short_description {
 Change Perl package declaration (with version and parents) to Raku style.
 _EOS_
 }
-sub run_before { }
-sub run_after { }
+sub depends_upon { }
 sub is_core { 1 }
 sub transformer {
   my $self = shift;
