@@ -87,7 +87,7 @@ sub _topological_sort {
 
   {
     my @remove_plugins;
-    for my $name ( keys %plugins ) {
+    for my $name ( sort keys %plugins ) {
       next if @{ $plugins{$name}{depends_upon} };
       push @sorted_plugins, $plugins{$name}{plugin};
       push @remove_plugins, $name;
@@ -101,7 +101,7 @@ sub _topological_sort {
   while ( keys %plugins ) {
     last if $safety_catch-- <= 0;
     my @remove_plugins;
-    for my $name ( keys %plugins ) {
+    for my $name ( sort keys %plugins ) {
       my $missing = 0;
       for my $dependency ( @{ $plugins{$name}{depends_upon} } ) {
 	next if grep { $dependency } @sorted_plugins;
@@ -121,7 +121,7 @@ sub _topological_sort {
   }
 
 # use YAML; die Dump(\@sorted_plugins);
- use YAML; warn Dump(\@sorted_plugins);
+# use YAML; warn Dump(\@sorted_plugins);
 
   if ( keys %plugins ) {
     die "Can't completely order the list of plugins given: conflicts below\n" .
