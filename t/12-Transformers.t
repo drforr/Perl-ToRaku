@@ -14,6 +14,7 @@ opendir my $lib_dir, 'lib/Perl/ToRaku/Transformers' or die $!;
 %transformers = map { $_ => undef }
                 map { s{ \.pm $ }{}x; $_ }
                 grep { $_ !~ m{ ^ \. }x }
+                grep { $_ =~ m{ \.pm $ }x }
                 readdir $lib_dir;
 closedir $lib_dir;
 
