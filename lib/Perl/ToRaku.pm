@@ -221,7 +221,7 @@ sub transform {
   my @sorted_transformers =
     _topological_sort( @core_transformers );
 
-  for my $plugin ( @core_transformers ) {
+  for my $plugin ( @sorted_transformers ) {
 	  #for my $plugin ( @sorted_transformers ) {
     $plugin->transformer( $self );
   }

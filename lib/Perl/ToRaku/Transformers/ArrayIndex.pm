@@ -29,11 +29,11 @@ sub transformer {
       $new_content =~ s{ ^ \$\# }{@}x;
       $array_index->set_content( $new_content );
 
-      my $new_elems = PPI::Token::Word->new( '.elems' );
+      my $new_elems = PPI::Token::Word->new( 'elems' );
       $array_index->insert_after( $new_elems );
 
-#      my $new_dot = PPI::Token::Operator->new( '.' );
-#      $array_index->insert_after( $new_dot );
+      my $new_dot = PPI::Token::Operator->new( '.' );
+      $array_index->insert_after( $new_dot );
     }
   }
 }
