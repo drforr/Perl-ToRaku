@@ -18,24 +18,23 @@ _EOS_
 }
 sub depends_upon { }
 sub is_core { 1 }
-sub transformer {
-  my $self = shift;
-  my $obj  = shift;
-  my $ppi  = $obj->_ppi;
+sub transforms { 'PPI::Statement::Compound' }
+sub transform {
+  my $self               = shift;
+  my $compound_statement = shift;
 
-  my $compound_statements = $ppi->find( 'PPI::Statement::Compound' );
-  if ( $compound_statements ) {
-    for my $compound_statement ( @{ $compound_statements } ) {
-      next unless $compound_statement->type eq 'foreach' or
-                  $compound_statement->type eq 'for';
+  my %map = (
+    foreach => 1,
+    for     => 1,
+  );
 
-      if ( $compound_statement->find( 'PPI::Structure::For' ) ) {
-        $compound_statement->first_element->set_content( 'loop' );
-      }
-      else {
-        $compound_statement->first_element->set_content( 'for' );
-      }
-    }
+  return unless exists $map{ $compound_statement->type };
+
+  if ( $compound_statement->find( 'PPI::Structure::For' ) ) {
+    $compound_statement->first_element->set_content( 'loop' );
+  }
+  else {
+    $compound_statement->first_element->set_content( 'for' );
   }
 }
 

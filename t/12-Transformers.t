@@ -50,7 +50,7 @@ subtest 'All transformers have common methods', sub {
     my $plugin_name = $plugin;
     $plugin_name    =~ s{ ^ Perl::ToRaku::Transformers:: }{}x;
 
-    ok $plugin->can( 'transformer' ), "$plugin_name has transformer()";
+#    ok $plugin->can( 'transformer' ), "$plugin_name has transformer()";
     ok $plugin->can( 'is_core' ),     "$plugin_name can tell you if it's core";
     ok $plugin->can( 'short_description' ),
        "$plugin_name has a short description";
@@ -59,6 +59,11 @@ subtest 'All transformers have common methods', sub {
     ok $plugin->can( 'long_description' ),
        "$plugin_name has a long description";
     ok $plugin->can( 'depends_upon' ), "$plugin_name has depends_upon()";
+
+    ok( $plugin->can( 'transformer' ) or
+       ( $plugin->can( 'transform' ) and
+         $plugin->can( 'transforms' ) ),
+       "$plugin_name either runs over the whole file or transforms one type" );
   }
 };
 

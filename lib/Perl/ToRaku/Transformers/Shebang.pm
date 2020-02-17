@@ -21,34 +21,29 @@ _EOS_
 }
 sub depends_upon { }
 sub is_core { 1 }
-sub transformer {
-  my $self = shift;
-  my $obj  = shift;
-  my $ppi  = $obj->_ppi;
+sub transforms { 'PPI::Token::Comment' }
+sub transform {
+  my $self          = shift;
+  my $comment_token = shift;
 
-  my $comment_tokens = $ppi->find( 'PPI::Token::Comment' );
-  if ( $comment_tokens ) {
-    for my $comment_token ( @{ $comment_tokens } ) {
-      next unless $comment_token->line;
-      my $new_content = $comment_token->content;
+  return unless $comment_token->line;
+  my $new_content = $comment_token->content;
 
-      if ( $new_content =~ m{ ^ \# \! perl }x ) {
-        $new_content = "#!raku\n";
-      }
-      elsif ( $new_content =~ m{ ^ \# \s* \! .+ env \s+ perl }x ) {
-        $new_content = $comment_token->content;
-        $new_content =~ s{ perl }{raku}x;
-      }
-      elsif ( $new_content =~ m{ ^ \# \s* \! .+ perl }x ) {
-        $new_content =~ s{ perl }{env raku}x;
-      }
-      else {
-        next;
-      }
-
-      $comment_token->set_content( $new_content );
-    }
+  if ( $new_content =~ m{ ^ \# \! perl }x ) {
+    $new_content = "#!raku\n";
   }
+  elsif ( $new_content =~ m{ ^ \# \s* \! .+ env \s+ perl }x ) {
+    $new_content = $comment_token->content;
+    $new_content =~ s{ perl }{raku}x;
+  }
+  elsif ( $new_content =~ m{ ^ \# \s* \! .+ perl }x ) {
+    $new_content =~ s{ perl }{env raku}x;
+  }
+  else {
+    return;
+  }
+
+  $comment_token->set_content( $new_content );
 }
 
 1;

@@ -17,29 +17,24 @@ _EOS_
 }
 sub depends_upon { }
 sub is_core { 1 }
-sub transformer {
-  my $self = shift;
-  my $obj  = shift;
-  my $ppi  = $obj->_ppi;
+sub transforms { 'PPI::Token::Word' }
+sub transform {
+  my $self       = shift;
+  my $word_token = shift;
 
-  my $word_tokens = $ppi->find( 'PPI::Token::Word' );
-  if ( $word_tokens ) {
-    for my $word_token ( @{ $word_tokens } ) {
-      next unless $word_token->content eq 'sort';
-      next unless $word_token->snext_sibling->isa( 'PPI::Structure::Block' );
+  return unless $word_token->content eq 'sort';
+  return unless $word_token->snext_sibling->isa( 'PPI::Structure::Block' );
 
-      my $block = $word_token->snext_sibling;
-      my $symbol_tokens = $block->find( 'PPI::Token::Symbol' );
-      if ( $symbol_tokens ) {
-        for my $symbol_token ( @{ $symbol_tokens } ) {
-          next unless $symbol_token->content eq '$a' or
-                      $symbol_token->content eq '$b';
-          my $new_content = $symbol_token->content;
-          $new_content =~ s{ ^ \$ }{\$^}x;
+  my $block = $word_token->snext_sibling;
+  my $symbol_tokens = $block->find( 'PPI::Token::Symbol' );
+  if ( $symbol_tokens ) {
+    for my $symbol_token ( @{ $symbol_tokens } ) {
+      next unless $symbol_token->content eq '$a' or
+                  $symbol_token->content eq '$b';
+      my $new_content = $symbol_token->content;
+      $new_content =~ s{ ^ \$ }{\$^}x;
 
-          $symbol_token->set_content( $new_content );
-        }
-      }
+      $symbol_token->set_content( $new_content );
     }
   }
 }

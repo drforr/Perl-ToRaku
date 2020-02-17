@@ -27,10 +27,10 @@ _EOS_
 }
 sub depends_upon { }
 sub is_core { 1 }
-sub transformer {
-  my $self = shift;
-  my $obj  = shift;
-  my $ppi  = $obj->_ppi;
+sub transforms { 'PPI::Statement::Include' }
+sub transform {
+  my $self         = shift;
+  my $include_stmt = shift;
 
   my %map = map { $_ => 1 } (
     'DateTime',
@@ -42,15 +42,10 @@ sub transformer {
     'Proc::Async'
   );
 
-  my $include_stmts = $ppi->find( 'PPI::Statement::Include' );
-  if ( $include_stmts ) {
-    for my $include_stmt ( @{ $include_stmts } ) {
-      next unless $include_stmt->type eq 'use';
-      next unless exists $map{ $include_stmt->module };
+  return unless $include_stmt->type eq 'use';
+  return unless exists $map{ $include_stmt->module };
 
-      $include_stmt->delete;
-    }
-  }
+  $include_stmt->delete;
 }
 
 1;

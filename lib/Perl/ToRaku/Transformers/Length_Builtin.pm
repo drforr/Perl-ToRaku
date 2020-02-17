@@ -48,30 +48,25 @@ _EOS_
 }
 sub depends_upon { 'BinaryOperators' }
 sub is_core { 1 }
-sub transformer {
-  my $self = shift;
-  my $obj  = shift;
-  my $ppi  = $obj->_ppi;
+sub transforms { 'PPI::Structure::List' }
+sub transform {
+  my $self           = shift;
+  my $list_structure = shift;
 
-  my $list_structures = $ppi->find( 'PPI::Structure::List' );
-  if ( $list_structures ) {
-    for my $list_structure ( @{ $list_structures } ) {
-      next unless $list_structure->sprevious_sibling;
-      next unless $list_structure->sprevious_sibling->content eq 'length';
+  return unless $list_structure->sprevious_sibling;
+  return unless $list_structure->sprevious_sibling->content eq 'length';
 
-      my $new_chars = PPI::Token::Word->new( 'chars' );
-      $list_structure->insert_after( $new_chars );
+  my $new_chars = PPI::Token::Word->new( 'chars' );
+  $list_structure->insert_after( $new_chars );
 
-      my $new_dot = PPI::Token::Operator->new( '.' );
-      $list_structure->insert_after( $new_dot );
+  my $new_dot = PPI::Token::Operator->new( '.' );
+  $list_structure->insert_after( $new_dot );
 
-      $list_structure->previous_sibling->delete;
-      if ( $list_structure->previous_sibling and
-           $list_structure->previous_sibling->isa( 'PPI::Token::Word' ) and
-           $list_structure->previous_sibling->content eq 'length' ) {
-        $list_structure->previous_sibling->remove;
-      }
-    }
+  $list_structure->previous_sibling->delete;
+  if ( $list_structure->previous_sibling and
+       $list_structure->previous_sibling->isa( 'PPI::Token::Word' ) and
+       $list_structure->previous_sibling->content eq 'length' ) {
+    $list_structure->previous_sibling->remove;
   }
 }
 

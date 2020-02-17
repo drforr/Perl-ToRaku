@@ -23,27 +23,22 @@ _EOS_
 }
 sub depends_upon { }
 sub is_core { 1 }
-sub transformer {
-  my $self = shift;
-  my $obj  = shift;
-  my $ppi  = $obj->_ppi;
+sub transforms { 'PPI::Token::Symbol' }
+sub transform {
+  my $self        = shift;
+  my $array_index = shift;
 
-  my $array_indices = $ppi->find( 'PPI::Token::Symbol' );
-  if ( $array_indices ) {
-    for my $array_index ( @{ $array_indices } ) {
-      if ( $array_index->snext_sibling and
-           $array_index->snext_sibling->isa( 'PPI::Structure::Subscript' ) ) {
-        if ( $array_index->snext_sibling->start->content eq '{' ) {
-          my $new_content = $array_index->content;
-          $new_content =~ s{ \$ }{\%}x;
-          $array_index->set_content( $new_content );
-        }
-        elsif ( $array_index->snext_sibling->start->content eq '[' ) {
-          my $new_content = $array_index->content;
-          $new_content =~ s{ \$ }{\@}x;
-          $array_index->set_content( $new_content );
-        }
-      }
+  if ( $array_index->snext_sibling and
+       $array_index->snext_sibling->isa( 'PPI::Structure::Subscript' ) ) {
+    if ( $array_index->snext_sibling->start->content eq '{' ) {
+      my $new_content = $array_index->content;
+      $new_content =~ s{ \$ }{\%}x;
+      $array_index->set_content( $new_content );
+    }
+    elsif ( $array_index->snext_sibling->start->content eq '[' ) {
+      my $new_content = $array_index->content;
+      $new_content =~ s{ \$ }{\@}x;
+      $array_index->set_content( $new_content );
     }
   }
 }

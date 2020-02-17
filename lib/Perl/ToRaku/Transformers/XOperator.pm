@@ -20,22 +20,17 @@ _EOS_
 }
 sub depends_upon { }
 sub is_core { 1 }
-sub transformer {
-  my $self = shift;
-  my $obj  = shift;
-  my $ppi  = $obj->_ppi;
+sub transforms { 'PPI::Token::Operator' }
+sub transform {
+  my $self           = shift;
+  my $operator_token = shift;
 
-  my $operator_tokens = $ppi->find( 'PPI::Token::Operator' );
-  if ( $operator_tokens  ) {
-    for my $operator_token ( @{ $operator_tokens } ) {
-      next unless $operator_token->content eq 'x';
-      next unless $operator_token->
-                  sprevious_sibling->isa( 'PPI::Structure::List' );
+  return unless $operator_token->content eq 'x';
+  return unless
+    $operator_token->sprevious_sibling->isa( 'PPI::Structure::List' );
 
-      my $new_content = 'xx';
-      $operator_token->set_content( $new_content );
-    }
-  }
+  my $new_content = 'xx';
+  $operator_token->set_content( $new_content );
 }
 
 1;

@@ -18,20 +18,15 @@ _EOS_
 }
 sub depends_upon { }
 sub is_core { 1 }
-sub transformer {
-  my $self = shift;
-  my $obj  = shift;
-  my $ppi  = $obj->_ppi;
+sub transforms { 'PPI::Token::Word' }
+sub transform {
+  my $self       = shift;
+  my $word_token = shift;
 
-  my $word_tokens = $ppi->find( 'PPI::Token::Word' );
-  if ( $word_tokens ) {
-    for my $word_token ( @{ $word_tokens } ) {
-      next unless $word_token->content eq 'undef';
+  return unless $word_token->content eq 'undef';
 
-      my $new_content = 'Nil';
-      $word_token->set_content( $new_content );
-    }
-  }
+  my $new_content = 'Nil';
+  $word_token->set_content( $new_content );
 }
 
 1;

@@ -22,30 +22,25 @@ _EOS_
 }
 sub depends_upon { 'BinaryOperators' }
 sub is_core { 1 }
-sub transformer {
-  my $self = shift;
-  my $obj  = shift;
-  my $ppi  = $obj->_ppi;
+sub transforms { 'PPI::Statement' }
+sub transform {
+  my $self      = shift;
+  my $statement = shift;
 
-  my $statements = $ppi->find( 'PPI::Statement' );
-  if ( $statements ) {
-    for my $statement ( @{ $statements } ) {
-      next unless $statement->first_element->content eq 'new';
+  return unless $statement->first_element->content eq 'new';
 
-      my $new_new = PPI::Token::Word->new( 'new' );
-      $statement->first_element->snext_sibling->insert_after( $new_new );
+  my $new_new = PPI::Token::Word->new( 'new' );
+  $statement->first_element->snext_sibling->insert_after( $new_new );
 
-      my $new_dot = PPI::Token::Operator->new( '.' );
-      $statement->first_element->snext_sibling->insert_after( $new_dot );
+  my $new_dot = PPI::Token::Operator->new( '.' );
+  $statement->first_element->snext_sibling->insert_after( $new_dot );
 
-      my $first_element = $statement->first_element;
+  my $first_element = $statement->first_element;
 
-      if ( $first_element->next_sibling->isa( 'PPI::Token::Whitespace' ) ) {
-        $first_element->next_sibling->delete();
-      }
-      $first_element->delete();
-    }
+  if ( $first_element->next_sibling->isa( 'PPI::Token::Whitespace' ) ) {
+    $first_element->next_sibling->delete();
   }
+  $first_element->delete();
 }
 
 1;

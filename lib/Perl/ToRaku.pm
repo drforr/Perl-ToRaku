@@ -195,6 +195,22 @@ sub _collect {
   }
 }
 
+sub _run_transform {
+  my ( $self, $plugin ) = @_;
+
+  if ( $plugin->can( 'transforms' ) ) {
+    my $nodes = $self->_ppi->find( $plugin->transforms );
+    if ( $nodes ) {
+      for my $node ( @{ $nodes } ) {
+        $plugin->transform( $node );
+      }
+    }
+  }
+  else {
+    $plugin->transformer( $self );
+  }
+}
+
 sub transform {
   my ( $self ) = @_;
   my $ppi      = $self->{ppi};
@@ -222,8 +238,7 @@ sub transform {
     _topological_sort( @core_transformers );
 
   for my $plugin ( @sorted_transformers ) {
-	  #for my $plugin ( @sorted_transformers ) {
-    $plugin->transformer( $self );
+    $self->_run_transform( $plugin );
   }
 
   for my $plugin ( @optional_transformers ) {
@@ -254,7 +269,7 @@ sub test_transform {
   $self->{ppi} = PPI::Document->new( \$text );
 
   $self->_collect();
-  $package->transformer( $self );
+  $self->_run_transform( $package );
   $self->{ppi}->serialize;
 }
 
