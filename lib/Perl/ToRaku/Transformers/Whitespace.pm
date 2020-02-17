@@ -10,6 +10,9 @@ Add some whitespace where Raku needs it for builtins.
 print($x)    ==> print ($x) 
 my($x)       ==> my ($x)
 if($i==0) {} ==> if ($i==0) {}
+q(foo bar)   ==> q (foo bar)
+qq(foo bar)   ==> qq (foo bar)
+qw(foo bar)   ==> qw (foo bar)
 _EOS_
 }
 sub short_description {
@@ -37,7 +40,9 @@ sub transformer {
     'for',
     'foreach',
 
-#    'qw',
+    'q',
+    'qq',
+    'qw',
 
     'my',
     'our',
@@ -58,11 +63,22 @@ sub transformer {
   my $quoted_word_tokens = $ppi->find( 'PPI::Token::QuoteLike::Words' );
   if ( $quoted_word_tokens ) {
     for my $quoted_word_token ( @{ $quoted_word_tokens } ) {
-      next unless $quoted_word_token->content =~ m{ ^ qw \( }x; # \)
+      next unless $quoted_word_token->content =~ m{ ^ q[wq]? \( }x; # \)
 
       my $new_content = $quoted_word_token->content;
       $new_content =~ s{ ^ qw }{qw }x;
       $quoted_word_token->set_content( $new_content );
+    }
+  }
+
+  my $quoted_tokens = $ppi->find( 'PPI::Token::Quote' );
+  if ( $quoted_tokens ) {
+    for my $quoted_token ( @{ $quoted_tokens } ) {
+      next unless $quoted_token->content =~ m{ ^ q[wq]? \( }x; # \)
+
+      my $new_content = $quoted_token->content;
+      $new_content =~ s{ \( }{ \(}x;
+      $quoted_token->set_content( $new_content );
     }
   }
 }

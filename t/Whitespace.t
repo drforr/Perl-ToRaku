@@ -6,18 +6,30 @@ use warnings;
 use Perl::ToRaku;
 use Test::More;
 
-plan tests => 22;
+plan tests => 25;
 
 my $package = 'Perl::ToRaku::Transformers::Whitespace';
 my $toRaku  = Perl::ToRaku->new;
 
 use_ok $package;
 
-is $toRaku->test_transform( $package, 'print( $x , $y );' ), 'print ( $x , $y );';
+is $toRaku->test_transform( $package, 'q( $x , $y );' ),
+   'q ( $x , $y );';
 
-is $toRaku->test_transform( $package, 'print($x,$y);' ), 'print ($x,$y);';
+is $toRaku->test_transform( $package, 'qw( $x , $y );' ),
+   'qw ( $x , $y );';
 
-is $toRaku->test_transform( $package, 'print ( $x , $y );' ), 'print ( $x , $y );';
+is $toRaku->test_transform( $package, 'qq( $x , $y );' ),
+   'qq ( $x , $y );';
+
+is $toRaku->test_transform( $package, 'print( $x , $y );' ),
+   'print ( $x , $y );';
+
+is $toRaku->test_transform( $package, 'print($x,$y);' ),
+   'print ($x,$y);';
+
+is $toRaku->test_transform( $package, 'print ( $x , $y );' ),
+   'print ( $x , $y );';
 
 is $toRaku->test_transform( $package, 'print ($x,$y);' ), 'print ($x,$y);';
 
