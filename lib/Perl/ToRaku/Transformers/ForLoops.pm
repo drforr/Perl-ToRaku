@@ -28,7 +28,7 @@ sub transform {
     for     => 1,
   );
 
-  return unless exists $map{ $compound_statement->type };
+  return unless $map{ $compound_statement->type };
 
   if ( $compound_statement->find( 'PPI::Structure::For' ) ) {
     $compound_statement->first_element->set_content( 'loop' );

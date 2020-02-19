@@ -32,14 +32,14 @@ sub transform {
   my $self         = shift;
   my $include_stmt = shift;
 
-  my %map = map { $_ => 1 } (
-    'DateTime',
-    'FatRat',
-    'IO::File',
-    'IO::Handle',
-    'IO::Path',
-    'IO::Socket',
-    'Proc::Async'
+  my %map = (
+    'DateTime'    => undef,
+    'FatRat'      => undef,
+    'IO::File'    => undef,
+    'IO::Handle'  => undef,
+    'IO::Path'    => undef,
+    'IO::Socket'  => undef,
+    'Proc::Async' => undef
   );
 
   return unless $include_stmt->type eq 'use';

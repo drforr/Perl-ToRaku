@@ -28,18 +28,18 @@ sub transform {
   my $self        = shift;
   my $array_index = shift;
 
-  if ( $array_index->snext_sibling and
-       $array_index->snext_sibling->isa( 'PPI::Structure::Subscript' ) ) {
-    if ( $array_index->snext_sibling->start->content eq '{' ) {
-      my $new_content = $array_index->content;
-      $new_content =~ s{ \$ }{\%}x;
-      $array_index->set_content( $new_content );
-    }
-    elsif ( $array_index->snext_sibling->start->content eq '[' ) {
-      my $new_content = $array_index->content;
-      $new_content =~ s{ \$ }{\@}x;
-      $array_index->set_content( $new_content );
-    }
+  return unless $array_index->snext_sibling;
+  return unless $array_index->snext_sibling->isa( 'PPI::Structure::Subscript' );
+
+  if ( $array_index->snext_sibling->start->content eq '{' ) {
+    my $new_content = $array_index->content;
+    $new_content =~ s{ \$ }{\%}x;
+    $array_index->set_content( $new_content );
+  }
+  elsif ( $array_index->snext_sibling->start->content eq '[' ) {
+    my $new_content = $array_index->content;
+    $new_content =~ s{ \$ }{\@}x;
+    $array_index->set_content( $new_content );
   }
 }
 

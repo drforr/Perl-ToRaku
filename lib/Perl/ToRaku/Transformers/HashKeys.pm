@@ -66,6 +66,7 @@ sub transformer {
 #    for my $subscript_block ( @{ $subscript_blocks } ) {
 #      next unless $subscript_block->schild(0)->isa( 'PPI::Statement' );
 #      next unless $subscript_block->schild(0)->schild(0)->isa( 'PPI::Structure::Subscript' );
+#
 #      my $word = $subscript_block->schild(0)->schild(0);
 #      my $new_word = q{'} . $word->content . q{'};
 #      $word->set_content( $new_word );

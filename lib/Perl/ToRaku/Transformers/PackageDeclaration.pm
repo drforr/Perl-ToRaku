@@ -162,26 +162,26 @@ sub remove_parent_package {
   my @package;
 
   my $include_stmts = $ppi->find( 'PPI::Statement::Include' );
-  if ( $include_stmts ) {
-    for my $include_stmt ( @{ $include_stmts } ) {
-      next unless $include_stmt->type eq 'use';
-      next unless $include_stmt->module eq 'base' or
-                  $include_stmt->module eq 'parent';
+  return unless $include_stmts;
 
-      $include_stmt->delete;
+  for my $include_stmt ( @{ $include_stmts } ) {
+    next unless $include_stmt->type eq 'use';
+    next unless $include_stmt->module eq 'base' or
+                $include_stmt->module eq 'parent';
+
+    $include_stmt->delete;
+  }
+
+  $include_stmts = $ppi->find( 'PPI::Statement::Variable' );
+  for my $include_stmt ( @{ $include_stmts } ) {
+    next unless $include_stmt->type eq 'our';
+    next unless grep { $_ eq '@ISA' } $include_stmt->variables;
+    if ( $include_stmt->variables > 1 ) {
+      warn 'Parent package @ISA is more complex than I can deal with ATM';
+      return;
     }
 
-    $include_stmts = $ppi->find( 'PPI::Statement::Variable' );
-    for my $include_stmt ( @{ $include_stmts } ) {
-      next unless $include_stmt->type eq 'our';
-      next unless grep { $_ eq '@ISA' } $include_stmt->variables;
-      if ( $include_stmt->variables > 1 ) {
-        warn 'Parent package @ISA is more complex than I can deal with ATM';
-        return;
-      }
-
-      $include_stmt->delete;
-    }
+    $include_stmt->delete;
   }
 }
 

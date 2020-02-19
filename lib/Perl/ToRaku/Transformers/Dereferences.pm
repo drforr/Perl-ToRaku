@@ -31,6 +31,7 @@ sub transformer {
   if ( $cast_tokens ) {
     for my $cast_token ( @{ $cast_tokens } ) {
       next unless $cast_token->snext_sibling->isa( 'PPI::Structure::Block' );
+
       $cast_token->snext_sibling->start->set_content( '(' );
       $cast_token->snext_sibling->finish->set_content( ')' );
     }
@@ -39,8 +40,10 @@ sub transformer {
   my $operator_tokens = $ppi->find( 'PPI::Token::Operator' );
   if ( $operator_tokens ) {
     for my $operator_token ( @{ $operator_tokens } ) {
-      next unless $operator_token->snext_sibling and
-                  $operator_token->snext_sibling->isa( 'PPI::Structure::Block' );
+      next unless $operator_token->snext_sibling;
+      next unless $operator_token->snext_sibling
+                                 ->isa( 'PPI::Structure::Block' );
+
       $operator_token->snext_sibling->start->set_content( '(' );
       $operator_token->snext_sibling->finish->set_content( ')' );
     }

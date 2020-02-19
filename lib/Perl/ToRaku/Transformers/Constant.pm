@@ -22,12 +22,14 @@ sub transform {
   my $self         = shift;
   my $include_stmt = shift;
 
-  return unless $include_stmt->type eq 'use';
+  return unless $include_stmt->type   eq 'use';
   return unless $include_stmt->module eq 'constant';
+  return unless $include_stmt->find_first( 'PPI::Token::Operator' );
 
   my $fat_arrow = $include_stmt->find_first( 'PPI::Token::Operator' );
-  return unless $fat_arrow;
 
+  # XXX Should double-check that these are what they claim to be.
+  #
   $include_stmt->first_token->delete; # Delete 'use'
   $include_stmt->first_token->delete; # Delete ' '
 

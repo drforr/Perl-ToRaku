@@ -27,7 +27,7 @@ sub transform {
     'int' => 'Int',
   );
 
-  return unless exists $map{ $token_word->content };
+  return unless $map{ $token_word->content };
 
   $token_word->set_content( $map{ $token_word->content } );
   if ( $token_word->next_sibling->isa( 'PPI::Token::Whitespace' ) ) {

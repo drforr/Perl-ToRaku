@@ -24,13 +24,17 @@ sub transform {
   my $self       = shift;
   my $word_token = shift;
 
-  return unless $word_token->content eq 'sort' or
-                $word_token->content eq 'map' or
-                $word_token->content eq 'grep';
+  my %map = (
+    'sort' => undef,
+    'map'  => undef,
+    'grep' => undef,
+  );
+
+  return unless exists $map{ $word_token->content };
   return unless $word_token->snext_sibling->isa( 'PPI::Structure::Block' );
   return if $word_token->snext_sibling->snext_sibling
                        ->isa( 'PPI::Token::Operator' ) and
-          $word_token->snext_sibling->snext_sibling->content eq ',';
+            $word_token->snext_sibling->snext_sibling->content eq ',';
 
   my $block = $word_token->snext_sibling;
   my $new_comma = PPI::Token::Operator->new( ',' ); 

@@ -31,14 +31,12 @@ sub transform {
   my $self         = shift;
   my $include_stmt = shift;
 
-  my %map = map { $_ => 1 } (
-    'strict',
-    'utf8',
-    'warnings'
+  my %map = (
+    'strict'   => undef,
+    'utf8'     => undef,
+    'warnings' => undef
   );
 
-  return unless $include_stmt->type eq 'use' or
-                $include_stmt->type eq 'no';
   return unless exists $map{ $include_stmt->module } or
                 $include_stmt->version =~ m{ [1-9][0-9]* \. [0-9]+ }x;
 

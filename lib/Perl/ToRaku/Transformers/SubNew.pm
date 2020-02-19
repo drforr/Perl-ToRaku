@@ -29,12 +29,12 @@ sub transformer {
   return unless defined( $obj->{is_package} );
 
   my $sub_stmts = $ppi->find( 'PPI::Statement::Sub' );
-  if ( $sub_stmts ) {
-    for my $sub_stmt ( @{ $sub_stmts } ) {
-      next unless $sub_stmt->name eq 'new';
+  return unless $sub_stmts;
 
-      $sub_stmt->first_element->set_content( 'multi method' );
-    }
+  for my $sub_stmt ( @{ $sub_stmts } ) {
+    next unless $sub_stmt->name eq 'new';
+
+    $sub_stmt->first_element->set_content( 'multi method' );
   }
 }
 

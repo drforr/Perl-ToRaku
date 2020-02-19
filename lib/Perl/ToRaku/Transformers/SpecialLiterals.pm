@@ -44,7 +44,7 @@ sub transformer {
   my $token_ends = $ppi->find( 'PPI::Token::End' );
   if ( $token_ends ) {
     for my $token_end ( @{ $token_ends } ) {
-      next unless exists $map{ $token_end->content };
+      next unless $map{ $token_end->content };
 
       $token_end->set_content( $map{ $token_end->content } );
     }
@@ -53,7 +53,7 @@ sub transformer {
   my $token_words = $ppi->find( 'PPI::Token::Word' );
   if ( $token_words ) {
     for my $token_word ( @{ $token_words } ) {
-      next unless exists $map{ $token_word->content };
+      next unless $map{ $token_word->content };
 
       $token_word->set_content( $map{ $token_word->content } );
     }

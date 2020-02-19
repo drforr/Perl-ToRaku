@@ -15,6 +15,10 @@ sub short_description {
 Change Perl array index '$#' to its Raku equivalent
 _EOS_
 }
+
+# Since it inserts '.', make sure the transform runs after operators are
+# changed over to Raku.
+#
 sub depends_upon { 'BinaryOperators' }
 sub is_core { 1 }
 sub transforms { 'PPI::Token::ArrayIndex' }
@@ -26,6 +30,8 @@ sub transform {
   $new_content =~ s{ ^ \$\# }{@}x;
   $array_index->set_content( $new_content );
 
+  # Since it's effectively a queue, add 'elems' before '.'.
+  #
   my $new_elems = PPI::Token::Word->new( 'elems' );
   $array_index->insert_after( $new_elems );
 

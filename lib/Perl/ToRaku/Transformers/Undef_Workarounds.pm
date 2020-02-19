@@ -24,6 +24,8 @@ sub transform {
 
   return unless $label_token->content =~ / undef /x;
 
+  # XXX Should fix the "colon", actually...
+  #
   my $new_content = $label_token->content;
   $new_content =~ s{ undef }{Nil}x;
   $label_token->set_content( $new_content );

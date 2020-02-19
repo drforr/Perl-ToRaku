@@ -35,11 +35,11 @@ sub transform {
     '>>' => '+>', '>>=' => '+>='
   );
 
-  # Just in case, make sure the operator is a binary one.
-  # I.E. it has a previous sibling.
+  # XXX Make sure the operator is a binary one.
+  # XXX I.E. it has a previous sibling.
   #
   return unless $operator_token->sprevious_sibling;
-  return unless exists $map{ $operator_token->content };
+  return unless $map{ $operator_token->content };
 
   my $new_content = $map{ $operator_token->content };
   $operator_token->set_content( $new_content );

@@ -27,7 +27,7 @@ sub transform {
     ':'  => '!!'
   );
 
-  return unless exists $map{ $operator_token->content };
+  return unless $map{ $operator_token->content };
 
   my $new_content = $map{ $operator_token->content };
   $operator_token->set_content( $new_content );

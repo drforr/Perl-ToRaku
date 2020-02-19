@@ -25,17 +25,23 @@ sub transform {
   return unless $word_token->content eq 'sort';
   return unless $word_token->snext_sibling->isa( 'PPI::Structure::Block' );
 
+  my %map = (
+    '$a' => '$^a',
+    '$b' => '$^b',
+  );
+
   my $block = $word_token->snext_sibling;
   my $symbol_tokens = $block->find( 'PPI::Token::Symbol' );
-  if ( $symbol_tokens ) {
-    for my $symbol_token ( @{ $symbol_tokens } ) {
-      next unless $symbol_token->content eq '$a' or
-                  $symbol_token->content eq '$b';
-      my $new_content = $symbol_token->content;
-      $new_content =~ s{ ^ \$ }{\$^}x;
+  return unless $symbol_tokens;
 
-      $symbol_token->set_content( $new_content );
-    }
+  for my $symbol_token ( @{ $symbol_tokens } ) {
+
+    # XXX Perl only allows these for "scope" variables, Raku allows more.
+    # XXX
+    next unless $map{ $symbol_token->content };
+
+    my $new_content = $map{ $symbol_token->content };
+    $symbol_token->set_content( $new_content );
   }
 }
 
