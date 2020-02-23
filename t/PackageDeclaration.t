@@ -6,7 +6,7 @@ use warnings;
 use Perl::ToRaku;
 use Test::More;
 
-plan tests => 17;
+plan tests => 15;
 
 my $package = 'Perl::ToRaku::Transformers::PackageDeclaration';
 
@@ -68,13 +68,6 @@ do {
   ok $toRaku->{is_package};
   is $toRaku->{is_package}{name}, 'My::Name';
   ok !defined( $toRaku->{is_package}{version} );
-};
-
-do {
-  my $toRaku  = Perl::ToRaku->new;
-  is $toRaku->test_transform( $package, '1 or 2' ),
-     '1 or 2';
-  ok !defined( $toRaku->{is_package} );
 };
 
 done_testing;

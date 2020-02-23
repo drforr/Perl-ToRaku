@@ -57,9 +57,6 @@ subtest 'exists at start of statement', sub {
 
   is $toRaku->test_transform( $package, 'exists $q{a}' ),
      '$q{a}:exists';
-
-  is $toRaku->test_transform( $package, '1 /= 1' ),
-     '1 /= 1';
 };
 
 done_testing;

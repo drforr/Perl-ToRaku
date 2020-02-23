@@ -6,7 +6,7 @@ use warnings;
 use Test::More;
 use Perl::ToRaku;
 
-plan tests => 8;
+plan tests => 7;
 
 my $package = 'Perl::ToRaku::Transformers::HashKeys';
 my $toRaku  = Perl::ToRaku->new;
@@ -36,8 +36,5 @@ is $toRaku->test_transform( $package, q{$a{foo}} ),
 #is $toRaku->test_transform( $package,
 #   q{$oBook.{FormatStr}{ $rhKey{Format}{FmtIdx} }} ),
 #   q{$oBook.{'FormatStr'}{ $rhKey{'Format'}{'FmtIdx'} }};
-
-is $toRaku->test_transform( $package, '1 /= 1' ),
-   '1 /= 1';
 
 done_testing;

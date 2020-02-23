@@ -6,7 +6,7 @@ use warnings;
 use Test::More;
 use Perl::ToRaku;
 
-plan tests => 4;
+plan tests => 3;
 
 my $package = 'Perl::ToRaku::Transformers::New_PrefixMethod';
 my $toRaku  = Perl::ToRaku->new;
@@ -20,8 +20,5 @@ is $toRaku->test_transform( $package, 'new Foo ( 2 )' ),
 
 is $toRaku->test_transform( $package, 'new Foo( 2 )' ),
    'Foo.new( 2 )';
-
-is $toRaku->test_transform( $package, '1/=1' ),
-   '1/=1';
 
 done_testing;

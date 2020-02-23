@@ -6,7 +6,7 @@ use warnings;
 use Test::More;
 use Perl::ToRaku;
 
-plan tests => 13;
+plan tests => 12;
 
 my $package = 'Perl::ToRaku::Transformers::Length_Builtin';
 my $toRaku  = Perl::ToRaku->new;
@@ -49,8 +49,5 @@ is $toRaku->test_transform( $package, 'length ( $a )' ),
 
 is $toRaku->test_transform( $package, 'length($a)' ),
    '($a).chars';
-
-is $toRaku->test_transform( $package, '1/=1' ),
-   '1/=1';
 
 done_testing;

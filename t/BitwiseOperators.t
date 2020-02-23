@@ -6,7 +6,7 @@ use warnings;
 use Test::More;
 use Perl::ToRaku;
 
-plan tests => 4;
+plan tests => 3;
 
 my $package = 'Perl::ToRaku::Transformers::BitwiseOperators';
 my $toRaku  = Perl::ToRaku->new;
@@ -18,8 +18,5 @@ is $toRaku->test_transform( $package, '1 & 2' ),
 
 is $toRaku->test_transform( $package, '1&2' ),
    '1+&2';
-
-is $toRaku->test_transform( $package, '1 or 2' ),
-   '1 or 2';
 
 done_testing;
