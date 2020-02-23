@@ -15,10 +15,12 @@ use_ok $package;
 
 #    %q{'streamLen'} = length( $stream_data );    # stream length
 
-is $toRaku->test_transform( $package, 'for ( $i = 0 ; $i < length( $password ) ; $i++ ) { }' ),
+is $toRaku->test_transform( $package,
+   'for ( $i = 0 ; $i < length( $password ) ; $i++ ) { }' ),
    'for ( $i = 0 ; $i < ( $password ).chars ; $i++ ) { }';
 
-is $toRaku->test_transform( $package, 'for($i=0;$i<length($password);$i++){}' ),
+is $toRaku->test_transform( $package,
+   'for($i=0;$i<length($password);$i++){}' ),
    'for($i=0;$i<($password).chars;$i++){}';
 
 is $toRaku->test_transform( $package, 'length ( $a . $b ) > 1' ),

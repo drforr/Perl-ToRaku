@@ -18,7 +18,7 @@ GetOptions(
            );
  
 if ($opt_debug) {
-    eval "use LWP::Debug qw(+);";
+    EVAL "use LWP::Debug qw(+);";
 }
  
 # PROXY SUPPORT

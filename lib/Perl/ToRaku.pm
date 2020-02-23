@@ -279,23 +279,6 @@ sub test_transform {
 #
 # $self->SUPER::func(...);
 
-# Note that subroutines may "fool" you into thinking they're methods.
-# Look at ParseExcel.pm's _subStrWk "method".
-# It has '$self' as the first argument.
-# Actually it probably *is* because of how it's called, but not how a modern Perl
-# author would think of it.
-#
-# Specifically _subStrWk( $oBook, substr( $sWk, 8 ) );
-#sub _subStrWk {
-#    my ( $self, $biff_data, $is_continue ) = @_;
-#}
-
-# 'sub Name { my ( $x ) = @_; my $y = shift; ... }'
-# =>
-# 'sub Name( $x, $y ) { ... }'
-
-# Does pack() exist?
-#
 # 'pack( "vVv", $value );'
 # =>
 # 'use experimental :pack;'
@@ -308,18 +291,6 @@ sub test_transform {
 # 'pack "vV", $value'
 # =>
 # '$value.pack( "vV" );'
-
-# '$x = $self->{Foo};' => 'has $.Foo;' ... '$x = $.Foo;'
-
-# '%x = $self->{Foo};' => 'has %.Foo;' ... '%x = %.Foo;'
-
-# '@x = $self->{Foo};' => 'has @.Foo;' ... '@x = @.Foo;'
-
-# '$self->{Foo}[0]' => 'has @.Foo;' ... '@.Foo[0]'
-
-# For packages, collect the name of the "functions" it declares.
-# In a given method, look to see if it calls one of those function names.
-# If so, the variable that calls it must be $self.
 
 1;
 

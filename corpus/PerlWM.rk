@@ -29,7 +29,7 @@ multi method new {
   $self.{'config'} = PerlWM::Config.load();
 
   my (@clients);
-  eval {
+  EVAL {
     local $self.{'x'}.{'error_handler'} = sub {
       die "Window Manager already running\n";
     };
@@ -53,7 +53,7 @@ multi method new {
 
 ############################################################################
 
-sub manage_window {
+method manage_window {
 
   my ($self, $id, $map_request) = @_;
 
@@ -71,7 +71,7 @@ sub manage_window {
 
 ############################################################################
 
-sub map_request {
+method map_request {
 
   my ($self, $event) = @_;
   $self.manage_window($event.{'xevent'}.{'window'}, 1);
@@ -79,7 +79,7 @@ sub map_request {
 
 ############################################################################
 
-sub configure_request {
+method configure_request {
 
   my ($self, $event) = @_;
   my $xe = $event.{'xevent'};
@@ -91,7 +91,7 @@ sub configure_request {
 
 ############################################################################
 
-sub EVENT { ( MapRequest => \&map_request,
+method EVENT { ( MapRequest => \&map_request,
 	      ConfigureRequest => \&configure_request,
 
 	      'Key(Mod4 s)' => action('keyboard_search') ) }

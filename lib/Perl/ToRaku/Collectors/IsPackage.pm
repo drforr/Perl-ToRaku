@@ -12,32 +12,32 @@ sub collector {
   my $obj  = shift;
   my $ppi  = $obj->_ppi;
 
-  my $package_statements = $ppi->find( 'PPI::Statement::Package' );
-  if ( $package_statements ) {
-    for my $package_statement ( @{ $package_statements } ) {
-      $obj->{is_package} = {
-        name => $package_statement->namespace
-      };
+  # Note that the case of multiple packages per file is currently
+  # unsupported, so we can assume that if we find *any* 'package Name'
+  # statement, then the file we're examining is by default a package.
+  #
+  my $package_statement = $ppi->find_first( 'PPI::Statement::Package' );
+  return unless $package_statement;
 
-      if ( $package_statement->version ) {
-        $obj->{is_package}{version} = $package_statement->version;
+  $obj->{is_package} = {
+    name => $package_statement->namespace
+  };
+
+  if ( $package_statement->version ) {
+    $obj->{is_package}{version} = $package_statement->version;
+  }
+  else {
+    my $variable_stmts = $ppi->find( 'PPI::Statement::Variable' );
+    return unless $variable_stmts;
+
+    for my $variable_stmt ( @{ $variable_stmts } ) {
+      next unless $variable_stmt->type eq 'our';
+      next unless grep { $_ eq '$VERSION' } $variable_stmt->variables;
+    
+      unless ( scalar( $variable_stmt->variables ) == 1 ) {
+        carp "'our' statement has more than just '\$VERSION'";
       }
-      else {
-        my $variable_stmts = $ppi->find( 'PPI::Statement::Variable' );
-        if ( $variable_stmts ) {
-          for my $variable_stmt ( @{ $variable_stmts } ) {
-            next unless $variable_stmt->type eq 'our';
-            next unless grep { $_ eq '$VERSION' } $variable_stmt->variables;
-          
-            unless ( scalar( $variable_stmt->variables ) == 1 ) {
-              carp "'our' statement has more than just '\$VERSION'";
-            }
-            $obj->{version} = $variable_stmt->find_first( 'PPI::Token::Quote' );
-     
-            last;
-          }
-        }
-      }
+      $obj->{version} = $variable_stmt->find_first( 'PPI::Token::Quote' );
       last;
     }
   }
